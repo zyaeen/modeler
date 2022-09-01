@@ -13,7 +13,6 @@ import com.vaadin.flow.router.Route;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 @PageTitle("Main")
 @Route(value = "")
@@ -22,25 +21,25 @@ public class MainView extends VerticalLayout {
     private TextField nodeIdField;
     private TextField connectToNodeField;
 
-    private List<Map<String, Integer>> edges;
+    private List<Edge> edges;
     private VisJs visJs;
-    private List<Map<String, Object>> nodes;
+    private List<Node> nodes;
 
     public MainView() throws JsonProcessingException {
 
         edges = new ArrayList<>(Arrays.asList(
-                new Edge(1, 3).getMap(),
-                new Edge(1, 2).getMap(),
-                new Edge(2, 4).getMap(),
-                new Edge(2, 5).getMap(),
-                new Edge(3, 3).getMap()
+                new Edge(1, 3),
+                new Edge(1, 2),
+                new Edge(2, 4),
+                new Edge(2, 5),
+                new Edge(3, 3)
         ));
         nodes = new ArrayList<>(Arrays.asList(
-                new Node(1).getMap(),
-                new Node(2).getMap(),
-                new Node(3).getMap(),
-                new Node(4).getMap(),
-                new Node(5).getMap()
+                new Node(1),
+                new Node(2),
+                new Node(3),
+                new Node(4),
+                new Node(5)
         ));
         visJs = new VisJs(edges, nodes);
         Button addButton = new Button("Add node");
@@ -57,8 +56,8 @@ public class MainView extends VerticalLayout {
         Node newNode = new Node(Integer.parseInt(nodeId));
         Edge newEdge = new Edge(Integer.parseInt(nodeId), Integer.parseInt(connectTo));
 
-        nodes.add(newNode.getMap());
-        edges.add(newEdge.getMap());
+        nodes.add(newNode);
+        edges.add(newEdge);
         visJs.addNode(Integer.parseInt(nodeId), Integer.parseInt(connectTo));
     }
 

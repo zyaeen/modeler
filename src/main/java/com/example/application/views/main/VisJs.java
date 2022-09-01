@@ -1,6 +1,8 @@
 package com.example.application.views.main;
 
 
+import com.example.application.network.Edge;
+import com.example.application.network.Node;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -10,18 +12,22 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 
 import java.util.List;
-import java.util.Map;
 
 @JsModule("./visjs-test.js")
 @NpmPackage(value = "vis", version = "0.110.0")
 @Tag("canvas")
 public class VisJs extends Component {
 
-    public VisJs(List<Map<String, Integer>> edges, List<Map<String, Object>> nodes) throws JsonProcessingException {
-        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-        String jsonEdges = ow.writeValueAsString(edges);
-        String jsonNodes = ow.writeValueAsString(nodes);
+    public VisJs(List<Edge> edges, List<Node> nodes) throws JsonProcessingException {
+        ObjectWriter owForEdges = new ObjectMapper().writer().withDefaultPrettyPrinter();
+        ObjectWriter owForNodes = new ObjectMapper().writer().withDefaultPrettyPrinter();
+
+        String jsonEdges = owForEdges.writeValueAsString(edges);
+        String jsonNodes = owForNodes.writeValueAsString(nodes);
         getElement().executeJs("window.initThree($0, $1, $2)", this, jsonEdges, jsonNodes);
+    }
+    public VisJs(){
+
     }
 
     public void addNode(Integer nodeId, Integer connectToNodeId) {

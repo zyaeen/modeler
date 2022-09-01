@@ -1,19 +1,14 @@
 package com.example.application.network;
 
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class Node {
     public Integer id;
+    public String label;
 
     public Node(Integer id){
         this.id = id;
+        this.label = "Node " + id.toString();
     }
-    public Map<String, Object> getMap(){
-        Map<String, Object> map = new HashMap<>();
-        map.put("id", this.id);
-        map.put("label", "Node " + this.id.toString());
-        return map;
-    }
+
 }
+
