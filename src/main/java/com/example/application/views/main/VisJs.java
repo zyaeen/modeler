@@ -24,13 +24,17 @@ public class VisJs extends Component {
 
         String jsonEdges = owForEdges.writeValueAsString(edges);
         String jsonNodes = owForNodes.writeValueAsString(nodes);
+
         getElement().executeJs("window.initThree($0, $1, $2)", this, jsonEdges, jsonNodes);
     }
     public VisJs(){
 
     }
 
-    public void addNode(Integer nodeId, Integer connectToNodeId) {
-        getElement().executeJs("window.addEdge($0, $1, $2)", this, nodeId, connectToNodeId);
+    public void addNode(Node node, Integer connectToNodeId) throws JsonProcessingException {
+        ObjectWriter owForNodes = new ObjectMapper().writer().withDefaultPrettyPrinter();
+
+        String jsonNode = owForNodes.writeValueAsString(node);
+        getElement().executeJs("window.addEdge($0, $1, $2)", this, jsonNode, connectToNodeId);
     }
 }
