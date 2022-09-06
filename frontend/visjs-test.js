@@ -5,7 +5,9 @@ class VisJsTest {
         this.element = element;
 
         var loadedNodes = JSON.parse(nodes);
-        console.log(loadedNodes);
+        this.historicalAttributes = [];
+        this.historicalKnots = [];
+
 
         var step;
         for (step = 0; step < loadedNodes.length; step++) {
@@ -31,13 +33,30 @@ class VisJsTest {
         };
         var options = {};
         this.network = new Network(this.container, this.data, options);
+        // console.log(this.nodesId)
+        var historicalAttributes = this.historicalAttributes;
+        var historicalKnots = this.historicalKnots;
+        this.network.on("afterDrawing", function (ctx) {
 
-        // this.network.on( 'click', function(properties) {
-        //     var ids = properties.nodes;
-        //     console.log(ids);
-        //     // var clickedNodes = this.nodes.get(ids);
-        //     // console.log('clicked nodes:', clickedNodes);
-        // });
+            for (step = 0; step < historicalAttributes.length; step++) {
+                console.log(historicalAttributes)
+                var nodePosition = this.getPositions([historicalAttributes[step]]);
+                ctx.strokeStyle = '#f66';
+                ctx.lineWidth = 2;
+                ctx.circle(nodePosition[historicalAttributes[step]].x, nodePosition[historicalAttributes[step]].y, 25 - 2);
+                ctx.stroke();
+            }
+
+            for (step = 0; step < historicalKnots.length; step++) {
+                console.log(historicalKnots)
+                var nodePosition = this.getPositions([historicalKnots[step]]);
+                ctx.strokeStyle = '#f66';
+                ctx.lineWidth = 2;
+                ctx.square(nodePosition[historicalKnots[step]].x, nodePosition[historicalKnots[step]].y, 25 - 4);
+                ctx.stroke();
+            }
+
+        })
     }
     fillEdge(edge){
         edge['color'] = {'color': "#000000"};
@@ -80,6 +99,33 @@ class VisJsTest {
                 node["shape"] = "circle";
                 break
             }
+            case 5: {
+                node["color"] = {
+                    border: "#f66",
+                    background: '#ffffff'
+                };
+                node["borderWidth"] = 2;
+                node["shape"] = "square";
+                node["scaling"] =  {
+                    label: {
+                        enabled: true,
+                        min: 50,
+                        max: 50
+                    }
+                };
+                this.historicalKnots.push(node["id"])
+                break
+            }
+            case 6: {
+                node["color"] = {
+                    border: "#f66",
+                    background: '#ffffff'
+                };
+                node["borderWidth"] = 2;
+                node["shape"] = "circle";
+                this.historicalAttributes.push(node["id"]);
+                break
+            }
         }
         return node;
     }
@@ -87,9 +133,7 @@ class VisJsTest {
     addEdge(newNode, newEdge){
 
         var node = JSON.parse(newNode);
-        console.log(node);
         node = this.fillNode(node);
-        console.log(node);
         try {
             this.network.body.data.nodes.add([node])
         } catch (err) {
