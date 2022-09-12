@@ -1,6 +1,18 @@
 # My Vaadin and Vis.js tryings 
 
-## UPD. 02.09 Что сделано? 
+## 12.09 Что сделано? 
+* Созданы классы XmlObject и LayoutProperties для работы с данными из xml. Пока что только для загрузки из xml на бэк и фронт. 
+* Классы Node и Edge переименовал в VisJsNode и VisJsEdge для однозначности при работе в классе XmlObject (он использует объекты библиотечного класса Node).
+* Со стороны фронта удалось добиться следующего:
+    * отрисовка по узлов по координатам из xml,
+    * фиксация позиции при двойном клике на узел,
+    * теперь отрисовывается не исторический кнот, а исторический тай,
+    * обработаны драг-н-дропы для узлов.
+* Добавлены кнопки, текст поля и комбобоксы - **взаимосключающая обработка их совместной работы сейчас в проработке!**
+* **Сейчас работаю над выгрузкой в XML**.
+* Можно попробовать загрузить файл в директории resources/xmls/ https://github.com/zyaeen/vaadin-visjs-testing-repo/tree/main/src/main/resources/xmls
+
+## 02.09 Что сделано? 
 * Для хранения инфы по узлам, их связями и их типов (анкер, кнот, тай, атрибут) была подключена бд H2. 
 * Для внесения изменений на лету был заимпорчен flyway и проведены [миграции](https://github.com/zyaeen/vaadin-visjs-testing-repo/tree/main/src/main/resources/db/migration).
 * Обновлены классы [Node, Edge](https://github.com/zyaeen/vaadin-visjs-testing-repo/tree/main/src/main/java/com/example/application/network), добавлены классы и интерфейсы [NodeType, NodeRepository, EdgeRepository, NodeTypeRepository](https://github.com/zyaeen/vaadin-visjs-testing-repo/tree/main/src/main/java/com/example/application/network) для выгрузки и сохранения данных в бд.
