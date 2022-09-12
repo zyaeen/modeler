@@ -6,8 +6,9 @@ class VisJsTest {
 
         var loadedNodes = JSON.parse(nodes);
         this.historicalAttributes = [];
-        this.historicalKnots = [];
+        this.historicalTies = [];
 
+        var _this = this;
 
         var step;
         for (step = 0; step < loadedNodes.length; step++) {
@@ -26,6 +27,7 @@ class VisJsTest {
 
         this.container = document.getElementById("outlet");
 
+        this.checked = [];
 
         this.data = {
             nodes: this.nodes,
@@ -33,31 +35,120 @@ class VisJsTest {
         };
         var options = {};
         this.network = new Network(this.container, this.data, options);
-        // console.log(this.nodesId)
         var historicalAttributes = this.historicalAttributes;
-        var historicalKnots = this.historicalKnots;
+        var historicalTies = this.historicalTies;
         this.network.on("afterDrawing", function (ctx) {
-
-            for (step = 0; step < historicalAttributes.length; step++) {
-                console.log(historicalAttributes)
-                var nodePosition = this.getPositions([historicalAttributes[step]]);
+            for (step = 0; step < _this.historicalAttributes.length; step++) {
+                var nodePosition = this.getPositions([_this.historicalAttributes[step]]);
                 ctx.strokeStyle = '#f66';
                 ctx.lineWidth = 2;
-                ctx.circle(nodePosition[historicalAttributes[step]].x, nodePosition[historicalAttributes[step]].y, 25 - 2);
+                ctx.circle(nodePosition[_this.historicalAttributes[step]].x, nodePosition[_this.historicalAttributes[step]].y, 15);
                 ctx.stroke();
             }
 
-            for (step = 0; step < historicalKnots.length; step++) {
-                console.log(historicalKnots)
-                var nodePosition = this.getPositions([historicalKnots[step]]);
-                ctx.strokeStyle = '#f66';
+            for (step = 0; step < _this.historicalTies.length; step++) {
+                var nodePosition = this.getPositions([_this.historicalTies[step]]);
+                ctx.strokeStyle = '#ffffff';
                 ctx.lineWidth = 2;
-                ctx.square(nodePosition[historicalKnots[step]].x, nodePosition[historicalKnots[step]].y, 25 - 4);
+                ctx.diamond(nodePosition[_this.historicalTies[step]].x, nodePosition[_this.historicalTies[step]].y, 20);
                 ctx.stroke();
-            }
 
+            }
+            for (step = 0; step < _this.checked.length; step++) {
+                var nodePosition = this.getPositions([_this.checked[step]]);
+                ctx.strokeStyle = '#000000';
+                ctx.lineWidth = 4;
+                ctx.circle(nodePosition[_this.checked[step]].x, nodePosition[_this.checked[step]].y, 2);
+                ctx.stroke();
+
+            }
         })
+        this.network.on( 'doubleClick', function(properties) {
+            var ids = properties.nodes;
+            if (ids.length > 0) {
+                if (_this.checked.includes(ids[0])) {
+                    var node = this.body.data.nodes._data[ids[0]];
+                    node["fixed"] = false;
+                    this.body.data.nodes.update(node);
+                    const index = _this.checked.indexOf(ids[0]);
+                    _this.checked.splice(index, 1);
+                } else {
+                    _this.checked.push(ids[0]);
+                    var node = this.body.data.nodes._data[ids[0]];
+                    node["fixed"] = true;
+                    var pos = this.getPositions([ids[0]]);
+                    node["x"] = pos[ids[0]].x;
+                    node["y"] = pos[ids[0]].y;
+                    this.body.data.nodes.update(node);
+                }
+            }
+        });
+        this.network.on('dragStart', function(properties) {
+            var ids = properties.nodes;
+            if (ids.length > 0) {
+                var node = this.body.data.nodes._data[ids[0]];
+                node["fixed"] = false;
+                var pos = this.getPositions([ids[0]]);
+                node["x"] = pos[ids[0]].x;
+                node["y"] = pos[ids[0]].y;
+                this.body.data.nodes.update(node);
+            }
+        });
+        this.network.on('dragEnd', function(properties) {
+            var ids = properties.nodes;
+
+            if (ids.length > 0) {
+                if (_this.checked.includes(ids[0])) {
+                    var node = this.body.data.nodes._data[ids[0]];
+                    node["fixed"] = true;
+                    var pos = this.getPositions([ids[0]]);
+                    node["x"] = pos[ids[0]].x;
+                    node["y"] = pos[ids[0]].y;
+                    this.body.data.nodes.update(node);
+                }
+            }
+        });
     }
+
+    redraw(element, edges, nodes) {
+
+        var loadedNodes = JSON.parse(nodes);
+        this.historicalAttributes = [];
+        this.historicalTies = [];
+
+        this.checked = [];
+
+        var step;
+        for (step = 0; step < loadedNodes.length; step++) {
+            loadedNodes[step] = this.fillNode(loadedNodes[step]);
+        }
+
+        this.nodes = new DataSet(loadedNodes);
+
+        var loadedEdges = JSON.parse(edges);
+        for (step = 0; step < loadedEdges.length; step++) {
+            loadedEdges[step] = this.fillEdge(loadedEdges[step]);
+        }
+
+        this.edges = new DataSet(loadedEdges);
+
+        this.data = {
+            nodes: this.nodes,
+            edges: this.edges,
+        };
+
+        this.network.body.data.edges.clear();
+        this.network.body.data.nodes.clear();
+
+
+        this.network.body.data.edges.update(
+          loadedEdges
+        );
+        this.network.body.data.nodes.update(
+          loadedNodes
+        );
+    }
+
     fillEdge(edge){
         edge['color'] = {'color': "#000000"};
         return edge;
@@ -70,7 +161,10 @@ class VisJsTest {
                 break
             }
             case 2:{
-                node["color"] = "#c0c0c0";
+                node["color"] =  {
+                    border: "#c0c0c0",
+                    background: '#c0c0c0'
+                };
                 node["shape"] = "diamond";
                 break
             }
@@ -96,16 +190,16 @@ class VisJsTest {
                     background: '#ffffff'
                 };
                 node["borderWidth"] = 2;
-                node["shape"] = "circle";
+                node["shape"] = "dot";
                 break
             }
             case 5: {
                 node["color"] = {
-                    border: "#f66",
-                    background: '#ffffff'
+                    border: "#c0c0c0",
+                    background: '#c0c0c0'
                 };
                 node["borderWidth"] = 2;
-                node["shape"] = "square";
+                node["shape"] = "diamond";
                 node["scaling"] =  {
                     label: {
                         enabled: true,
@@ -113,7 +207,7 @@ class VisJsTest {
                         max: 50
                     }
                 };
-                this.historicalKnots.push(node["id"])
+                this.historicalTies.push(node["id"])
                 break
             }
             case 6: {
@@ -122,10 +216,13 @@ class VisJsTest {
                     background: '#ffffff'
                 };
                 node["borderWidth"] = 2;
-                node["shape"] = "circle";
+                node["shape"] = "dot";
                 this.historicalAttributes.push(node["id"]);
                 break
             }
+        }
+        if (node["fixed"] === true) {
+            this.checked.push(node["id"]);
         }
         return node;
     }
@@ -133,18 +230,38 @@ class VisJsTest {
     addEdge(newNode, newEdge){
 
         var node = JSON.parse(newNode);
+        var edge = JSON.parse(newEdge);
+
         node = this.fillNode(node);
+        edge = this.fillEdge(edge)
         try {
             this.network.body.data.nodes.add([node])
         } catch (err) {
             console.log(err);
         }
         try {
-            this.network.body.data.edges.add([{from: node['id'], to: newEdge, color: { color: "#000000"}}])
+            this.network.body.data.edges.add([edge])
         } catch (err) {
             console.log(err);
         }
+    }
+    getCoordinates(element){
 
+        const url = 'http://localhost:8080/download';
+
+        try {
+            const response =  fetch(url, {
+                method: 'POST', // или 'PUT'
+                body: JSON.stringify(this.nodes._data), // данные могут быть 'строкой' или {объектом}!
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const json = response;
+            console.log('Успех:', json);
+        } catch (error) {
+            console.error('Ошибка:', error);
+        }
     }
 
 }
@@ -159,3 +276,11 @@ window.initThree = function(element, edges, nodes) {
 window.addEdge = function (element, newNodeId, nodeToConnectId){
     tt.addEdge(newNodeId, nodeToConnectId);
 }
+
+window.redraw = function(element, edges, nodes) {
+    tt.redraw(element, edges, nodes);
+};
+
+window.getCoordinates = function(element) {
+    tt.getCoordinates(element);
+};

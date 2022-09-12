@@ -1,8 +1,8 @@
 package com.example.application.views.main;
 
 
-import com.example.application.network.Edge;
-import com.example.application.network.Node;
+import com.example.application.network.VisJsEdge;
+import com.example.application.network.VisJsNode;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -18,7 +18,7 @@ import java.util.List;
 @Tag("canvas")
 public class VisJs extends Component {
 
-    public VisJs(List<Edge> edges, List<Node> nodes) throws JsonProcessingException {
+    public VisJs(List<VisJsEdge> edges, List<VisJsNode> nodes) throws JsonProcessingException {
         ObjectWriter owForEdges = new ObjectMapper().writer().withDefaultPrettyPrinter();
         ObjectWriter owForNodes = new ObjectMapper().writer().withDefaultPrettyPrinter();
 
@@ -31,10 +31,28 @@ public class VisJs extends Component {
 
     }
 
-    public void addNode(Node node, Integer connectToNodeId) throws JsonProcessingException {
+    public void addNode(VisJsNode node, VisJsEdge connectToNodeId) throws JsonProcessingException {
         ObjectWriter owForNodes = new ObjectMapper().writer().withDefaultPrettyPrinter();
+        ObjectWriter owForEdges = new ObjectMapper().writer().withDefaultPrettyPrinter();
 
         String jsonNode = owForNodes.writeValueAsString(node);
-        getElement().executeJs("window.addEdge($0, $1, $2)", this, jsonNode, connectToNodeId);
+        String jsonEdge = owForEdges.writeValueAsString(connectToNodeId);
+        getElement().executeJs("window.addEdge($0, $1, $2)", this, jsonNode, jsonEdge);
     }
+
+    public void refresh(List<VisJsEdge> edges, List<VisJsNode> nodes) throws JsonProcessingException {
+        ObjectWriter owForEdges = new ObjectMapper().writer().withDefaultPrettyPrinter();
+        ObjectWriter owForNodes = new ObjectMapper().writer().withDefaultPrettyPrinter();
+
+        String jsonEdges = owForEdges.writeValueAsString(edges);
+        String jsonNodes = owForNodes.writeValueAsString(nodes);
+
+        getElement().executeJs("window.redraw($0, $1, $2)", this, jsonEdges, jsonNodes);
+    }
+
+    public void getNodesCoordinates(){
+        getElement().executeJs("window.getCoordinates($0)", this);
+    }
+
+
 }
