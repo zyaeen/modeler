@@ -291,17 +291,11 @@ public class MainView extends VerticalLayout {
             newNode = new VisJsNode(type.getType(), nodeId);
         }
 
-        VisJsNode node = nodes.stream().filter(
-            visJsNode -> visJsNode.getId() == Integer.parseInt(connectTo)
-        ).collect(Collectors.toList()).get(0);
-
         VisJsEdge newEdge = new VisJsEdge(
             Integer.parseInt(connectTo),
             newNode.getId(),
             edgeLabel,
-            edgeType,
-            type.getType(),
-            node.getType()
+            edgeType
         );
 
         if (!uploadFromFile)
