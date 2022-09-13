@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><schema date="2022-09-12" format="0.99.9.9" time="14:24:16"><knot dataRange="varchar(42)" descriptor="ParentalType" identity="tinyint" mnemonic="PAT">
+		<metadata capsule="dbo" generator="false"/>
+		<layout fixed="true" x="1218.8" y="787.79"/>
+	</knot><knot dataRange="varchar(42)" descriptor="Gender" identity="tinyint" mnemonic="GEN">
+		<metadata capsule="dbo" generator="false"/>
+		<layout fixed="false" x="1256.49" y="591.64"/>
+	</knot><knot dataRange="varchar(42)" descriptor="ProfessionalLevel" identity="tinyint" mnemonic="PLV">
+		<metadata capsule="dbo" generator="false"/>
+		<layout fixed="false" x="1034.48" y="856.49"/>
+	</knot><knot dataRange="varchar(42)" descriptor="Utilization" identity="tinyint" mnemonic="UTL">
+		<metadata capsule="dbo" generator="false"/>
+		<layout fixed="false" x="732.98" y="36.48"/>
+	</knot><knot dataRange="varchar(42)" descriptor="Ongoing" identity="tinyint" mnemonic="ONG">
+		<metadata capsule="dbo" generator="false"/>
+		<layout fixed="false" x="1215.16" y="492.86"/>
+	</knot><knot dataRange="varchar(42)" descriptor="Rating" identity="tinyint" mnemonic="RAT">
+		<metadata capsule="dbo" generator="false"/>
+		<layout fixed="false" x="835.92" y="732.15"/>
+	</knot><anchor descriptor="Performance" identity="int" mnemonic="PE">
+		<metadata capsule="dbo" generator="true"/>
+		
+		
+		
+		<layout fixed="false" x="866.61" y="549.41"/>
+	<attribute dataRange="int" descriptor="Date" mnemonic="DAT">
+			<metadata capsule="dbo" deletable="false" idempotent="false" privacy="Ignore"/>
+			<layout fixed="false" x="866.61" y="549.41"/>
+		</attribute><attribute dataRange="int" descriptor="Audience" mnemonic="AUD">
+			<metadata capsule="dbo" deletable="false" idempotent="false" privacy="Ignore"/>
+			<layout fixed="false" x="904.62" y="474.52"/>
+		</attribute><attribute dataRange="int" descriptor="Revenue" mnemonic="REV">
+			<metadata capsule="dbo" deletable="false" idempotent="false" privacy="Ignore"/>
+			<layout fixed="false" x="777.33" y="495.59"/>
+		</attribute></anchor><anchor descriptor="Event" identity="int" mnemonic="EV">
+		<metadata capsule="dbo" generator="true"/>
+		
+		
+		
+		<layout fixed="false" x="981.88" y="399.58"/>
+	</anchor><anchor descriptor="Stage" identity="int" mnemonic="ST">
+		<metadata capsule="dbo" generator="true"/>
+		
+		
+		
+		<layout fixed="false" x="673.46" y="257.96"/>
+	<attribute dataRange="int" descriptor="Name" mnemonic="NAM" timeRange="datetime">
+			<metadata capsule="dbo" deletable="false" idempotent="false" privacy="Ignore"/>
+			<layout fixed="false" x="673.46" y="257.96"/>
+		</attribute><attribute dataRange="int" descriptor="Location" mnemonic="LOC">
+			<metadata capsule="dbo" deletable="false" idempotent="false" privacy="Ignore"/>
+			<layout fixed="false" x="805.94" y="247.86"/>
+		</attribute><attribute dataRange="int" descriptor="Average" knotRange="UTL" mnemonic="AVG" timeRange="datetime">
+			<metadata capsule="dbo" deletable="false" idempotent="false" privacy="Ignore"/>
+			<layout fixed="false" x="771.09" y="132.79"/>
+		</attribute><attribute dataRange="int" descriptor="Minimum" knotRange="UTL" mnemonic="MIN">
+			<metadata capsule="dbo" deletable="false" idempotent="false" privacy="Ignore"/>
+			<layout fixed="false" x="714.27" y="138.69"/>
+		</attribute></anchor><anchor descriptor="Actor" identity="int" mnemonic="AC">
+		<metadata capsule="dbo" generator="true"/>
+		
+		
+		
+		<layout fixed="false" x="1024.22" y="665.84"/>
+	<attribute dataRange="int" descriptor="Name" mnemonic="NAM" timeRange="datetime">
+			<metadata capsule="dbo" deletable="false" idempotent="false" privacy="Ignore"/>
+			<layout fixed="false" x="1024.22" y="665.84"/>
+		</attribute><attribute dataRange="int" descriptor="Gender" knotRange="GEN" mnemonic="GEN">
+			<metadata capsule="dbo" deletable="false" idempotent="false" privacy="Ignore"/>
+			<layout fixed="false" x="1215.9" y="624.83"/>
+		</attribute><attribute dataRange="int" descriptor="ProfessionalLevel" knotRange="PLV" mnemonic="PLV" timeRange="datetime">
+			<metadata capsule="dbo" deletable="false" idempotent="false" privacy="Ignore"/>
+			<layout fixed="false" x="1054.36" y="772.05"/>
+		</attribute></anchor><anchor descriptor="Program" identity="int" mnemonic="PR">
+		<metadata capsule="dbo" generator="true"/>
+		
+		
+		
+		<layout fixed="false" x="596.65" y="558.04"/>
+	<attribute dataRange="int" descriptor="Name" mnemonic="NAM">
+			<metadata capsule="dbo" deletable="false" idempotent="false" privacy="Ignore"/>
+			<layout fixed="false" x="596.65" y="558.04"/>
+		</attribute></anchor><tie timeRange="datetime"><anchorRole identifier="false" role="exclusive" type="AC"/><anchorRole identifier="false" role="with" type="AC"/><knotRole identifier="false" role="currently" type="ONG"/><layout fixed="false" x="1154.28" y="541.17"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="true" role="wasHeld" type="PE"/><anchorRole identifier="false" role="at" type="ST"/><layout fixed="false" x="830.04" y="403.34"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="false" role="subset" type="PE"/><anchorRole identifier="false" role="of" type="EV"/><layout fixed="false" x="930.68" y="435.71"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="true" role="at" type="PE"/><anchorRole identifier="false" role="wasPlayed" type="PR"/><layout fixed="false" x="758.85" y="600.97"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="true" role="in" type="PE"/><anchorRole identifier="true" role="wasCast" type="AC"/><layout fixed="false" x="978.03" y="548.78"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie timeRange="datetime"><anchorRole identifier="true" role="part" type="AC"/><anchorRole identifier="true" role="in" type="PR"/><knotRole identifier="false" role="got" type="RAT"/><layout fixed="false" x="861.47" y="642.86"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie timeRange="datetime"><anchorRole identifier="true" role="at" type="ST"/><anchorRole identifier="true" role="isPlaying" type="PR"/><layout fixed="false" x="681.57" y="402.48"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="true" role="parent" type="AC"/><anchorRole identifier="true" role="child" type="AC"/><knotRole identifier="true" role="having" type="PAT"/><layout fixed="false" x="1188.93" y="718.75"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="false" role="content" type="PR"/><anchorRole identifier="false" role="location" type="ST"/><anchorRole identifier="true" role="of" type="PE"/><layout fixed="false" x="745.71" y="446.45"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie></schema>
