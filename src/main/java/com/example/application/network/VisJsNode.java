@@ -4,6 +4,8 @@ package com.example.application.network;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "NODE")
@@ -35,6 +37,10 @@ public class VisJsNode {
     @Transient
     public Boolean fixed;
 
+    @JsonIgnore
+    @Transient
+    public List<String> tiedElements = new ArrayList<>();
+
     protected VisJsNode() {}
 
     public VisJsNode(Integer id, Integer type, String label) {
@@ -58,6 +64,9 @@ public class VisJsNode {
         this.mnemonic = label.toUpperCase().substring(0,3);
         this.label = label;
         this.type = type;
+        this.x = 700.;
+        this.y = 700.;
+        this.fixed = false;
     }
 
     public String getLabel(){
@@ -71,7 +80,7 @@ public class VisJsNode {
     public String toString() {
         return "ID: " + this.id + ", TYPE: " + this.type +
             ", MNE: " + this.mnemonic + ", label: " + this.label +
-            ", x, y: " + this.x.toString() +", " + this.y.toString() + ", fixed: " + this.fixed.toString();
+            (this.x == null ? "" : ", x, y: " + this.x.toString() +", " + this.y.toString() + ", fixed: " + this.fixed.toString());
     }
 
     public String getMnemonic(){
@@ -89,6 +98,18 @@ public class VisJsNode {
         this.fixed = fixed;
     }
 
+    public Double getX(){
+        return this.x;
+    }
+    public Double getY(){
+        return this.y;
+    }
+    public Boolean getFixed(){
+        return this.fixed;
+    }
+    public void fillTies(String nodeMnemonic){
+        tiedElements.add(nodeMnemonic);
+    }
 
 }
 

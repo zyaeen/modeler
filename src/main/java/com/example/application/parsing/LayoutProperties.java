@@ -10,9 +10,7 @@ import org.w3c.dom.NodeList;
 public class LayoutProperties {
 
     public Double x;
-
     public Double y;
-
     public Boolean fixed;
 
     public LayoutProperties(Node node){

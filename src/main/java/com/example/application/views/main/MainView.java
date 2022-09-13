@@ -5,6 +5,8 @@ import com.example.application.parsing.XmlObject;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
@@ -20,6 +22,9 @@ import org.apache.commons.io.IOUtils;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -30,18 +35,19 @@ import java.util.stream.Collectors;
 @Route(value = "")
 public class MainView extends VerticalLayout {
 
-    private TextField nodeIdField;
+    private TextField nodeLabelField;
     private TextField edgeLabel;
 
     private List<VisJsEdge> edges = new ArrayList<>();;
     private VisJs visJs;
     private List<VisJsNode> nodes = new ArrayList<>();
-
     private List<NodeType> nodeTypes = new ArrayList<>();
-
     private Boolean uploadFromFile = false;
-
     private Integer lastIndex;
+    private List<VisJsNode> newNodes = new ArrayList<>();
+    private List<VisJsEdge> newEdges = new ArrayList<>();;
+
+    private XmlObject xmlObject;
 
     @Autowired
     public MainView(NodeRepository nodeRepository, EdgeRepository edgeRepository, NodeTypeRepository nodeTypeRepository) throws JsonProcessingException {
@@ -50,9 +56,9 @@ public class MainView extends VerticalLayout {
         Iterable<NodeType> iterableNodeTypes = nodeTypeRepository.findAll();
         iterableNodeTypes.forEach(nodeTypes::add);
 
-        ComboBox<NodeType> select = new ComboBox<>("Select node type");
-        select.setItems(nodeTypes);
-        select.setItemLabelGenerator(NodeType::getLabel);
+        ComboBox<NodeType> selectNodeType = new ComboBox<>("Select node type");
+        selectNodeType.setItems(nodeTypes);
+        selectNodeType.setItemLabelGenerator(NodeType::getLabel);
 
         Iterable<VisJsEdge> iterableEdges = edgeRepository.findAll();
         iterableEdges.forEach(edges::add);
@@ -65,11 +71,27 @@ public class MainView extends VerticalLayout {
         ComboBox<VisJsNode> connectToNode = new ComboBox<>("Connect to");
         connectToNode.setEnabled(false);
 
+        nodeLabelField = new TextField("Node label:");
+        nodeLabelField.setRequired(true);
+
+        edgeLabel = new TextField("Connection name");
+        edgeLabel.setRequired(true);
+
         ComboBox<Boolean> edgeType = new ComboBox<>("Connection multiplicity");
         edgeType.setItems(true, false);
         edgeType.setItemLabelGenerator(item -> item ? "Many" : "One");
+        edgeType.setValue(true);
 
-        select.addValueChangeListener(
+        Button addButton = new Button("Add node");
+
+        MultiFileMemoryBuffer multiFileMemoryBuffer = new MultiFileMemoryBuffer();
+        Upload multiFileUpload = new Upload(multiFileMemoryBuffer);
+
+        Button loadDataToXml = new Button("Load data to XML");
+        loadDataToXml.setEnabled(false);
+
+
+        selectNodeType.addValueChangeListener(
             comboBoxNodeTypeComponentValueChangeEvent -> {
                 NodeType type = null;
                 type = comboBoxNodeTypeComponentValueChangeEvent.getValue();
@@ -101,41 +123,23 @@ public class MainView extends VerticalLayout {
                 } else {
                     connectToNode.setEnabled(false);
                 }
-
             }
         );
 
+
+
+
         visJs = new VisJs(edges, nodes);
-        Button addButton = new Button("Add node");
-
-        Button loadDataToXml = new Button("Load data to XML");
-        loadDataToXml.setEnabled(false);
-
-        nodeIdField = new TextField("Node label:");
-        edgeLabel = new TextField("Connection name");
-
-        MultiFileMemoryBuffer multiFileMemoryBuffer = new MultiFileMemoryBuffer();
-        Upload multiFileUpload = new Upload(multiFileMemoryBuffer);
 
         multiFileUpload.addSucceededListener(event -> {
-            // Determine which file was uploaded
+
             String fileName = event.getFileName();
-
-            // Get input stream specifically for the finished file
             InputStream fileData = multiFileMemoryBuffer.getInputStream(fileName);
-            long contentLength = event.getContentLength();
-            String mimeType = event.getMIMEType();
 
-            XmlObject xmlObject = new XmlObject(fileData);
+            xmlObject = new XmlObject(fileData);
             xmlObject.getKnots();
             xmlObject.getAnchors();
             xmlObject.getTies();
-//            System.out.println(xmlObject.knotList);
-//            System.out.println(xmlObject.anchorList);
-//            System.out.println(xmlObject.attributeList);
-//            System.out.println(xmlObject.tieList);
-//            System.out.println("---------");
-//            System.out.println(xmlObject.edgeList);
 
             edges = new ArrayList<>();
             nodes = new ArrayList<>();
@@ -155,23 +159,30 @@ public class MainView extends VerticalLayout {
             uploadFromFile = true;
 
             loadDataToXml.setEnabled(true);
-
-            // Do something with the file data
-            // processFile(fileData, fileName, contentLength, mimeType);
         });
 
         addButton.addClickListener(
             click -> {
                 try {
-                    addNode(
-                        nodeIdField.getValue(),
-                        connectToNode.getValue().getId().toString(),
-                        edgeLabel.getValue(),
-                        edgeType.getValue(),
-                        select.getValue(),
-                        nodeRepository,
-                        edgeRepository
-                    );
+
+                    if (selectNodeType.getValue() == null || connectToNode.getValue() == null ||
+                        Objects.equals(nodeLabelField.getValue(), "") || nodeLabelField.getValue() == null ||
+                        Objects.equals(edgeLabel.getValue(), "") || edgeLabel.getValue() == null
+                    ) {
+                        Notification notification = Notification.show("Заполните первые 4 поля!!!");
+                        notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+                    } else {
+                        addNode(
+                            nodeLabelField.getValue(),
+                            connectToNode.getValue().getId().toString(),
+                            edgeLabel.getValue(),
+                            edgeType.getValue(),
+                            selectNodeType.getValue(),
+                            nodeRepository,
+                            edgeRepository
+                        );
+                    }
+
                 } catch (JsonProcessingException e) {
                     throw new RuntimeException(e);
                 }
@@ -202,19 +213,39 @@ public class MainView extends VerticalLayout {
                                     while (keys.hasNext()){
                                         String key = keys.next();
                                         if (jsonObject.get(key) instanceof JSONObject) {
-                                            int index = nodes.indexOf(
-                                                nodes.stream().filter(
-                                                    visJsNode -> visJsNode.getId() == ((JSONObject) jsonObject.get(key)).get("id")
-                                                ).collect(Collectors.toList()).get(0)
-                                            );
-                                            nodes.get(index).setXYAndFixed(
-                                                Double.parseDouble(((JSONObject) jsonObject.get(key)).get("x").toString()),
-                                                Double.parseDouble(((JSONObject) jsonObject.get(key)).get("y").toString()),
-                                                Boolean.parseBoolean(((JSONObject) jsonObject.get(key)).get("fixed").toString())
-                                            );
-                                        }
-                                    }
 
+                                            Integer nodeId = ((JSONObject) jsonObject.get(key)).getInt("id");
+                                            Double x = ((JSONObject) jsonObject.get(key)).getDouble("x");
+                                            Double y = ((JSONObject) jsonObject.get(key)).getDouble("y");
+                                            Boolean fixed = ((JSONObject) jsonObject.get(key)).getBoolean("fixed");
+
+                                            VisJsNode node = nodes.stream().filter(
+                                                visJsNode -> visJsNode.getId().equals(nodeId)
+                                            ).collect(Collectors.toList()).get(0);
+                                            nodes.get(nodes.indexOf(node)).setXYAndFixed(
+                                                x,
+                                                y,
+                                                fixed
+                                            );
+
+                                            List<VisJsNode> newNodeToCompare = newNodes.stream().filter(
+                                                visJsNode -> visJsNode.getId().equals(nodeId)
+                                            ).collect(Collectors.toList());
+                                            if (newNodeToCompare.size() > 0) {
+                                                newNodes.get(newNodes.indexOf(newNodeToCompare.get(0))).setXYAndFixed(
+                                                    x,
+                                                    y,
+                                                    fixed
+                                                );
+                                            }
+                                        }
+
+                                    }
+                                    try {
+                                        xmlObject.writeToXml(nodes, edges);
+                                    } catch (TransformerException | ParserConfigurationException e) {
+                                        throw new RuntimeException(e);
+                                    }
                                     return true;
                                 } else
                                     return false;
@@ -226,9 +257,9 @@ public class MainView extends VerticalLayout {
         add(
             visJs,
             new HorizontalLayout(
-                select,
+                selectNodeType,
                 connectToNode,
-                nodeIdField,
+                nodeLabelField,
                 edgeLabel,
                 edgeType
                 ),
@@ -260,11 +291,17 @@ public class MainView extends VerticalLayout {
             newNode = new VisJsNode(type.getType(), nodeId);
         }
 
+        VisJsNode node = nodes.stream().filter(
+            visJsNode -> visJsNode.getId() == Integer.parseInt(connectTo)
+        ).collect(Collectors.toList()).get(0);
+
         VisJsEdge newEdge = new VisJsEdge(
-            newNode.getId(),
             Integer.parseInt(connectTo),
+            newNode.getId(),
             edgeLabel,
-            edgeType
+            edgeType,
+            type.getType(),
+            node.getType()
         );
 
         if (!uploadFromFile)
@@ -274,12 +311,10 @@ public class MainView extends VerticalLayout {
         }
 
         nodes.add(newNode);
+        newNodes.add(newNode);
         edges.add(newEdge);
+        newEdges.add(newEdge);
         visJs.addNode(newNode, newEdge);
-
-        System.out.println(nodes);
-        System.out.println(edges);
-
     }
 
 

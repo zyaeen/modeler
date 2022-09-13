@@ -235,12 +235,12 @@ class VisJsTest {
         node = this.fillNode(node);
         edge = this.fillEdge(edge)
         try {
-            this.network.body.data.nodes.add([node])
+            this.network.body.data.nodes.update(node)
         } catch (err) {
             console.log(err);
         }
         try {
-            this.network.body.data.edges.add([edge])
+            this.network.body.data.edges.update(edge)
         } catch (err) {
             console.log(err);
         }
@@ -252,11 +252,12 @@ class VisJsTest {
         try {
             const response =  fetch(url, {
                 method: 'POST', // или 'PUT'
-                body: JSON.stringify(this.nodes._data), // данные могут быть 'строкой' или {объектом}!
+                body: JSON.stringify(this.network.body.data.nodes._data), // данные могут быть 'строкой' или {объектом}!
                 headers: {
                     'Content-Type': 'application/json'
                 }
             });
+            console.log(this.network.body.data.nodes)
             const json = response;
             console.log('Успех:', json);
         } catch (error) {
