@@ -1,5 +1,9 @@
 # My Vaadin and Vis.js tryings 
 
+## 13.09 UPD Что сделано? 
+* Схему можно выгружать в xml. Она сохраняется в файл [downloaded](https://github.com/zyaeen/vaadin-visjs-testing-repo/tree/main/src/main/resources/xmls). Интерактивную выгрузку через браузер не сделал.
+* При открытии файла Dossier.xml закрепленные элементы не сдвигаются с места автоматически — предполагаю, что так работает физика VisJs.
+
 ## 12.09 Что сделано? 
 * Созданы классы XmlObject и LayoutProperties для работы с данными из xml. Пока что только для загрузки из xml на бэк и фронт. 
 * Классы Node и Edge переименовал в VisJsNode и VisJsEdge для однозначности при работе в классе XmlObject (он использует объекты библиотечного класса Node).
