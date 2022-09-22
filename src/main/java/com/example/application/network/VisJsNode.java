@@ -59,10 +59,10 @@ public class VisJsNode {
         this.fixed = fixed;
     }
 
-    public VisJsNode(Integer type, String label) {
+    public VisJsNode(Integer type, String descriptor, String mnemonic) {
         this.id = idFromXml++;
-        this.mnemonic = label.toUpperCase().substring(0,3);
-        this.label = label;
+        this.mnemonic = mnemonic;
+        this.label = descriptor;
         this.type = type;
         this.x = 700.;
         this.y = 700.;
@@ -96,6 +96,13 @@ public class VisJsNode {
         this.x = x;
         this.y = y;
         this.fixed = fixed;
+    }
+
+    public void setMnemonic(String mnemonic) {
+        this.mnemonic = mnemonic;
+    }
+    public void setLabel(String label) {
+        this.label = label;
     }
 
     public Double getX(){

@@ -4,7 +4,6 @@ package com.example.application.network;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
-import javax.persistence.criteria.CriteriaBuilder;
 
 @Entity
 @Table(name = "NODE_TYPE")
@@ -21,7 +20,7 @@ public class NodeType {
     public String getLabel(){
         return this.label;
     }
-    public Integer getType(){
+    public Integer getId(){
         return this.id;
     }
 

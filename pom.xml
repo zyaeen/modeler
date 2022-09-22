@@ -188,7 +188,7 @@
                 <artifactId>flyway-maven-plugin</artifactId>
                 <version>8.5.12</version>
                 <configuration>
-                    <url>jdbc:h2:./target/local_db22</url>
+                    <url>jdbc:h2:./target/local_db23</url>
                     <user>sa</user>
                     <password></password>
                     <cleanDisabled>false</cleanDisabled>

@@ -15,8 +15,10 @@ import java.util.List;
 
 @JsModule("./visjs-test.js")
 @NpmPackage(value = "vis", version = "0.110.0")
-@Tag("canvas")
+@Tag("custom-tag")
 public class VisJs extends Component {
+
+
 
     public VisJs(List<VisJsEdge> edges, List<VisJsNode> nodes) throws JsonProcessingException {
         ObjectWriter owForEdges = new ObjectMapper().writer().withDefaultPrettyPrinter();
@@ -24,6 +26,8 @@ public class VisJs extends Component {
 
         String jsonEdges = owForEdges.writeValueAsString(edges);
         String jsonNodes = owForNodes.writeValueAsString(nodes);
+
+        setId("customId");
 
         getElement().executeJs("window.initThree($0, $1, $2)", this, jsonEdges, jsonNodes);
     }
@@ -54,5 +58,18 @@ public class VisJs extends Component {
         getElement().executeJs("window.getCoordinates($0)", this);
     }
 
+    public void updateNode(VisJsNode node) throws JsonProcessingException {
+        ObjectWriter owForNodes = new ObjectMapper().writer().withDefaultPrettyPrinter();
+
+        String jsonNode = owForNodes.writeValueAsString(node);
+        getElement().executeJs("window.updateNode($0, $1)", this, jsonNode);
+    }
+
+    public void deleteNode(VisJsNode node) throws JsonProcessingException {
+        ObjectWriter owForNodes = new ObjectMapper().writer().withDefaultPrettyPrinter();
+
+        String jsonNode = owForNodes.writeValueAsString(node);
+        getElement().executeJs("window.updateNode($0, $1)", this, jsonNode);
+    }
 
 }

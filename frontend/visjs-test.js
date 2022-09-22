@@ -2,41 +2,21 @@ import {DataSet, Network} from "vis";
 
 class VisJsTest {
     init(element, edges, nodes) {
+
         this.element = element;
-
-        var loadedNodes = JSON.parse(nodes);
-        this.historicalAttributes = [];
-        this.historicalTies = [];
-
         var _this = this;
 
-        var step;
-        for (step = 0; step < loadedNodes.length; step++) {
-            loadedNodes[step] = this.fillNode(loadedNodes[step]);
-        }
+        this.draw(element, edges, nodes);
 
-        this.nodes = new DataSet(loadedNodes);
+        this.container = document.getElementById("customId");
 
-        var loadedEdges = JSON.parse(edges);
-        for (step = 0; step < loadedEdges.length; step++) {
-            loadedEdges[step] = this.fillEdge(loadedEdges[step]);
-        }
+        document.addEventListener('contextmenu', event => event.preventDefault());
 
-        this.edges = new DataSet(loadedEdges);
-
-
-        this.container = document.getElementById("outlet");
-
-        this.checked = [];
-
-        this.data = {
-            nodes: this.nodes,
-            edges: this.edges,
-        };
         var options = {};
         this.network = new Network(this.container, this.data, options);
         var historicalAttributes = this.historicalAttributes;
         var historicalTies = this.historicalTies;
+        var step;
         this.network.on("afterDrawing", function (ctx) {
             for (step = 0; step < _this.historicalAttributes.length; step++) {
                 var nodePosition = this.getPositions([_this.historicalAttributes[step]]);
@@ -83,6 +63,33 @@ class VisJsTest {
                 }
             }
         });
+        this.network.on( 'oncontext', function(properties) {
+
+            var a = this.getNodeAt(properties.pointer.DOM);
+            var b = this.getEdgeAt(properties.pointer.DOM)
+
+            if (b != null){
+
+            }
+
+            const url = 'http://localhost:8080/down';
+
+            if (a != null){
+                try {
+                    const response =  fetch(url, {
+                        method: 'POST', // или 'PUT'
+                        body: a.toString(), // данные могут быть 'строкой' или {объектом}!
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    const json = response;
+                    console.log('Успех:', json);
+                } catch (error) {
+                    console.error('Ошибка:', error);
+                }
+            }
+        });
         this.network.on('dragStart', function(properties) {
             var ids = properties.nodes;
             if (ids.length > 0) {
@@ -96,7 +103,6 @@ class VisJsTest {
         });
         this.network.on('dragEnd', function(properties) {
             var ids = properties.nodes;
-
             if (ids.length > 0) {
                 if (_this.checked.includes(ids[0])) {
                     var node = this.body.data.nodes._data[ids[0]];
@@ -110,42 +116,45 @@ class VisJsTest {
         });
     }
 
-    redraw(element, edges, nodes) {
-
-        var loadedNodes = JSON.parse(nodes);
+    draw(element, edges, nodes){
+        this.loadedNodes = JSON.parse(nodes);
         this.historicalAttributes = [];
         this.historicalTies = [];
 
         this.checked = [];
 
         var step;
-        for (step = 0; step < loadedNodes.length; step++) {
-            loadedNodes[step] = this.fillNode(loadedNodes[step]);
+        for (step = 0; step < this.loadedNodes.length; step++) {
+            this.loadedNodes[step] = this.fillNode(this.loadedNodes[step]);
         }
 
-        this.nodes = new DataSet(loadedNodes);
+        this.nodes = new DataSet(this.loadedNodes);
 
-        var loadedEdges = JSON.parse(edges);
-        for (step = 0; step < loadedEdges.length; step++) {
-            loadedEdges[step] = this.fillEdge(loadedEdges[step]);
+        this.loadedEdges = JSON.parse(edges);
+        for (step = 0; step < this.loadedEdges.length; step++) {
+            this.loadedEdges[step] = this.fillEdge(this.loadedEdges[step]);
         }
 
-        this.edges = new DataSet(loadedEdges);
+        this.edges = new DataSet(this.loadedEdges);
 
         this.data = {
             nodes: this.nodes,
             edges: this.edges,
         };
+    }
+
+    redraw(element, edges, nodes) {
+
+        this.draw(element, edges, nodes);
 
         this.network.body.data.edges.clear();
         this.network.body.data.nodes.clear();
 
-
         this.network.body.data.edges.update(
-          loadedEdges
+          this.loadedEdges
         );
         this.network.body.data.nodes.update(
-          loadedNodes
+          this.loadedNodes
         );
     }
 
@@ -232,8 +241,12 @@ class VisJsTest {
         var node = JSON.parse(newNode);
         var edge = JSON.parse(newEdge);
 
-        node = this.fillNode(node);
-        edge = this.fillEdge(edge)
+        if (node != null){
+            node = this.fillNode(node);
+        }
+        if (edge != null){
+            edge = this.fillEdge(edge);
+        }
         try {
             this.network.body.data.nodes.update(node)
         } catch (err) {
@@ -257,14 +270,27 @@ class VisJsTest {
                     'Content-Type': 'application/json'
                 }
             });
-            console.log(this.network.body.data.nodes)
-            const json = response;
-            console.log('Успех:', json);
+            console.log('Успех:', response);
         } catch (error) {
             console.error('Ошибка:', error);
         }
     }
-
+    updateNode(element, node){
+        var node = JSON.parse(node);
+        try {
+            this.network.body.data.nodes.update(node)
+        } catch (err) {
+            console.log(err);
+        }
+    }
+    deleteNode(element, node){
+        var node = JSON.parse(node);
+        try {
+            this.network.body.data.nodes.update(node)
+        } catch (err) {
+            console.log(err);
+        }
+    }
 }
 
 const tt = new VisJsTest();
@@ -285,3 +311,11 @@ window.redraw = function(element, edges, nodes) {
 window.getCoordinates = function(element) {
     tt.getCoordinates(element);
 };
+
+window.updateNode = function (element, node){
+    tt.updateNode(element, node)
+}
+
+window.deleteNode = function (element, node){
+    tt.deleteNode(element, node)
+}

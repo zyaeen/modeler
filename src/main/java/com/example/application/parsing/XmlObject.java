@@ -318,9 +318,17 @@ public class XmlObject {
 
                             Integer idOfNodeToConnect = edge.getFrom().equals(node.getId()) ? edge.getTo() : edge.getFrom();
 
-                            VisJsNode nodeToConnect = nodes.stream().filter(
-                                visJsNode -> visJsNode.getId().equals(idOfNodeToConnect)
-                            ).collect(Collectors.toList()).get(0);
+                            VisJsNode nodeToConnect = null;
+
+                            try {
+                                nodeToConnect = nodes.stream().filter(
+                                    visJsNode -> visJsNode.getId().equals(idOfNodeToConnect)
+                                ).collect(Collectors.toList()).get(0);
+                            } catch (Exception e){
+
+                            }
+
+
 
                             Element childTag;
 
