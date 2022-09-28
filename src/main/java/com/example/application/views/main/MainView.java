@@ -79,34 +79,10 @@ public class MainView extends VerticalLayout {
         Iterable<NodeType> iterableNodeTypes = nodeTypeRepository.findAll();
         iterableNodeTypes.forEach(nodeTypes::add);
 
-//        ComboBox<NodeType> selectNodeType = new ComboBox<>("Select node type");
-//        selectNodeType.setItems(nodeTypes);
-//        selectNodeType.setItemLabelGenerator(NodeType::getLabel);
-//
-//        Iterable<VisJsEdge> iterableEdges = edgeRepository.findAll();
-//        iterableEdges.forEach(edges::add);
-//
-//        Iterable<VisJsNode> iterator = nodeRepository.findAll();
-//        iterator.forEach(nodes::add);
 
         dialogManager = new DialogManager(nodeTypes);
         ContextMenu menu = new ContextMenu();
 
-//        ComboBox<VisJsNode> connectToNode = new ComboBox<>("Connect to");
-//        connectToNode.setEnabled(false);
-//
-//        nodeLabelField = new TextField("Node label:");
-//        nodeLabelField.setRequired(true);
-//
-//        edgeLabel = new TextField("Connection name");
-//        edgeLabel.setRequired(true);
-//
-//        ComboBox<Boolean> edgeType = new ComboBox<>("Connection multiplicity");
-//        edgeType.setItems(true, false);
-//        edgeType.setItemLabelGenerator(item -> item ? "Many" : "One");
-//        edgeType.setValue(true);
-//
-//        Button addButton = new Button("Add node");
 
         MultiFileMemoryBuffer multiFileMemoryBuffer = new MultiFileMemoryBuffer();
         Upload multiFileUpload = new Upload(multiFileMemoryBuffer);
@@ -138,41 +114,6 @@ public class MainView extends VerticalLayout {
 
 
 
-        //        selectNodeType.addValueChangeListener(
-//            comboBoxNodeTypeComponentValueChangeEvent -> {
-//                NodeType type = null;
-//                type = comboBoxNodeTypeComponentValueChangeEvent.getValue();
-//
-//                if (type != null) {
-//                    List<VisJsNode> list = new ArrayList<>();
-//                    Integer typeId = type.getId();
-//
-//                    switch (typeId) {
-//                        case 1:
-//                        case 3:
-//                            for (VisJsNode node : nodes) {
-//                                if (node.getType() != 1 && node.getType() != 3) {
-//                                    list.add(node);
-//                                }
-//                            }
-//                            break;
-//                        default:
-//                            for (VisJsNode node : nodes) {
-//                                if (node.getType() != 2 && node.getType() != 4 && node.getType() != 6 && node.getType() != 5) {
-//                                    list.add(node);
-//                                }
-//                            }
-//                            break;
-//                    }
-//                    connectToNode.setItems(list);
-//                    connectToNode.setItemLabelGenerator(VisJsNode::getLabel);
-//                    connectToNode.setEnabled(true);
-//                } else {
-//                    connectToNode.setEnabled(false);
-//                }
-//            }
-//        );
-
         multiFileUpload.addSucceededListener(event -> {
 
             String fileName = event.getFileName();
@@ -192,55 +133,6 @@ public class MainView extends VerticalLayout {
             uploadFromFile = true;
         });
 
-//        addButton.addClickListener(
-//            click -> {
-//                try {
-//                    if (selectNodeType.getValue() == null || connectToNode.getValue() == null ||
-//                        Objects.equals(nodeLabelField.getValue(), "") || nodeLabelField.getValue() == null ||
-//                        Objects.equals(edgeLabel.getValue(), "") || edgeLabel.getValue() == null
-//                    ) {
-//                        Notification notification = Notification.show("Заполните первые 4 поля!!!");
-//                        notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
-//                    } else {
-//
-//                        VisJsNode newNode = new VisJsNode(
-//                            selectNodeType.getValue().getId(),
-//                            nodeLabelField.getValue(),
-//                            nodeLabelField.getValue().substring(0,3)
-//                        );
-//                        VisJsEdge newEdge = new VisJsEdge(
-//                            connectToNode.getValue().getId(),
-//                            newNode.getId(),
-//                            edgeLabel.getValue(),
-//                            edgeType.getValue()
-//                        );
-//
-//                        nodes.add(newNode);
-//                        newNodes.add(newNode);
-//
-//                        edges.add(newEdge);
-//                        newEdges.add(newEdge);
-//
-//                        visJs.addNode(newNode, newEdge);
-//
-////                        addNode(
-////                            selectNodeType.getValue(),
-////                            nodeLabelField.getValue().substring(0,3),
-////                            nodeLabelField.getValue(),
-////                            "",
-////                            connectToNode.getValue().getId().toString(),
-////                            edgeLabel.getValue(),
-////                            edgeType.getValue(),
-////                            nodeRepository,
-////                            edgeRepository
-////                        );
-//                    }
-//
-//                } catch (JsonProcessingException e) {
-//                    throw new RuntimeException(e);
-//                }
-//            }
-//        );
 
         VaadinSession.getCurrent().addRequestHandler(
             (
@@ -403,8 +295,6 @@ public class MainView extends VerticalLayout {
         menu.addItem("Edit", menuItemClickEvent -> {
             if (editableNodeId != null) {
 
-//                dialogManager.setIsEditDialogClosed(false);
-
                 Integer nodeId = Integer.valueOf(editableNodeId);
                 VisJsNode node = nodes.stream().filter(
                     visJsNode -> visJsNode.getId().equals(nodeId)
@@ -435,18 +325,6 @@ public class MainView extends VerticalLayout {
         menu.setTarget(visJs);
 
         add(
-//            new HorizontalLayout(
-//                selectNodeType,
-//                connectToNode,
-//                nodeLabelField,
-//                edgeLabel,
-//                edgeType
-//                ),
-//            addButton,
-//            new HorizontalLayout(
-////                multiFileUpload,
-//                loadDataToXml
-//            ),
             visJs
         );
         add(nonTieCreationDialog);
@@ -509,58 +387,13 @@ public class MainView extends VerticalLayout {
                 nodes.add(dialogManager.getNodeToBeAdded());
                 newNodes.add(dialogManager.getNodeToBeAdded());
 
-//                if (editableNodeId != null){
                 edges.add(dialogManager.getEdgeToBeAdded());
                 newEdges.add(dialogManager.getEdgeToBeAdded());
-//                }
 
             }
         }
         editableNodeId = null;
         dialogManager.setIsCreationDialogClosed(true);
     }
-
-
-//    public void addNode(
-//        NodeType type,
-//        String nodeMnemonic,
-//        String nodeDescriptor,
-//        String nodeDescription,
-//        String connectTo,
-//        String edgeLabel,
-//        Boolean edgeType,
-//        NodeRepository nodeRepository,
-//        EdgeRepository edgeRepository
-//    ) throws JsonProcessingException {
-//
-//        VisJsNode newNode;
-//
-//        if (!uploadFromFile) {
-//            lastIndex++;
-//            newNode = new VisJsNode(lastIndex, type.getId(), nodeDescriptor);
-//        } else {
-//            newNode = new VisJsNode(type.getId(), nodeDescriptor, nodeMnemonic);
-//        }
-//
-//        VisJsEdge newEdge = new VisJsEdge(
-//            Integer.parseInt(connectTo),
-//            newNode.getId(),
-//            edgeLabel,
-//            edgeType
-//        );
-//
-//        if (!uploadFromFile)
-//        {
-//            nodeRepository.save(newNode);
-//            edgeRepository.save(newEdge);
-//        }
-//
-//        nodes.add(newNode);
-//        newNodes.add(newNode);
-//        edges.add(newEdge);
-//        newEdges.add(newEdge);
-//        visJs.addNode(newNode, newEdge);
-//    }
-
 
 }
