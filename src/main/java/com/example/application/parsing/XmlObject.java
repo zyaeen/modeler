@@ -274,9 +274,9 @@ public class XmlObject {
                                     .setNodeValue(attributeNode.getFixed().toString());
 
                                 for(VisJsEdge visJsEdge : edges) {
-                                    if (visJsEdge.getTo().equals(attributeNode.getId())) {
+                                    if (visJsEdge.getTo().equals(attributeNode.getId()) || visJsEdge.getFrom().equals(attributeNode.getId())) {
                                         List<VisJsNode> knotNodes = nodes.stream().filter(
-                                            visJsNode -> (visJsNode.getId().equals(visJsEdge.getFrom()) && visJsNode.getType().equals(3))
+                                            visJsNode -> ((visJsNode.getId().equals(visJsEdge.getFrom()) || visJsNode.getId().equals(visJsEdge.getTo())) && visJsNode.getType().equals(3))
                                         ).collect(Collectors.toList());
                                         if (knotNodes.size() > 0){
                                             if (bufferAttributeExample.getAttributes().getNamedItem("knotRange") != null) {

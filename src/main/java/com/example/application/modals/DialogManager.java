@@ -101,8 +101,7 @@ public class DialogManager {
                     }
                 }
                 break;
-            case 4:
-            case 6:
+
             case 5:
             case 2:
                 for (NodeType node : nodeTypeList) {
@@ -112,8 +111,21 @@ public class DialogManager {
                 }
                 break;
 
+            case 4:
+            case 6:
+                for (NodeType node : nodeTypeList) {
+                    if (node.getId() == 3) {
+                        list.add(node);
+                    }
+                }
+                break;
+
             case 7:
-                list = nodeTypeList;
+                for (NodeType node : nodeTypeList) {
+                    if (node.getId() == 1) {
+                        list.add(node);
+                    }
+                }
                 break;
 
         }

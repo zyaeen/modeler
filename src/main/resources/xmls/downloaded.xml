@@ -76,30 +76,62 @@
         <description>
             Статус связи распоряжений с БО
         </description>
-    </knot><knot dataRange="varchar2(255 CHAR)" descriptor="00000" identity="number(19)" mnemonic="000">
+    </knot><knot dataRange="varchar2(255 CHAR)" descriptor="K2K2" identity="number(19)" mnemonic="K2K">
         <metadata capsule="dbo" generator="false"/>
         <layout fixed="false" x="700.0" y="700.0"/>
         <description>
             Статус связи распоряжений с БО
         </description>
-    </knot><knot dataRange="varchar2(255 CHAR)" descriptor="00000" identity="number(19)" mnemonic="000">
+    </knot><knot dataRange="varchar2(255 CHAR)" descriptor="K3K3" identity="number(19)" mnemonic="K3K">
         <metadata capsule="dbo" generator="false"/>
-        <layout fixed="false" x="66.0" y="589.0"/>
+        <layout fixed="false" x="700.0" y="700.0"/>
         <description>
             Статус связи распоряжений с БО
         </description>
-    </knot><knot dataRange="varchar2(255 CHAR)" descriptor="ЧЧЧ" identity="number(19)" mnemonic="ЧЧЧ">
+    </knot><knot dataRange="varchar2(255 CHAR)" descriptor="K4K4" identity="number(19)" mnemonic="K4K">
         <metadata capsule="dbo" generator="false"/>
         <layout fixed="false" x="700.0" y="700.0"/>
+        <description>
+            Статус связи распоряжений с БО
+        </description>
+    </knot><knot dataRange="varchar2(255 CHAR)" descriptor="K6K6" identity="number(19)" mnemonic="K6K">
+        <metadata capsule="dbo" generator="false"/>
+        <layout fixed="false" x="700.0" y="700.0"/>
+        <description>
+            Статус связи распоряжений с БО
+        </description>
+    </knot><knot dataRange="varchar2(255 CHAR)" descriptor="K7K7" identity="number(19)" mnemonic="K7K">
+        <metadata capsule="dbo" generator="false"/>
+        <layout fixed="false" x="700.0" y="700.0"/>
+        <description>
+            Статус связи распоряжений с БО
+        </description>
+    </knot><knot dataRange="varchar2(255 CHAR)" descriptor="K8K8" identity="number(19)" mnemonic="K8K">
+        <metadata capsule="dbo" generator="false"/>
+        <layout fixed="false" x="700.0" y="700.0"/>
+        <description>
+            Статус связи распоряжений с БО
+        </description>
+    </knot><knot dataRange="varchar2(255 CHAR)" descriptor="K9K9" identity="number(19)" mnemonic="K9K">
+        <metadata capsule="dbo" generator="false"/>
+        <layout fixed="false" x="700.0" y="700.0"/>
+        <description>
+            Статус связи распоряжений с БО
+        </description>
+    </knot><knot dataRange="varchar2(255 CHAR)" descriptor="K10K10" identity="number(19)" mnemonic="K10">
+        <metadata capsule="dbo" generator="false"/>
+        <layout fixed="true" x="454.0" y="1018.0"/>
         <description>
             Статус связи распоряжений с БО
         </description>
     </knot><anchor descriptor="Element" identity="number(19)" mnemonic="VE">
         <metadata capsule="dbo" generator="true"/>
-        
-        
-        
+
         <layout fixed="false" x="-1305.25" y="203.75"/>
+
+        
+        
+        
     <attribute dataRange="number(19)" descriptor="ModuleId" mnemonic="VEM">
             <metadata capsule="dbo" deletable="false" privacy="Ignore"/>
             <layout fixed="false" x="-1305.25" y="203.75"/>
@@ -111,10 +143,12 @@
             <layout fixed="false" x="-1445.54" y="195.33"/>
         </attribute></anchor><anchor descriptor="Vertex" identity="number(19)" mnemonic="VX">
         <metadata capsule="dbo" generator="true"/>
-        
-        
-        
+
         <layout fixed="false" x="-938.59" y="231.03"/>
+
+        
+        
+        
     <attribute dataRange="number(19)" descriptor="Context" mnemonic="VXC">
             <metadata capsule="dbo" deletable="false" privacy="Ignore"/>
             <layout fixed="false" x="-938.59" y="231.03"/>
@@ -141,16 +175,20 @@
             <layout fixed="false" x="-716.19" y="238.92"/>
         </attribute></anchor><anchor descriptor="CardLE" identity="number(19)" mnemonic="LE">
         <metadata capsule="dbo" generator="true"/>
-        
-        
-        
+
         <layout fixed="false" x="2126.13" y="865.18"/>
+
+        
+        
+        
     </anchor><anchor descriptor="Dossier" identity="number(19)" mnemonic="DL">
         <metadata capsule="dbo" generator="true"/>
-        
-        
-        
+
         <layout fixed="false" x="2569.95" y="178.86"/>
+
+        
+        
+        
     <attribute dataRange="number(19)" descriptor="TypeVal" knotRange="DDT" mnemonic="DTV">
             <metadata capsule="dbo" deletable="false" privacy="Ignore"/>
             <layout fixed="false" x="2569.95" y="178.86"/>
@@ -159,17 +197,21 @@
             <layout fixed="false" x="3063.4" y="-62.99"/>
         </attribute></anchor><anchor descriptor="DRequest" identity="number(19)" mnemonic="DR">
         <metadata capsule="dbo" generator="true"/>
-        
-        
-        
+
         <layout fixed="false" x="2212.94" y="0.61"/>
-    </anchor><anchor descriptor="sssssss" identity="number(19)" mnemonic="BR">
+
+        
+        
+        
+    </anchor><anchor descriptor="BICRequest" identity="number(19)" mnemonic="BR">
         <metadata capsule="dbo" generator="true"/>
-        
-        
-        
+
         <layout fixed="false" x="2301.08" y="761.43"/>
-    <attribute dataRange="number(19)" descriptor="StatusBICReq" mnemonic="SBR" timeRange="datetime">
+
+        
+        
+        
+    <attribute dataRange="number(19)" descriptor="StatusBICReq" knotRange="K9K" mnemonic="SBR" timeRange="datetime">
             <metadata capsule="dbo" deletable="false" privacy="Ignore"/>
             <layout fixed="false" x="2301.08" y="761.43"/>
         </attribute><attribute dataRange="number(19)" descriptor="PRType" mnemonic="BRT">
@@ -183,10 +225,12 @@
             <layout fixed="false" x="2384.31" y="693.64"/>
         </attribute></anchor><anchor descriptor="Notion" identity="number(19)" mnemonic="NO">
         <metadata capsule="dbo" generator="true"/>
-        
-        
-        
+
         <layout fixed="false" x="1219.67" y="547.45"/>
+
+        
+        
+        
     <attribute dataRange="number(19)" descriptor="XmlContent" mnemonic="NXC">
             <metadata capsule="dbo" deletable="false" privacy="Ignore"/>
             <layout fixed="false" x="1219.67" y="547.45"/>
@@ -201,10 +245,12 @@
             <layout fixed="false" x="1332.53" y="383.38"/>
         </attribute></anchor><anchor descriptor="TPRN" identity="number(19)" mnemonic="CN">
         <metadata capsule="dbo" generator="true"/>
-        
-        
-        
+
         <layout fixed="false" x="1633.21" y="-676.65"/>
+
+        
+        
+        
     <attribute dataRange="number(19)" descriptor="Type" mnemonic="CTT">
             <metadata capsule="dbo" deletable="false" privacy="Ignore"/>
             <layout fixed="false" x="1633.21" y="-676.65"/>
@@ -228,22 +274,28 @@
             <layout fixed="false" x="1683.83" y="-719.93"/>
         </attribute></anchor><anchor descriptor="Contract" identity="number(19)" mnemonic="CC">
         <metadata capsule="dbo" generator="true"/>
-        
-        
-        
+
         <layout fixed="false" x="1276.87" y="177.79"/>
+
+        
+        
+        
     </anchor><anchor descriptor="Account" identity="number(19)" mnemonic="AC">
         <metadata capsule="dbo" generator="true"/>
-        
-        
-        
+
         <layout fixed="false" x="1606.78" y="857.35"/>
+
+        
+        
+        
     </anchor><anchor descriptor="NatureDoc" identity="number(19)" mnemonic="ND">
         <metadata capsule="dbo" generator="true"/>
-        
-        
-        
+
         <layout fixed="false" x="2397.16" y="-358.26"/>
+
+        
+        
+        
     <attribute dataRange="number(19)" descriptor="RegDate" mnemonic="DRD" timeRange="datetime">
             <metadata capsule="dbo" deletable="false" privacy="Ignore"/>
             <layout fixed="false" x="2397.16" y="-358.26"/>
@@ -279,10 +331,12 @@
             <layout fixed="false" x="2538.35" y="-407.61"/>
         </attribute></anchor><anchor descriptor="Command" identity="number(19)" mnemonic="CD">
         <metadata capsule="dbo" generator="true"/>
+
+        <layout fixed="false" x="1607.99" y="246.79"/>
+
         
         
         
-        <layout fixed="false" x="707.0" y="438.0"/>
     <attribute dataRange="number(19)" descriptor="EDID" mnemonic="CDE">
             <metadata capsule="dbo" deletable="false" privacy="Ignore"/>
             <layout fixed="false" x="1607.99" y="246.79"/>
@@ -291,10 +345,12 @@
             <layout fixed="false" x="1850.36" y="292.56"/>
         </attribute></anchor><anchor descriptor="CTempl" identity="number(19)" mnemonic="CP">
         <metadata capsule="dbo" generator="true"/>
-        
-        
-        
+
         <layout fixed="false" x="1278.6" y="-544.66"/>
+
+        
+        
+        
     <attribute dataRange="number(19)" descriptor="Type" mnemonic="CPT">
             <metadata capsule="dbo" deletable="false" privacy="Ignore"/>
             <layout fixed="false" x="1278.6" y="-544.66"/>
@@ -312,10 +368,12 @@
             <layout fixed="false" x="1281.8" y="-670.43"/>
         </attribute></anchor><anchor descriptor="AParam" identity="number(19)" mnemonic="AP">
         <metadata capsule="dbo" generator="true"/>
-        
-        
-        
+
         <layout fixed="false" x="1990.52" y="-598.0"/>
+
+        
+        
+        
     <attribute dataRange="number(19)" descriptor="DELETED" mnemonic="DEL" timeRange="datetime">
             <metadata capsule="dbo" deletable="false" privacy="Ignore"/>
             <layout fixed="false" x="1990.52" y="-598.0"/>
@@ -330,19 +388,23 @@
             <layout fixed="false" x="2127.94" y="-589.47"/>
         </attribute></anchor><anchor descriptor="TmplEl" identity="number(19)" mnemonic="TE">
         <metadata capsule="dbo" generator="true"/>
-        
-        
-        
+
         <layout fixed="false" x="688.05" y="-120.28"/>
+
+        
+        
+        
     <attribute dataRange="number(19)" descriptor="ElementForm" mnemonic="TEF">
             <metadata capsule="dbo" deletable="false" privacy="Ignore"/>
             <layout fixed="false" x="688.05" y="-120.28"/>
         </attribute></anchor><anchor descriptor="Template" identity="number(19)" mnemonic="TL">
         <metadata capsule="dbo" generator="true"/>
+
+        <layout fixed="false" x="303.19" y="-157.14"/>
+
         
         
         
-        <layout fixed="true" x="-50.0" y="139.0"/>
     <attribute dataRange="number(19)" descriptor="DocType" mnemonic="TLT">
             <metadata capsule="dbo" deletable="false" privacy="Ignore"/>
             <layout fixed="false" x="303.19" y="-157.14"/>
@@ -375,10 +437,12 @@
             <layout fixed="false" x="-222.25" y="-32.75"/>
         </attribute></anchor><anchor descriptor="Element" identity="number(19)" mnemonic="CL">
         <metadata capsule="dbo" generator="true"/>
-        
-        
-        
+
         <layout fixed="false" x="422.86" y="-377.73"/>
+
+        
+        
+        
     <attribute dataRange="number(19)" descriptor="Type" knotRange="CLT" mnemonic="CLT">
             <metadata capsule="dbo" deletable="false" privacy="Ignore"/>
             <layout fixed="false" x="422.86" y="-377.73"/>
@@ -414,10 +478,12 @@
             <layout fixed="false" x="609.8" y="-418.16"/>
         </attribute></anchor><anchor descriptor="Classifier" identity="number(19)" mnemonic="CV">
         <metadata capsule="dbo" generator="true"/>
-        
-        
-        
+
         <layout fixed="false" x="0.3" y="-347.36"/>
+
+        
+        
+        
     <attribute dataRange="number(19)" descriptor="End" mnemonic="CVE">
             <metadata capsule="dbo" deletable="false" privacy="Ignore"/>
             <layout fixed="false" x="0.3" y="-347.36"/>
@@ -429,34 +495,42 @@
             <layout fixed="false" x="0.01" y="-309.15"/>
         </attribute></anchor><anchor descriptor="ContractElem" identity="number(19)" mnemonic="CE">
         <metadata capsule="dbo" generator="true"/>
-        
-        
-        
+
         <layout fixed="false" x="732.14" y="82.79"/>
+
+        
+        
+        
     <attribute dataRange="number(19)" descriptor="Done" knotRange="CER" mnemonic="CED">
             <metadata capsule="dbo" deletable="false" privacy="Ignore"/>
             <layout fixed="false" x="732.14" y="82.79"/>
         </attribute></anchor><anchor descriptor="Group" identity="number(19)" mnemonic="GR">
         <metadata capsule="dbo" generator="true"/>
-        
-        
-        
+
         <layout fixed="false" x="-556.14" y="172.73"/>
+
+        
+        
+        
     <attribute dataRange="number(19)" descriptor="BOTYPE" knotRange="BOM" mnemonic="BOT">
             <metadata capsule="dbo" deletable="false" privacy="Ignore"/>
             <layout fixed="false" x="-556.14" y="172.73"/>
         </attribute></anchor><anchor descriptor="Property" identity="number(19)" mnemonic="PR">
         <metadata capsule="dbo" generator="true"/>
-        
-        
-        
+
         <layout fixed="false" x="-110.24" y="322.2"/>
+
+        
+        
+        
     </anchor><anchor descriptor="PRConfigControl" identity="number(19)" mnemonic="PC">
         <metadata capsule="dbo" generator="true"/>
-        
-        
-        
+
         <layout fixed="false" x="329.56" y="661.96"/>
+
+        
+        
+        
     <attribute dataRange="number(19)" descriptor="AccUser" mnemonic="ACU" timeRange="datetime">
             <metadata capsule="dbo" deletable="false" privacy="Ignore"/>
             <layout fixed="false" x="329.56" y="661.96"/>
@@ -486,43 +560,59 @@
             <layout fixed="false" x="524.75" y="596.25"/>
         </attribute></anchor><anchor descriptor="Svalue" identity="number(19)" mnemonic="BS">
         <metadata capsule="dbo" generator="true"/>
-        
-        
-        
+
         <layout fixed="false" x="-766.45" y="-80.11"/>
+
+        
+        
+        
     <attribute dataRange="number(19)" descriptor="BOTYPE" knotRange="BOM" mnemonic="BST">
             <metadata capsule="dbo" deletable="false" privacy="Ignore"/>
             <layout fixed="false" x="-766.45" y="-80.11"/>
         </attribute></anchor><anchor descriptor="Nvalue" identity="number(19)" mnemonic="BN">
         <metadata capsule="dbo" generator="true"/>
-        
-        
-        
+
         <layout fixed="false" x="-519.66" y="-90.8"/>
+
+        
+        
+        
     <attribute dataRange="number(19)" descriptor="BOTYPE" knotRange="BOM" mnemonic="BNT">
             <metadata capsule="dbo" deletable="false" privacy="Ignore"/>
             <layout fixed="false" x="-519.66" y="-90.8"/>
+        </attribute><attribute dataRange="number(19)" descriptor="A1A1" mnemonic="A1A">
+            <metadata capsule="dbo" deletable="false" privacy="Ignore"/>
+            <layout fixed="false" x="700.0" y="700.0"/>
+        </attribute><attribute dataRange="number(19)" descriptor="HA1HA1" mnemonic="HA1" timeRange="datetime">
+            <metadata capsule="dbo" deletable="false" privacy="Ignore"/>
+            <layout fixed="false" x="700.0" y="700.0"/>
         </attribute></anchor><anchor descriptor="Dvalue" identity="number(19)" mnemonic="BD">
         <metadata capsule="dbo" generator="true"/>
-        
-        
-        
+
         <layout fixed="false" x="-612.88" y="-80.34"/>
+
+        
+        
+        
     <attribute dataRange="number(19)" descriptor="BOTYPE" knotRange="BOM" mnemonic="BDT">
             <metadata capsule="dbo" deletable="false" privacy="Ignore"/>
             <layout fixed="false" x="-612.88" y="-80.34"/>
         </attribute></anchor><anchor descriptor="Contact" identity="number(19)" mnemonic="CO">
         <metadata capsule="dbo" generator="true"/>
-        
-        
-        
+
         <layout fixed="false" x="2090.8" y="1166.3"/>
+
+        
+        
+        
     </anchor><anchor descriptor="LinkedObject" identity="number(19)" mnemonic="LO">
         <metadata capsule="dbo" generator="true"/>
-        
-        
-        
+
         <layout fixed="false" x="-707.16" y="428.01"/>
+
+        
+        
+        
     <attribute dataRange="number(19)" descriptor="Obj" knotRange="BOM" mnemonic="LOI">
             <metadata capsule="dbo" deletable="false" privacy="Ignore"/>
             <layout fixed="false" x="-707.16" y="428.01"/>
@@ -531,10 +621,12 @@
             <layout fixed="false" x="-1065.7" y="451.1"/>
         </attribute></anchor><anchor descriptor="Link" identity="number(19)" mnemonic="LK">
         <metadata capsule="dbo" generator="true"/>
-        
-        
-        
+
         <layout fixed="false" x="-1293.22" y="421.84"/>
+
+        
+        
+        
     <attribute dataRange="number(19)" descriptor="UserDelete" mnemonic="LKE">
             <metadata capsule="dbo" deletable="false" privacy="Ignore"/>
             <layout fixed="false" x="-1293.22" y="421.84"/>
@@ -549,47 +641,72 @@
             <layout fixed="false" x="-1341.81" y="279.35"/>
         </attribute></anchor><anchor descriptor="Persons" identity="number(19)" mnemonic="PS">
         <metadata capsule="dbo" generator="true"/>
-        
-        
-        
+
         <layout fixed="false" x="3045.97" y="-260.78"/>
+
+        
+        
+        
     </anchor><anchor descriptor="PersonLinkDetails" identity="number(19)" mnemonic="PD">
         <metadata capsule="dbo" generator="true"/>
-        
-        
-        
+
         <layout fixed="false" x="3246.3" y="-460.05"/>
+
+        
+        
+        
     <attribute dataRange="number(19)" descriptor="Link" mnemonic="PDL">
             <metadata capsule="dbo" deletable="false" privacy="Ignore"/>
             <layout fixed="false" x="3246.3" y="-460.05"/>
         </attribute></anchor><anchor descriptor="CF" identity="number(19)" mnemonic="CF">
         <metadata capsule="dbo" generator="true"/>
-        
-        
-        
+
         <layout fixed="false" x="956.75" y="186.75"/>
+
+        
+        
+        
     </anchor><anchor descriptor="UFCF" identity="number(19)" mnemonic="UF">
         <metadata capsule="dbo" generator="true"/>
-        
-        
-        
+
         <layout fixed="false" x="899.75" y="90.75"/>
-    </anchor><anchor descriptor="ChangedAnchorName" identity="number(19)" mnemonic="Anc">
+
+        
+        
+        
+    </anchor><anchor descriptor="A2A2" identity="number(19)" mnemonic="A2A">
         <metadata capsule="dbo" generator="true"/>
+
+        <layout fixed="true" x="341.0" y="1059.0"/>
+
         
         
         
-        <layout fixed="true" x="149.0" y="318.0"/>
-    </anchor><anchor descriptor="ссс" identity="number(19)" mnemonic="ссс">
+    <attribute dataRange="number(19)" descriptor="HA5HA5" knotRange="K10" mnemonic="HA5" timeRange="datetime">
+            <metadata capsule="dbo" deletable="false" privacy="Ignore"/>
+            <layout fixed="false" x="700.0" y="700.0"/>
+        </attribute></anchor><anchor descriptor="A3A3" identity="number(19)" mnemonic="A3A">
         <metadata capsule="dbo" generator="true"/>
-        
-        
-        
-        <layout fixed="false" x="-117.0" y="662.0"/>
-    </anchor><anchor descriptor="иии" identity="number(19)" mnemonic="иии">
-        <metadata capsule="dbo" generator="true"/>
-        
-        
-        
+
         <layout fixed="false" x="700.0" y="700.0"/>
-    </anchor><tie><anchorRole identifier="true" role="source" type="VX"/><anchorRole identifier="true" role="target" type="VX"/><layout fixed="false" x="-820.51" y="30.0"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="true" role="hv" type="AC"/><anchorRole identifier="true" role="hv" type="CD"/><layout fixed="false" x="1644.86" y="655.95"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie timeRange="datetime"><anchorRole identifier="false" role="hv" type="DL"/><anchorRole identifier="true" role="the" type="LE"/><knotRole identifier="false" role="set" type="CGD"/><layout fixed="false" x="3110.81" y="480.72"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="false" role="hv" type="DL"/><anchorRole identifier="true" role="the" type="ND"/><layout fixed="false" x="2547.22" y="-40.29"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="false" role="have" type="LE"/><anchorRole identifier="true" role="the" type="CC"/><layout fixed="false" x="2071.32" y="59.81"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="false" role="h" type="CD"/><anchorRole identifier="true" role="hv" type="LE"/><layout fixed="false" x="1902.7" y="657.04"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="true" role="the" type="ND"/><anchorRole identifier="false" role="have" type="LE"/><layout fixed="false" x="3438.28" y="587.08"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="false" role="hv" type="DL"/><anchorRole identifier="true" role="the" type="DR"/><layout fixed="false" x="2370.11" y="15.57"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="true" role="hv" type="CC"/><anchorRole identifier="false" role="hv" type="CD"/><layout fixed="false" x="1477.64" y="314.49"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="true" role="the" type="BR"/><anchorRole identifier="false" role="have" type="LE"/><layout fixed="false" x="2239.25" y="796.38"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="false" role="the" type="BR"/><anchorRole identifier="false" role="hv" type="CD"/><layout fixed="false" x="2304.03" y="369.36"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="false" role="the" type="CD"/><anchorRole identifier="true" role="hv" type="NO"/><layout fixed="false" x="1481.28" y="472.37"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="true" role="the" type="CN"/><anchorRole identifier="false" role="hv" type="CC"/><layout fixed="false" x="1606.64" y="-307.15"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="true" role="the" type="ND"/><anchorRole identifier="false" role="have" type="CC"/><layout fixed="false" x="1954.64" y="-162.15"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="false" role="the" type="CP"/><anchorRole identifier="true" role="have" type="CC"/><layout fixed="false" x="1302.65" y="-210.53"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="true" role="the" type="CN"/><anchorRole identifier="true" role="have" type="AP"/><layout fixed="false" x="1835.53" y="-487.98"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="true" role="target" type="ND"/><anchorRole identifier="false" role="source" type="AC"/><layout fixed="false" x="3160.56" y="1004.99"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie timeRange="datetime"><anchorRole identifier="false" role="the" type="CC"/><anchorRole identifier="true" role="have" type="CE"/><knotRole identifier="true" role="is" type="ENB"/><layout fixed="false" x="889.12" y="346.46"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie timeRange="datetime"><anchorRole identifier="true" role="many" type="CE"/><anchorRole identifier="true" role="many" type="AC"/><knotRole identifier="true" role="is" type="ENB"/><layout fixed="false" x="898.11" y="706.04"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie timeRange="datetime"><anchorRole identifier="true" role="the" type="TE"/><anchorRole identifier="true" role="parent" type="TE"/><anchorRole identifier="true" role="in" type="TL"/><knotRole identifier="true" role="is" type="ENB"/><layout fixed="false" x="291.48" y="-42.66"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="true" role="the" type="TE"/><anchorRole identifier="true" role="based" type="CL"/><layout fixed="false" x="504.67" y="-143.54"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="true" role="the" type="CL"/><anchorRole identifier="false" role="parent" type="CL"/><anchorRole identifier="false" role="in" type="CV"/><layout fixed="false" x="228.95" y="-279.55"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="false" role="the" type="TE"/><anchorRole identifier="true" role="have" type="CE"/><layout fixed="false" x="581.68" y="100.65"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="true" role="the" type="GR"/><anchorRole identifier="true" role="hv" type="PR"/><layout fixed="false" x="-266.05" y="115.72"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="true" role="hv" type="GR"/><anchorRole identifier="true" role="the" type="GR"/><layout fixed="false" x="-471.22" y="446.35"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie timeRange="datetime"><anchorRole identifier="true" role="hv" type="PR"/><anchorRole identifier="true" role="the" type="PC"/><knotRole identifier="true" role="hv" type="ICT"/><layout fixed="false" x="39.61" y="480.51"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="true" role="the" type="PC"/><anchorRole identifier="true" role="hv" type="PC"/><layout fixed="false" x="-8.09" y="701.92"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="false" role="hv" type="LE"/><anchorRole identifier="true" role="the" type="AC"/><layout fixed="false" x="1972.78" y="1022.35"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="true" role="hv" type="CC"/><anchorRole identifier="true" role="the" type="AC"/><layout fixed="false" x="917.0" y="1084.37"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="false" role="the" type="VX"/><anchorRole identifier="true" role="hv" type="VE"/><layout fixed="false" x="-1162.91" y="170.7"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="true" role="source" type="VE"/><anchorRole identifier="true" role="target" type="VE"/><layout fixed="false" x="-1334.24" y="-54.4"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="false" role="the" type="LE"/><anchorRole identifier="true" role="hv" type="CO"/><layout fixed="false" x="2122.75" y="1033.67"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="false" role="source" type="LO"/><anchorRole identifier="true" role="with" type="LK"/><anchorRole identifier="false" role="target" type="LO"/><layout fixed="false" x="-1327.25" y="701.25"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="true" role="the" type="ND"/><anchorRole identifier="true" role="have" type="PS"/><layout fixed="false" x="2832.69" y="-237.25"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="false" role="the" type="CE"/><anchorRole identifier="true" role="hv" type="CF"/><layout fixed="false" x="833.75" y="214.75"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="false" role="the" type="CE"/><anchorRole identifier="true" role="hv" type="UF"/><layout fixed="false" x="790.22" y="107.43"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="true" role="the" type="PD"/><anchorRole identifier="false" role="hv" type="ND"/><layout fixed="false" x="2941.91" y="-414.77"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie timeRange="datetime"><layout fixed="false" x="-135.0" y="534.0"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="true" role="|||" type="BN"/><layout fixed="false" x="700.0" y="700.0"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie timeRange="datetime"><anchorRole identifier="true" role="|||" type="BS"/><layout fixed="false" x="700.0" y="700.0"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="true" role="|||" type="Anc"/><knotRole identifier="true" role="|||" type="ЧЧЧ"/><layout fixed="false" x="700.0" y="700.0"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="true" role="|||" type="Anc"/><layout fixed="false" x="700.0" y="700.0"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie></schema>
+
+        
+        
+        
+    </anchor><anchor descriptor="A6A6" identity="number(19)" mnemonic="A6A">
+        <metadata capsule="dbo" generator="true"/>
+
+        <layout fixed="false" x="700.0" y="700.0"/>
+
+        
+        
+        
+    </anchor><tie><anchorRole identifier="true" role="source" type="VX"/><anchorRole identifier="true" role="target" type="VX"/><layout fixed="false" x="-820.51" y="30.0"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="true" role="hv" type="AC"/><anchorRole identifier="true" role="hv" type="CD"/><layout fixed="false" x="1644.86" y="655.95"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie timeRange="datetime"><anchorRole identifier="false" role="hv" type="DL"/><anchorRole identifier="true" role="the" type="LE"/><knotRole identifier="false" role="set" type="CGD"/><layout fixed="false" x="3110.81" y="480.72"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="false" role="hv" type="DL"/><anchorRole identifier="true" role="the" type="ND"/><layout fixed="false" x="2547.22" y="-40.29"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="false" role="have" type="LE"/><anchorRole identifier="true" role="the" type="CC"/><layout fixed="false" x="2071.32" y="59.81"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="false" role="h" type="CD"/><anchorRole identifier="true" role="hv" type="LE"/><layout fixed="false" x="1902.7" y="657.04"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="true" role="the" type="ND"/><anchorRole identifier="false" role="have" type="LE"/><layout fixed="false" x="3438.28" y="587.08"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="false" role="hv" type="DL"/><anchorRole identifier="true" role="the" type="DR"/><layout fixed="false" x="2370.11" y="15.57"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="true" role="hv" type="CC"/><anchorRole identifier="false" role="hv" type="CD"/><layout fixed="false" x="1477.64" y="314.49"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="true" role="the" type="BR"/><anchorRole identifier="false" role="have" type="LE"/><layout fixed="false" x="2239.25" y="796.38"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="false" role="the" type="BR"/><anchorRole identifier="false" role="hv" type="CD"/><layout fixed="false" x="2304.03" y="369.36"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="false" role="the" type="CD"/><anchorRole identifier="true" role="hv" type="NO"/><layout fixed="false" x="1481.28" y="472.37"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="true" role="the" type="CN"/><anchorRole identifier="false" role="hv" type="CC"/><layout fixed="false" x="1606.64" y="-307.15"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="true" role="the" type="ND"/><anchorRole identifier="false" role="have" type="CC"/><layout fixed="false" x="1954.64" y="-162.15"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="false" role="the" type="CP"/><anchorRole identifier="true" role="have" type="CC"/><layout fixed="false" x="1302.65" y="-210.53"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="true" role="the" type="CN"/><anchorRole identifier="true" role="have" type="AP"/><layout fixed="false" x="1835.53" y="-487.98"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="true" role="target" type="ND"/><anchorRole identifier="false" role="source" type="AC"/><layout fixed="false" x="3160.56" y="1004.99"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie timeRange="datetime"><anchorRole identifier="false" role="the" type="CC"/><anchorRole identifier="true" role="have" type="CE"/><knotRole identifier="true" role="is" type="ENB"/><layout fixed="false" x="889.12" y="346.46"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie timeRange="datetime"><anchorRole identifier="true" role="many" type="CE"/><anchorRole identifier="true" role="many" type="AC"/><knotRole identifier="true" role="is" type="ENB"/><layout fixed="false" x="898.11" y="706.04"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie timeRange="datetime"><anchorRole identifier="true" role="the" type="TE"/><anchorRole identifier="true" role="parent" type="TE"/><anchorRole identifier="true" role="in" type="TL"/><knotRole identifier="true" role="is" type="ENB"/><layout fixed="false" x="291.48" y="-42.66"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="true" role="the" type="TE"/><anchorRole identifier="true" role="based" type="CL"/><layout fixed="false" x="504.67" y="-143.54"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="true" role="the" type="CL"/><anchorRole identifier="false" role="parent" type="CL"/><anchorRole identifier="false" role="in" type="CV"/><layout fixed="false" x="228.95" y="-279.55"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="false" role="the" type="TE"/><anchorRole identifier="true" role="have" type="CE"/><layout fixed="false" x="581.68" y="100.65"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="true" role="the" type="GR"/><anchorRole identifier="true" role="hv" type="PR"/><anchorRole identifier="true" role="|||" type="A3A"/><knotRole identifier="true" role="|||" type="K3K"/><layout fixed="false" x="-266.05" y="115.72"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="true" role="hv" type="GR"/><anchorRole identifier="true" role="the" type="GR"/><layout fixed="false" x="-471.22" y="446.35"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie timeRange="datetime"><anchorRole identifier="true" role="hv" type="PR"/><anchorRole identifier="true" role="the" type="PC"/><knotRole identifier="true" role="hv" type="ICT"/><layout fixed="false" x="39.61" y="480.51"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="true" role="the" type="PC"/><anchorRole identifier="true" role="hv" type="PC"/><layout fixed="false" x="-8.09" y="701.92"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="false" role="hv" type="LE"/><anchorRole identifier="true" role="the" type="AC"/><layout fixed="false" x="1972.78" y="1022.35"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="true" role="hv" type="CC"/><anchorRole identifier="true" role="the" type="AC"/><layout fixed="false" x="917.0" y="1084.37"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="false" role="the" type="VX"/><anchorRole identifier="true" role="hv" type="VE"/><layout fixed="false" x="-1162.91" y="170.7"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="true" role="source" type="VE"/><anchorRole identifier="true" role="target" type="VE"/><layout fixed="false" x="-1334.24" y="-54.4"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="false" role="the" type="LE"/><anchorRole identifier="true" role="hv" type="CO"/><layout fixed="false" x="2122.75" y="1033.67"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="false" role="source" type="LO"/><anchorRole identifier="true" role="with" type="LK"/><anchorRole identifier="false" role="target" type="LO"/><layout fixed="false" x="-1327.25" y="701.25"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="true" role="the" type="ND"/><anchorRole identifier="true" role="have" type="PS"/><layout fixed="false" x="2832.69" y="-237.25"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="false" role="the" type="CE"/><anchorRole identifier="true" role="hv" type="CF"/><layout fixed="false" x="833.75" y="214.75"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="false" role="the" type="CE"/><anchorRole identifier="true" role="hv" type="UF"/><layout fixed="false" x="790.22" y="107.43"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="true" role="the" type="PD"/><anchorRole identifier="false" role="hv" type="ND"/><layout fixed="false" x="2941.91" y="-414.77"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="true" role="|||" type="BN"/><layout fixed="false" x="700.0" y="700.0"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie timeRange="datetime"><anchorRole identifier="true" role="|||" type="BN"/><anchorRole identifier="true" role="|||" type="A6A"/><knotRole identifier="true" role="|||" type="K4K"/><layout fixed="false" x="700.0" y="700.0"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie><anchorRole identifier="true" role="|||" type="A2A"/><layout fixed="false" x="700.0" y="700.0"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><tie timeRange="datetime"><anchorRole identifier="true" role="|||" type="CO"/><anchorRole identifier="true" role="|||" type="A12"/><layout fixed="false" x="700.0" y="700.0"/><metadata capsule="dbo" deletable="false" idempotent="false"/></tie><anchor descriptor="A12A12" identity="number(19)" mnemonic="A12">
+        <metadata capsule="dbo" generator="true"/>
+
+        <layout fixed="false" x="700.0" y="700.0"/>
+
+        
+        
+        
+    </anchor></schema>

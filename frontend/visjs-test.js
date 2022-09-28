@@ -1,6 +1,18 @@
 import {DataSet, Network} from "vis";
+import { LitElement, html } from 'lit';
 
-class VisJsTest {
+class VisJsTest extends LitElement{
+
+    constructor() {
+        super();
+    }
+
+    render() {
+        return html`
+            <slot></slot>
+        `;
+    }
+
     init(element, edges, nodes) {
 
         this.element = element;
@@ -293,29 +305,36 @@ class VisJsTest {
     }
 }
 
-const tt = new VisJsTest();
+const myFunc = () => {
+    const tt = new VisJsTest();
+    console.log(tt);
 
+    window.initThree = function(element, edges, nodes) {
+        tt.init(element, edges, nodes);
+    };
 
-window.initThree = function(element, edges, nodes) {
-    tt.init(element, edges, nodes);
-};
+    window.addEdge = function (element, newNodeId, nodeToConnectId){
+        tt.addEdge(newNodeId, nodeToConnectId);
+    }
 
-window.addEdge = function (element, newNodeId, nodeToConnectId){
-    tt.addEdge(newNodeId, nodeToConnectId);
+    window.redraw = function(element, edges, nodes) {
+        tt.redraw(element, edges, nodes);
+    };
+
+    window.getCoordinates = function(element) {
+        tt.getCoordinates(element);
+    };
+
+    window.updateNode = function (element, node){
+        tt.updateNode(element, node)
+    }
+
+    window.deleteNode = function (element, node){
+        tt.deleteNode(element, node)
+    }
+
 }
 
-window.redraw = function(element, edges, nodes) {
-    tt.redraw(element, edges, nodes);
-};
+customElements.define('custom-tag', VisJsTest);
 
-window.getCoordinates = function(element) {
-    tt.getCoordinates(element);
-};
-
-window.updateNode = function (element, node){
-    tt.updateNode(element, node)
-}
-
-window.deleteNode = function (element, node){
-    tt.deleteNode(element, node)
-}
+myFunc();

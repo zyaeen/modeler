@@ -389,7 +389,7 @@ public class MainView extends VerticalLayout {
 
                 dialogManager.setNodeToAdd(nodeId);
 
-                if (nodeType == 1 || nodeType == 3) {
+                if (nodeType == 1) {
                     nonTieCreationDialog.open();
                 } else if (nodeType == 2 || nodeType == 5) {
                     tieCreationDialog.open();
