@@ -58,7 +58,6 @@ public class XmlObject {
 
         NodeList nodeList = this.document.getElementsByTagName("schema");
         rootXmlExample = nodeList.item(0).cloneNode(false);
-//        rootXmlExample = this.document.importNode(rootXmlExample, true);
 
     }
 
@@ -370,7 +369,7 @@ public class XmlObject {
         DOMSource source = new DOMSource(newDocument);
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
         Transformer transformer = transformerFactory.newTransformer();
-        StreamResult result = new StreamResult("src/main/resources/xmls/downloaded.xml");
+        StreamResult result = new StreamResult("src/main/resources/xmls/usingXml.xml");
         transformer.transform(source, result);
 
     }

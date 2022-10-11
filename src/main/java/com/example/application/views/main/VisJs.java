@@ -10,15 +10,18 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.dom.Element;
 
+import java.util.ArrayList;
 import java.util.List;
 
-@JsModule("./visjs-test.js")
+@JsModule("./visjs-test.ts")
 @NpmPackage(value = "vis", version = "0.110.0")
 @Tag("custom-tag")
 public class VisJs extends Component {
 
-
+    List<VisJsNode> nodes = new ArrayList<>();
+    List<VisJsEdge> edges = new ArrayList<>();
 
     public VisJs(List<VisJsEdge> edges, List<VisJsNode> nodes) throws JsonProcessingException {
         ObjectWriter owForEdges = new ObjectMapper().writer().withDefaultPrettyPrinter();
@@ -31,8 +34,24 @@ public class VisJs extends Component {
 
         getElement().executeJs("window.initThree($0, $1, $2)", this, jsonEdges, jsonNodes);
     }
-    public VisJs(){
+    public VisJs(List<VisJsEdge> edges, List<VisJsNode> nodes, Boolean bool){
 
+        this.edges = edges;
+        this.nodes = nodes;
+
+    }
+
+    public void initConnection() throws JsonProcessingException {
+
+        ObjectWriter owForEdges = new ObjectMapper().writer().withDefaultPrettyPrinter();
+        ObjectWriter owForNodes = new ObjectMapper().writer().withDefaultPrettyPrinter();
+
+        String jsonEdges = owForEdges.writeValueAsString(this.edges);
+        String jsonNodes = owForNodes.writeValueAsString(this.nodes);
+
+        setId("customId");
+
+        getElement().executeJs("window.initThree($0, $1, $2)", this, jsonEdges, jsonNodes);
     }
 
     public void addNode(VisJsNode node, VisJsEdge connectToNodeId) throws JsonProcessingException {
@@ -51,7 +70,11 @@ public class VisJs extends Component {
         String jsonEdges = owForEdges.writeValueAsString(edges);
         String jsonNodes = owForNodes.writeValueAsString(nodes);
 
+
         getElement().executeJs("window.redraw($0, $1, $2)", this, jsonEdges, jsonNodes);
+
+
+
     }
 
     public void getNodesCoordinates(){

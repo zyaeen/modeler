@@ -1,5 +1,6 @@
 package com.example.application.views.main;
 
+import backend.restprovider.TreeStorageService;
 import com.example.application.modals.DialogManager;
 import com.example.application.network.*;
 import com.example.application.parsing.XmlObject;
@@ -12,10 +13,6 @@ import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.contextmenu.SubMenu;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Hr;
-import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.menubar.MenuBarVariant;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
@@ -29,36 +26,28 @@ import com.vaadin.flow.server.VaadinSession;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-
+import org.xml.sax.InputSource;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @PageTitle("Main")
 @Route(value = "")
 public class MainView extends VerticalLayout {
 
-    private TextField nodeLabelField;
-    private TextField edgeLabel;
-
-
     private List<VisJsEdge> edges = new ArrayList<>();;
     private VisJs visJs;
     private List<VisJsNode> nodes = new ArrayList<>();
     private List<NodeType> nodeTypes = new ArrayList<>();
     private Boolean uploadFromFile = false;
-    private Integer lastIndex;
     private List<VisJsNode> newNodes = new ArrayList<>();
     private List<VisJsEdge> newEdges = new ArrayList<>();;
-
-    private UI ui;
     private String editableNodeId = null;
     private Dialog nonTieCreationDialog;
     private Dialog tieCreationDialog;
@@ -71,7 +60,9 @@ public class MainView extends VerticalLayout {
     private DialogManager dialogManager;
 
     @Autowired
-    public MainView(NodeRepository nodeRepository, EdgeRepository edgeRepository, NodeTypeRepository nodeTypeRepository)
+    public MainView(NodeTypeRepository nodeTypeRepository,
+        TreeStorageService treeStorageService
+    )
         throws JsonProcessingException, FileNotFoundException {
 
         setId("mainview");
@@ -105,13 +96,14 @@ public class MainView extends VerticalLayout {
 
         creationDialog = dialogManager.createCreationDialog("Edit node", 7);
 
-        InputStream fileData = new FileInputStream("src/main/resources/xmls/downloaded.xml");
+        InputStream fileData = new FileInputStream("src/main/resources/xmls/usingXml.xml");
 
         readXml(fileData);
 
-        lastIndex = nodes.stream().max(Comparator.comparing(VisJsNode::getId)).get().getId();
         visJs = new VisJs(edges, nodes);
 
+//        visJs = treeStorageService.getVisJsComponent();
+//        visJs.initConnection();
 
 
         multiFileUpload.addSucceededListener(event -> {
@@ -134,8 +126,7 @@ public class MainView extends VerticalLayout {
         });
 
 
-        VaadinSession.getCurrent().addRequestHandler(
-            (
+        VaadinSession.getCurrent().addRequestHandler((
                 (RequestHandler) (session, request, response) -> {
                     if ("/down".equals(request.getPathInfo())) {
 
@@ -147,13 +138,61 @@ public class MainView extends VerticalLayout {
                         response.getWriter().format(Locale.ENGLISH,
                             "Time: %Tc\n", new Date());
 
-
                         return true;
-                    } else
+                    } else if ("/count".equals(request.getPathInfo())) {
+                        String string = IOUtils.toString(request.getInputStream(), StandardCharsets.UTF_8);
+                    } else if ("/download".equals(request.getPathInfo())) {
+                        response.setContentType("text/plain");
+                        response.getWriter().append(
+                            "Here's some dynamically generated content.\n");
+                        response.getWriter().format(Locale.ENGLISH,
+                            "Time: %Tc\n", new Date());
+
+                        String theString = IOUtils.toString(request.getInputStream(), StandardCharsets.UTF_8);
+                        JSONObject jsonObject = new JSONObject(theString);
+                        Iterator<String> keys = jsonObject.keys();
+
+                        while (keys.hasNext()){
+                            String key = keys.next();
+                            if (jsonObject.get(key) instanceof JSONObject) {
+
+                                Integer nodeId = ((JSONObject) jsonObject.get(key)).getInt("id");
+                                Double x = ((JSONObject) jsonObject.get(key)).getDouble("x");
+                                Double y = ((JSONObject) jsonObject.get(key)).getDouble("y");
+                                Boolean fixed = ((JSONObject) jsonObject.get(key)).getBoolean("fixed");
+
+                                VisJsNode node = nodes.stream().filter(
+                                    visJsNode -> visJsNode.getId().equals(nodeId)
+                                ).collect(Collectors.toList()).get(0);
+                                nodes.get(nodes.indexOf(node)).setXYAndFixed(
+                                    x,
+                                    y,
+                                    fixed
+                                );
+
+                                List<VisJsNode> newNodeToCompare = newNodes.stream().filter(
+                                    visJsNode -> visJsNode.getId().equals(nodeId)
+                                ).collect(Collectors.toList());
+                                if (newNodeToCompare.size() > 0) {
+                                    newNodes.get(newNodes.indexOf(newNodeToCompare.get(0))).setXYAndFixed(
+                                        x,
+                                        y,
+                                        fixed
+                                    );
+                                }
+                            }
+
+                        }
+                        try {
+                            xmlObject.writeToXml(nodes, edges);
+                        } catch (TransformerException | ParserConfigurationException e) {
+                            throw new RuntimeException(e);
+                        }
+                        return true;
+                    }
                         return false;
                 })
         );
-
 
         loadDataToXml.addClickListener(
             buttonClickEvent -> {
@@ -223,7 +262,6 @@ public class MainView extends VerticalLayout {
         );
 
 
-
         nonTieCreationDialog.addOpenedChangeListener(
           dialogCloseActionEvent ->
           {
@@ -248,14 +286,12 @@ public class MainView extends VerticalLayout {
                 handleCreationDialogClosing();
             }
         );
-
         nonTieEditDialog.addOpenedChangeListener(
             dialogCloseActionEvent ->
             {
                 handleEditDialogClosing();
             }
         );
-
         tieEditDialog.addOpenedChangeListener(
             dialogCloseActionEvent ->
             {
@@ -327,9 +363,9 @@ public class MainView extends VerticalLayout {
         add(
             visJs
         );
-        add(nonTieCreationDialog);
-
+//        add(nonTieCreationDialog);
     }
+
     public void getNodesCoordinates(){
         visJs.getNodesCoordinates();
     }
