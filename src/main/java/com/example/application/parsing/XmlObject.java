@@ -8,6 +8,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import javax.print.Doc;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -16,6 +17,8 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -43,7 +46,7 @@ public class XmlObject {
     public Node attributeXmlExample;
     public Node rootXmlExample;
 
-    public XmlObject(InputStream inputStream){
+    public XmlObject(InputStream inputStream) throws IOException, SAXException {
         try {
             this.documentBuilder = documentBuilderFactory.newDocumentBuilder();
         } catch (ParserConfigurationException e) {
@@ -56,14 +59,21 @@ public class XmlObject {
         }
         this.document.getDocumentElement().normalize();
 
-        NodeList nodeList = this.document.getElementsByTagName("schema");
+        InputStream fileData = new FileInputStream("src/main/resources/xmls/Dossier.xml");
+        Document exampleDocument = documentBuilder.parse(fileData);
+
+        NodeList nodeList = exampleDocument.getElementsByTagName("schema");
         rootXmlExample = nodeList.item(0).cloneNode(false);
+        knotXmlExample = exampleDocument.getElementsByTagName("knot").item(0).cloneNode(true);
+        anchorXmlExample = exampleDocument.getElementsByTagName("anchor").item(0).cloneNode(true);
+        tieXmlExample = exampleDocument.getElementsByTagName("tie").item(0).cloneNode(true);
+        attributeXmlExample = ((Element)anchorXmlExample).getElementsByTagName("attribute").item(0).cloneNode(true);
 
     }
 
     public void getKnots(){
         NodeList nodeList = this.document.getElementsByTagName("knot");
-        knotXmlExample = nodeList.item(0).cloneNode(true);
+//        knotXmlExample = nodeList.item(0).cloneNode(true);
         for(int i = 0; i < nodeList.getLength(); i++){
             LayoutProperties layoutProperties = new LayoutProperties(nodeList.item(i));
 
@@ -79,9 +89,9 @@ public class XmlObject {
             );
         }
     }
+
     public void getAnchors(){
         NodeList localAnchorList = this.document.getElementsByTagName("anchor");
-        anchorXmlExample = localAnchorList.item(0);
         for(int i = 0; i < localAnchorList.getLength(); i++){
 
             LayoutProperties layoutProperties = new LayoutProperties(localAnchorList.item(i));
@@ -149,7 +159,7 @@ public class XmlObject {
     public void getTies(){
         int tieCounter = 1;
         NodeList localTiesList = this.document.getElementsByTagName("tie");
-        tieXmlExample = localTiesList.item(0);
+//        tieXmlExample = localTiesList.item(0);
         for(int i = 0; i < localTiesList.getLength(); i++){
 
             LayoutProperties layoutProperties = new LayoutProperties(localTiesList.item(i));
@@ -233,7 +243,6 @@ public class XmlObject {
                         );
                     }
 
-                    attributeXmlExample = attributes.item(0).cloneNode(true);
                     bufferAnchorExample.removeChild(attributes.item(0));
 
                     bufferAnchorExample.getAttributes().getNamedItem("mnemonic").setNodeValue(node.getMnemonic());
@@ -245,10 +254,12 @@ public class XmlObject {
                     importedNode.appendChild(bufferAnchorExample);
 
                     for (VisJsEdge edge : edges){
-                        if (edge.getFrom().equals(node.getId())){
+                        if (edge.getFrom().equals(node.getId()) || edge.getTo().equals(node.getId())){
+
+                            Integer idOfNodeToConnect = edge.getFrom().equals(node.getId()) ? edge.getTo() : edge.getFrom();
 
                             VisJsNode attributeNode = nodes.stream().filter(
-                                visJsNode -> visJsNode.getId().equals(edge.getTo())
+                                    visJsNode -> visJsNode.getId().equals(idOfNodeToConnect)
                             ).collect(Collectors.toList()).get(0);
 
                             if (!attributeNode.getType().equals(2) && !attributeNode.getType().equals(5)) {

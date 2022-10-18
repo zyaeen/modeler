@@ -1,6 +1,5 @@
 package com.example.application;
 
-import backend.restprovider.TreeStorageProperties;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.page.AppShellConfigurator;
 import com.vaadin.flow.server.PWA;
@@ -22,10 +21,7 @@ import org.springframework.context.annotation.ComponentScan;
 @Theme(value = "mytodo")
 @PWA(name = "My Todo", shortName = "My Todo", offlineResources = {})
 @NpmPackage(value = "line-awesome", version = "1.3.0")
-@ComponentScan(basePackages = { "backend.restprovider" })
-@EnableConfigurationProperties({
-    TreeStorageProperties.class
-})
+
 public class Application extends SpringBootServletInitializer implements AppShellConfigurator {
 
     public static void main(String[] args) {

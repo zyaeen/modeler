@@ -76,7 +76,8 @@ class VisJsTest extends LitElement{
 
             }
         })
-        this.network.on( 'doubleClick', function(properties) {
+
+        this.network.on('doubleClick', function(properties) {
             var ids = properties.nodes;
             if (ids.length > 0) {
                 if (_this.checked.includes(ids[0])) {

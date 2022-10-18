@@ -20,7 +20,7 @@ public class VisJsNode {
     @Transient
     static int idFromXml = 1;
 
-    @JsonIgnore
+//    @JsonIgnore
     @Transient
     public String mnemonic;
 

@@ -28,7 +28,7 @@ public class VisJsEdge {
     public String label;
 
     @Transient
-    @JsonIgnore
+//    @JsonIgnore
     public Boolean edgeType;
 
     protected VisJsEdge() {}
