@@ -90,6 +90,8 @@ public class VisJsComponent extends Component {
         List<VisJsNode> nodesToDownload = new ArrayList<>();
         List<VisJsEdge> edgesToDownload = new ArrayList<>();
 
+        System.out.println(edges);
+
         while (keysOfNodes.hasNext()) {
             String key = keysOfNodes.next();
             if (jsonOfNodes.get(key) instanceof JSONObject) {
@@ -122,14 +124,15 @@ public class VisJsComponent extends Component {
                 edgesToDownload
                     .add(
                         new VisJsEdge(
-                                to,
                                 from,
+                                to,
                                 "|||",
                                 true
                         )
                     );
             }
         }
+
 
         try {
             xmlObject.writeToXml(nodesToDownload, edgesToDownload);

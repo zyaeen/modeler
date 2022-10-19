@@ -1,24 +1,20 @@
-import { css, html, LitElement } from 'lit-element';
-import { customElement, state,property, query  } from 'lit-element';
+import { css, html, LitElement } from 'lit';
+import { customElement, state, property  } from 'lit/decorators';
 import '@vaadin/menu-bar';
 import { MenuBarItem, MenuBarItemSelectedEvent } from '@vaadin/menu-bar';
-import { applyTheme } from 'Frontend/generated/theme';
 import {createTemplate} from "Frontend/getIcons";
 import {Icon} from "@vaadin/icon";
 import {Upload} from "@vaadin/upload";
 import { DataSet, Network } from "vis";
 import '@vaadin/vertical-layout';
 import {PropertyValues} from "lit";
-// import { Network } from "vis-network/peer/esm/vis-network";
-// import { DataSet } from "vis-data/peer/esm/vis-data"
-
+import {randomBytes} from "crypto";
 
 const template = createTemplate();
 document.head.appendChild(template.content);
 
 @customElement('custom-tag')
 export class VisJsComponent extends LitElement {
-
 
     static get styles() {
         return css`
@@ -93,10 +89,12 @@ export class VisJsComponent extends LitElement {
     private edges?: any;
     @state()
     private loadedNodes?: any;
-    @state()
-    private historicalAttributes?: any;
+    @property()
+    public historicalAttributes = [];
     @state()
     private historicalTies?: any;
+    @state()
+    private faberge?: any;
     @state()
     private checked?: any;
     @state()
@@ -107,7 +105,7 @@ export class VisJsComponent extends LitElement {
     private host?: any;
 
     @property()
-    private network!: Network// = this.initZaglushka();
+    private network!: Network;
 
     private $server?: VisJsComponentServerInterface;
 
@@ -133,6 +131,9 @@ export class VisJsComponent extends LitElement {
     @property()
     private checkBoxValues = []
 
+    @property()
+    private it = ['122 31 1 23123 1 2131 121212  ','2131']
+
     render() {
         return html`
             <div style="position: absolute; z-index: 1; background-color: transparent;">
@@ -145,6 +146,15 @@ export class VisJsComponent extends LitElement {
                                 style=" background-color: hsla(0, 0%, 100%, 0.3);"
                         >
                         </vaadin-menu-bar>
+                        <vaadin-combo-box
+                                label="Country"
+                                item-label-path="name"
+                                item-value-path="id"
+                                id="field"
+                                .items="${this.it}"
+                                style="width: 400px"
+                                @selected-item-changed="${this.changed}"
+                        ></vaadin-combo-box>
                     </vaadin-vertical-layout>
                     <vaadin-vertical-layout style="width: 48vw; align-items: flex-end">
                         <vaadin-menu-bar
@@ -167,18 +177,22 @@ export class VisJsComponent extends LitElement {
                                                theme="text-field-width"
                                                value = "${this.mnemonic}"
                                                style="visibility: ${this.mneAndDescriptorVisibility}"
+                                               @value-changed="${this.mnemonicChanged}"
                             >
                             </vaadin-text-field>
                             <vaadin-text-field label="Дескриптор" 
                                                theme="text-field-width"
                                                value="${this.descriptor}"
                                                style="visibility: ${this.mneAndDescriptorVisibility}"
+                                               @value-changed="${this.descriptorChanged}"
                             />
                             </vaadin-text-field>
                             <vaadin-text-area label="Описание" 
                                               theme="text-field-width"
                                               value="${this.description}"
                                               style="visibility: ${this.DescriptionVisibility}"
+                                              @value-changed="${this.descriptionChanged}"
+                                              caret="20"
                             />
                             </vaadin-text-area>
                         </vaadin-vertical-layout>
@@ -189,6 +203,7 @@ export class VisJsComponent extends LitElement {
                             <br>
                             <vaadin-checkbox-group                                                  
                                     .value="${this.checkBoxValues}"
+                                    @value-changed="${this.checkBoxChanged}"
                             >
                                 <vaadin-checkbox label="Исторический" 
                                                  theme="vertical"
@@ -229,6 +244,147 @@ export class VisJsComponent extends LitElement {
     private clickAction() {
         this.$server!.displayNotification("Click on button");
     }
+    changed(e: CustomEvent){
+        // this.shadowRoot.getElementById('field').value='aasd'
+        console.log(this.shadowRoot.getElementById('field'))
+        console.log(this.shadowRoot.getElementById('vaadin-combo-box-0'))
+        this.shadowRoot.getElementById('vaadin-combo-box-0').focus()
+        // this.shadowRoot.getElementById('vaadin-combo-box-0').focus()
+        this.shadowRoot.getElementById('vaadin-combo-box-0').setSelectionRange(0, 0)
+        console.log(this.shadowRoot.getElementById('vaadin-combo-box-0').selectionStart)
+        // this.shadowRoot.getElementById('vaadin-combo-box-0').setSelectionRange(0, 0)
+    }
+    checkBoxChanged(e: CustomEvent){
+        console.log(e.detail.value)
+        if(this.selectedNode != null){
+            // @ts-ignore
+            let node = this.network.body.data.nodes._data[this.selectedNode];
+
+            console.log(node)
+
+
+            // if(this.checkBoxValues != e.detail.value){
+            //     // this.checkBoxValues = e.detail.value;
+            //
+            //     if(e.detail.value.includes('0') ){
+            //         if(node['type'] == 4){
+            //             node['type'] = 6;
+            //         } else if(node['type'] == 2) {
+            //             node['type'] = 5;
+            //         }
+            //         node = this.fillNode(node);
+            //         // @ts-ignore
+            //         this.network.body.data.nodes.update(node);
+            //         if(e.detail.value.includes('1')){
+            //             this.addNode(3, false);
+            //         } else {
+            //             let connectedNodes = this.network.getConnectedNodes(this.selectedNode);
+            //
+            //             for(let index in connectedNodes){
+            //                 // @ts-ignore
+            //                 let nodeToCheck = this.network.body.data.nodes._data[connectedNodes[index]];
+            //                 if(nodeToCheck['type'] == 3) {
+            //                     let connectedEdges = this.network.getConnectedEdges(nodeToCheck['id']);
+            //                     if(connectedEdges.length > 1){
+            //                         for(let edgeIndex in connectedEdges){
+            //                             // @ts-ignore
+            //                             if(connectedEdges[edgeIndex]['from'] == this.selectedNode
+            //                                 // @ts-ignore
+            //                                 || connectedEdges[edgeIndex]['to'] == this.selectedNode){
+            //                                 // @ts-ignore
+            //                                 this.network.body.data.edges.remove(connectedEdges[edgeIndex]);
+            //                             }
+            //                         }
+            //                     } else {
+            //                         // @ts-ignore
+            //                         this.network.body.data.nodes.remove(nodeToCheck['id']);
+            //                     }
+            //                 }
+            //             }
+            //         }
+            //
+            //     } else  {
+            //         if(node['type'] == 6){
+            //             // @ts-ignore
+            //             this.historicalAttributes.splice(this.historicalAttributes.indexOf(node['id']), 1);
+            //             node['type'] = 4;
+            //         } else if(node['type'] == 5) {
+            //             this.historicalTies.splice(this.historicalTies.indexOf(node['id']), 1);
+            //             node['type'] = 2;
+            //         }
+            //         node = this.fillNode(node);
+            //         // @ts-ignore
+            //         this.network.body.data.nodes.update(node);
+            //         if(e.detail.value.includes('1')){
+            //             this.addNode(3, false);
+            //         } else {
+            //             let connectedNodes = this.network.getConnectedNodes(this.selectedNode);
+            //
+            //             for(let index in connectedNodes){
+            //                 // @ts-ignore
+            //                 let nodeToCheck = this.network.body.data.nodes._data[connectedNodes[index]];
+            //                 if(nodeToCheck['type'] == 3) {
+            //                     let connectedEdges = this.network.getConnectedEdges(nodeToCheck['id']);
+            //                     if(connectedEdges.length > 1){
+            //                         for(let edgeIndex in connectedEdges){
+            //                             // @ts-ignore
+            //                             if(connectedEdges[edgeIndex]['from'] == this.selectedNode
+            //                                 // @ts-ignore
+            //                                 || connectedEdges[edgeIndex]['to'] == this.selectedNode){
+            //                                 // @ts-ignore
+            //                                 this.network.body.data.edges.remove(connectedEdges[edgeIndex]);
+            //                             }
+            //                         }
+            //                     } else {
+            //                         // @ts-ignore
+            //                         this.network.body.data.nodes.remove(nodeToCheck['id']);
+            //                     }
+            //                 }
+            //             }
+            //         }
+            //
+            //     }
+            //     // @ts-ignore
+            //
+            //     this.checkBoxValues = e.detail.value;
+            // }
+        }
+    }
+    descriptorChanged(e: CustomEvent){
+        if(this.selectedNode != null){
+            // @ts-ignore
+            let node = this.network.body.data.nodes._data[this.selectedNode];
+
+            if(this.descriptor != e.detail.value){
+                this.descriptor = e.detail.value;
+                node['label'] = this.descriptor;
+                // @ts-ignore
+                this.network.body.data.nodes.update(node);
+            }
+        }
+    }
+    mnemonicChanged(e: CustomEvent){
+        if(this.selectedNode != null){
+            // @ts-ignore
+            let node = this.network.body.data.nodes._data[this.selectedNode];
+            if(this.mnemonic != e.detail.value) {
+                this.mnemonic = e.detail.value;
+                node['mnemonic'] = this.mnemonic;
+                // @ts-ignore
+                this.network.body.data.nodes.update(node);
+            }
+        }
+    }
+    descriptionChanged(e: CustomEvent){
+        // if(this.selectedNode != null){
+        //     // @ts-ignore
+        //     let node = this.network.body.data.nodes._data[this.selectedNode];
+        //     this.description = e.detail.value;
+        //     node['description'] = this.description;
+        //     // @ts-ignore
+        //     this.network.body.data.nodes.update(node);
+        // }
+    }
 
     createItem(iconName: string, iconRepo: string, id: string) {
 
@@ -239,13 +395,10 @@ export class VisJsComponent extends LitElement {
         item.setAttribute('id', String(id))
         item.setAttribute('theme', "icon")
 
-        var _this = this;
-
         if(iconName == 'search-plus'){
             item.onclick = () => {
                 this.scale = this.scale * 1.5;
                 this.network.moveTo({scale: this.scale});
-                this.mneAndDescriptorVisibility = "вот"
             };
         }
         if(iconName === 'search-minus'){
@@ -298,13 +451,17 @@ export class VisJsComponent extends LitElement {
                 this.download()
             }
         }
+        if(iconName === 'attribute-composed-add'){
+            item.onclick = () => {
+                this.addNode(8, false)
+            }
+        }
 
         item.appendChild(ic);
         return item;
     }
 
     download(){
-
         this.$server!.addNodesAndEdges(
             // @ts-ignore
             JSON.stringify(this.network.body.data.nodes._data),
@@ -342,11 +499,11 @@ export class VisJsComponent extends LitElement {
 
         this.getNodesAndEdges(edges, nodes);
 
-        var data = {
+        const data = {
             nodes: this.nodes,
             edges: this.edges,
         };
-        var options = {
+        const options = {
             height: '500',
             width: '100%',
             interaction: {
@@ -372,22 +529,68 @@ export class VisJsComponent extends LitElement {
 
     initEvents(){
 
-        var step;
+        let step;
+        let nodePosition;
 
-        var _this = this;
+        this.network.on("afterDrawing", (ctx) => {
+            for (step = 0; step < this.historicalAttributes.length; step++) {
+                nodePosition = this.network.getPositions([this.historicalAttributes[step]]);
+                ctx.strokeStyle = '#f66';
+                ctx.lineWidth = 2;
+                ctx.circle(
+                    nodePosition[this.historicalAttributes[step]].x,
+                    nodePosition[this.historicalAttributes[step]].y,
+                    15
+                );
+                ctx.stroke();
+            }
 
+            for (step = 0; step < this.historicalTies.length; step++) {
+                nodePosition = this.network.getPositions([this.historicalTies[step]]);
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2;
+                ctx.diamond(nodePosition[this.historicalTies[step]].x, nodePosition[this.historicalTies[step]].y, 20);
+                ctx.stroke();
+
+            }
+            for (step = 0; step < this.checked.length; step++) {
+                nodePosition = this.network.getPositions([this.checked[step]]);
+                ctx.strokeStyle = '#000000';
+                ctx.lineWidth = 4;
+                ctx.circle(
+                    nodePosition[this.checked[step]].x,
+                    nodePosition[this.checked[step]].y,
+                    2
+                );
+                ctx.stroke();
+
+            }
+            for (step = 0; step < this.faberge.length; step++) {
+                nodePosition = this.network.getPositions([this.faberge[step]]);
+                ctx.strokeStyle = '#f66';
+                ctx.lineWidth = 2;
+                ctx.circle(
+                    nodePosition[this.faberge[step]].x + 35,
+                    nodePosition[this.faberge[step]].y,
+                    25
+                );
+                ctx.fillStyle='#ffffff'
+                ctx.fill()
+                ctx.stroke();
+            }
+
+        });
         this.network.on("selectNode", (params) => {
             this.switchCaseMenuBar(params);
             this.fillWorkplace(params)
         });
-
         this.network.on("deselectNode", (params) => {
 
 
 
-            var selectedNodeId = params.nodes[0];
+            const selectedNodeId = params.nodes[0];
             // @ts-ignore
-            var node = this.network.body.nodes[selectedNodeId];
+            const node = this.network.body.nodes[selectedNodeId];
 
             if (this.network.getSelectedNodes().length == 1){
                 this.fillItemList(node.options.type);
@@ -406,48 +609,22 @@ export class VisJsComponent extends LitElement {
             this.checkBoxValues = [];
             this.CheckBoxesVisibility = 'hidden';
 
-            this.description = "";
-            this.descriptor = "";
-            this.mnemonic = "";
+            // this.description = "";
+            // this.descriptor = "";
+            // this.mnemonic = "";
 
             this.mneAndDescriptorVisibility = 'hidden';
             this.DescriptionVisibility = 'hidden';
 
+
+
         });
-
-
-        this.network.on("afterDrawing", (ctx) => {
-            for (step = 0; step < this.historicalAttributes.length; step++) {
-                var nodePosition = this.network.getPositions([this.historicalAttributes[step]]);
-                ctx.strokeStyle = '#f66';
-                ctx.lineWidth = 2;
-                ctx.circle(nodePosition[this.historicalAttributes[step]].x, nodePosition[this.historicalAttributes[step]].y, 15);
-                ctx.stroke();
-            }
-
-            for (step = 0; step < this.historicalTies.length; step++) {
-                var nodePosition = this.network.getPositions([this.historicalTies[step]]);
-                ctx.strokeStyle = '#ffffff';
-                ctx.lineWidth = 2;
-                ctx.diamond(nodePosition[this.historicalTies[step]].x, nodePosition[this.historicalTies[step]].y, 20);
-                ctx.stroke();
-
-            }
-            for (step = 0; step < this.checked.length; step++) {
-                var nodePosition = this.network.getPositions([this.checked[step]]);
-                ctx.strokeStyle = '#000000';
-                ctx.lineWidth = 4;
-                ctx.circle(nodePosition[this.checked[step]].x, nodePosition[this.checked[step]].y, 2);
-                ctx.stroke();
-
-            }
-        })
         this.network.on( 'doubleClick', (properties) => {
-            var ids = properties.nodes;
+            const ids = properties.nodes;
 
             if (ids.length > 0) {
                 // @ts-ignore
-                var node = this.network.body.data.nodes._data[ids[0]];
+                const node = this.network.body.data.nodes._data[ids[0]];
                 if (this.checked.includes(ids[0])) {
                     // @ts-ignore
                     node["fixed"] = false;
@@ -458,7 +635,7 @@ export class VisJsComponent extends LitElement {
                 } else {
                     this.checked.push(ids[0]);
                     node["fixed"] = true;
-                    var pos = this.network.getPositions([ids[0]]);
+                    const pos = this.network.getPositions([ids[0]]);
                     node["x"] = pos[ids[0]].x;
                     node["y"] = pos[ids[0]].y;
                     // @ts-ignore
@@ -468,8 +645,8 @@ export class VisJsComponent extends LitElement {
         });
         this.network.on( 'oncontext', (properties) => {
 
-            var a = this.network.getNodeAt(properties.pointer.DOM);
-            var b = this.network.getEdgeAt(properties.pointer.DOM)
+            const a = this.network.getNodeAt(properties.pointer.DOM);
+            const b = this.network.getEdgeAt(properties.pointer.DOM);
 
             if (b != null){
 
@@ -487,8 +664,7 @@ export class VisJsComponent extends LitElement {
                             'Content-Type': 'application/json'
                         }
                     });
-                    const json = response;
-                    console.log('Успех:', json);
+                    console.log('Успех:', response);
                 } catch (error) {
                     console.error('Ошибка:', error);
                 }
@@ -502,12 +678,12 @@ export class VisJsComponent extends LitElement {
             }
 
 
-            var ids = params.nodes;
+            const ids = params.nodes;
             if (ids.length > 0) {
                 // @ts-ignore
-                var node = this.network.body.data.nodes._data[ids[0]];
+                const node = this.network.body.data.nodes._data[ids[0]];
                 node["fixed"] = false;
-                var pos = this.network.getPositions([ids[0]]);
+                const pos = this.network.getPositions([ids[0]]);
                 node["x"] = pos[ids[0]].x;
                 node["y"] = pos[ids[0]].y;
                 // @ts-ignore
@@ -515,13 +691,13 @@ export class VisJsComponent extends LitElement {
             }
         });
         this.network.on('dragEnd', (properties) => {
-            var ids = properties.nodes;
+            const ids = properties.nodes;
             if (ids.length > 0) {
                 if (this.checked.includes(ids[0])) {
                     // @ts-ignore
-                    var node = this.network.body.data.nodes._data[ids[0]];
+                    const node = this.network.body.data.nodes._data[ids[0]];
                     node["fixed"] = true;
-                    var pos = this.network.getPositions([ids[0]]);
+                    const pos = this.network.getPositions([ids[0]]);
                     node["x"] = pos[ids[0]].x;
                     node["y"] = pos[ids[0]].y;
                     // @ts-ignore
@@ -532,9 +708,12 @@ export class VisJsComponent extends LitElement {
     }
 
     switchCaseMenuBar(properties: any){
-        var selectedNodeId = properties.nodes[0];
+        const selectedNodeId = properties.nodes[0];
+
+        console.log(selectedNodeId);
+
         // @ts-ignore
-        var node = this.network.body.nodes[selectedNodeId];
+        const node = this.network.body.nodes[selectedNodeId];
 
         this.selectedNode = selectedNodeId;
 
@@ -553,14 +732,17 @@ export class VisJsComponent extends LitElement {
     }
 
     fillWorkplace(properties: any){
-        var selectedNodeId = properties.nodes[0].toString();
+        const selectedNodeId = properties.nodes[0].toString();
         // this.$server!.workplaceFillComponent(selectedNodeId);
 
         // @ts-ignore
-        var node = this.network.body.nodes[selectedNodeId];
+        const node = this.network.body.nodes[selectedNodeId];
 
         this.mnemonic = node.options.mnemonic;
         this.descriptor = node.options.label;
+        // this.shadowRoot.getElementById('field').selectionStart;
+
+
         // this.description = node.options.description;
 
         this.checkBoxValues = [];
@@ -651,10 +833,11 @@ export class VisJsComponent extends LitElement {
         this.loadedNodes = JSON.parse(nodes);
         this.historicalAttributes = [];
         this.historicalTies = [];
+        this.faberge = [];
 
         this.checked = [];
 
-        var step;
+        let step;
         for (step = 0; step < this.loadedNodes.length; step++) {
             this.loadedNodes[step] = this.fillNode(this.loadedNodes[step]);
         }
@@ -669,20 +852,9 @@ export class VisJsComponent extends LitElement {
         this.edges = new DataSet(this.loadedEdges);
     }
 
-    draw(element: any, edges: string, nodes: string){
-
-
-        this.getNodesAndEdges(edges, nodes)
-
-        var data = {
-            nodes: this.nodes,
-            edges: this.edges,
-        };
-    }
-
     redraw(element: any, edges: string, nodes: string) {
 
-        this.draw(element, edges, nodes);
+        this.getNodesAndEdges(edges, nodes);
 
         // @ts-ignore
         this.network.body.data.edges.clear();
@@ -775,6 +947,17 @@ export class VisJsComponent extends LitElement {
                 this.historicalAttributes.push(node["id"]);
                 break
             }
+            case 8: {
+                node["color"] = {
+                    border: "#f66",
+                    background: '#ffffff'
+                };
+                node["borderWidth"] = 2;
+                node["shape"] = "dot";
+
+                this.faberge.push(node["id"]);
+                break
+            }
         }
         if (node["fixed"] === true) {
             this.checked.push(node["id"]);
@@ -784,8 +967,8 @@ export class VisJsComponent extends LitElement {
 
     addEdge(newNode: string, newEdge: string){
 
-        var node = JSON.parse(newNode);
-        var edge = JSON.parse(newEdge);
+        let node = JSON.parse(newNode);
+        let edge = JSON.parse(newEdge);
 
         if (node != null){
             node = this.fillNode(node);
@@ -813,7 +996,7 @@ export class VisJsComponent extends LitElement {
         let node = {
             "id": this.lastId,
             "label": "Example",
-            "mnemonic": "Example",
+            "mnemonic": randomBytes(20).toString('hex'),
             "type": nodeType,
             "x": 0,
             "y": 0,
@@ -837,7 +1020,7 @@ export class VisJsComponent extends LitElement {
             let node = {
                 "id": this.lastId,
                 "label": "AnchorExample",
-                "mnemonic": "Example",
+                "mnemonic": randomBytes(20).toString('hex'),
                 "type": 1,
                 "x": 0,
                 "y": 0,
@@ -864,7 +1047,7 @@ export class VisJsComponent extends LitElement {
 
         }
 
-        for (var i = 0; i < this.network.getSelectedNodes().length; i++) {
+        for (let i = 0; i < this.network.getSelectedNodes().length; i++) {
             try {
                 let edge = {
                     "from": idFrom,

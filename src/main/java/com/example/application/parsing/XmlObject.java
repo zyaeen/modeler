@@ -229,6 +229,7 @@ public class XmlObject {
             importedNode
         );
 
+        System.out.println(edges);
 
         for (VisJsNode node : nodes){
             switch (node.getType()){

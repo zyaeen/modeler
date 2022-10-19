@@ -3,42 +3,24 @@ package com.example.application.network;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
-@Table(name = "NODE")
+
 public class VisJsNode {
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "node_id_generator")
-    @SequenceGenerator(name = "node_id_generator", sequenceName = "sq_node_id", allocationSize = 1)
-    @JsonIgnore
-    public long node_Id;
 
     @JsonIgnore
-    @Transient
     static int idFromXml = 1;
-
 //    @JsonIgnore
-    @Transient
     public String mnemonic;
-
     public Integer id;
     public String label;
-
-    @Column(name="TYPE_ID")
     public Integer type;
-
-    @Transient
     public Double x;
-    @Transient
     public Double y;
-    @Transient
     public Boolean fixed;
 
     @JsonIgnore
-    @Transient
     public List<String> tiedElements = new ArrayList<>();
 
     protected VisJsNode() {}

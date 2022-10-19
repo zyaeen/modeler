@@ -17,19 +17,10 @@ import java.io.*;
 public class MainView extends VerticalLayout {
 
 
-    private VisJsComponent visJsComponent;
-
-
     @Autowired
-    public MainView()
-            throws IOException, SAXException {
-
-        visJsComponent = new VisJsComponent();
-
-
-        add(
-                visJsComponent
-        );
+    public MainView() throws IOException, SAXException {
+        VisJsComponent visJsComponent = new VisJsComponent();
+        add(visJsComponent);
     }
 
 
