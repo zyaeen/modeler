@@ -146,15 +146,6 @@ export class VisJsComponent extends LitElement {
                                 style=" background-color: hsla(0, 0%, 100%, 0.3);"
                         >
                         </vaadin-menu-bar>
-                        <vaadin-combo-box
-                                label="Country"
-                                item-label-path="name"
-                                item-value-path="id"
-                                id="field"
-                                .items="${this.it}"
-                                style="width: 400px"
-                                @selected-item-changed="${this.changed}"
-                        ></vaadin-combo-box>
                     </vaadin-vertical-layout>
                     <vaadin-vertical-layout style="width: 48vw; align-items: flex-end">
                         <vaadin-menu-bar
@@ -243,16 +234,6 @@ export class VisJsComponent extends LitElement {
     }
     private clickAction() {
         this.$server!.displayNotification("Click on button");
-    }
-    changed(e: CustomEvent){
-        // this.shadowRoot.getElementById('field').value='aasd'
-        console.log(this.shadowRoot.getElementById('field'))
-        console.log(this.shadowRoot.getElementById('vaadin-combo-box-0'))
-        this.shadowRoot.getElementById('vaadin-combo-box-0').focus()
-        // this.shadowRoot.getElementById('vaadin-combo-box-0').focus()
-        this.shadowRoot.getElementById('vaadin-combo-box-0').setSelectionRange(0, 0)
-        console.log(this.shadowRoot.getElementById('vaadin-combo-box-0').selectionStart)
-        // this.shadowRoot.getElementById('vaadin-combo-box-0').setSelectionRange(0, 0)
     }
     checkBoxChanged(e: CustomEvent){
         console.log(e.detail.value)

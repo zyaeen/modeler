@@ -1,0 +1,427 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <!--  todo  xmlns="pbo:anchor:schema"            targetNamespace="pbo:anchor:schema"-->
+    <xs:element name="schema" type="schema"/>
+    <xs:complexType name="schemaMetadata">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute type="xs:string" name="changingRange"/>
+                <xs:attribute type="xs:string" name="encapsulation"/>
+                <xs:attribute type="xs:string" name="identity"/>
+                <xs:attribute type="xs:string" name="metadataPrefix"/>
+                <xs:attribute type="xs:string" name="metadataType"/>
+                <xs:attribute type="xs:string" name="metadataUsage"/>
+                <xs:attribute type="xs:string" name="changingSuffix"/>
+                <xs:attribute type="xs:string" name="identitySuffix"/>
+                <xs:attribute type="xs:string" name="positIdentity"/>
+                <xs:attribute type="xs:string" name="positGenerator"/>
+                <xs:attribute type="xs:string" name="positingRange"/>
+                <xs:attribute type="xs:string" name="positingSuffix"/>
+                <xs:attribute type="xs:string" name="positorRange"/>
+                <xs:attribute type="xs:string" name="positorSuffix"/>
+                <xs:attribute type="xs:string" name="reliabilityRange"/>
+                <xs:attribute type="xs:string" name="reliabilitySuffix"/>
+                <xs:attribute type="xs:string" name="deleteReliability"/>
+                <xs:attribute type="xs:string" name="assertionSuffix"/>
+                <xs:attribute type="xs:string" name="partitioning"/>
+                <xs:attribute type="xs:string" name="entityIntegrity"/>
+                <xs:attribute type="xs:string" name="restatability"/>
+                <xs:attribute type="xs:string" name="idempotency"/>
+                <xs:attribute type="xs:string" name="assertiveness"/>
+                <xs:attribute type="xs:string" name="naming"/>
+                <xs:attribute type="xs:string" name="positSuffix"/>
+                <xs:attribute type="xs:string" name="annexSuffix"/>
+                <xs:attribute type="xs:string" name="chronon"/>
+                <xs:attribute type="xs:string" name="now"/>
+                <xs:attribute type="xs:string" name="dummySuffix"/>
+                <xs:attribute type="xs:string" name="versionSuffix"/>
+                <xs:attribute type="xs:string" name="statementTypeSuffix"/>
+                <xs:attribute type="xs:string" name="checksumSuffix"/>
+                <xs:attribute type="xs:string" name="businessViews"/>
+                <xs:attribute type="xs:string" name="decisiveness"/>
+                <xs:attribute type="xs:string" name="equivalence"/>
+                <xs:attribute type="xs:string" name="equivalentSuffix"/>
+                <xs:attribute type="xs:string" name="equivalentRange"/>
+                <xs:attribute type="xs:string" name="databaseTarget"/>
+                <xs:attribute type="xs:string" name="temporalization"/>
+                <xs:attribute type="xs:string" name="deletability"/>
+                <xs:attribute type="xs:string" name="deletablePrefix"/>
+                <xs:attribute type="xs:string" name="deletionSuffix"/>
+                <xs:attribute type="xs:string" name="checksum"/>
+                <xs:attribute type="xs:string" name="triggers"/>
+                <xs:attribute type="xs:string" name="privacy"/>
+                <xs:attribute type="xs:string" name="author"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+    <xs:complexType name="layout">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="x" type="xs:double"/>
+                <xs:attribute name="y" type="xs:double"/>
+                <xs:attribute name="fixed" type="xs:boolean"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <xs:complexType name="knot">
+        <xs:complexContent>
+            <xs:extension base="baseObjectAttributes">
+                <xs:sequence>
+                    <xs:group ref="baseObjectSequence"/>
+                    <xs:element name="items" type="items" minOccurs="0"/>
+                </xs:sequence>
+                <xs:attribute name="mnemonic" type="knotAndAttrMnemonic" use="required"/>
+                <xs:attribute name="identity" type="identity"/>
+                <xs:attribute name="dataRange" type="dataRange" use="required"/>
+                <xs:attribute name="skip" type="xs:boolean" default="false"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="attribute">
+        <xs:complexContent>
+            <xs:extension base="baseObjectAttributes">
+                <xs:sequence>
+                    <xs:element name="innerColumn" type="columnDescription" minOccurs="0" maxOccurs="25"/>
+                    <xs:element type="constraintsType" name="constraints" minOccurs="0"/>
+                    <xs:element type="indexesType" name="indexes" minOccurs="0"/>
+                    <xs:group ref="baseObjectSequence"/>
+                </xs:sequence>
+                <xs:attribute name="mnemonic" type="knotAndAttrMnemonic" use="required"/>
+                <xs:attribute name="dataRange" type="dataRange"/>
+                <xs:attribute name="timeRange" type="identity"/>
+                <xs:attribute name="knotRange" type="knotAndAttrMnemonic"/>
+                <xs:attribute name="included" default="false" type="xs:boolean"/>
+                <xs:attribute name="columnName" type="xs:string"/>
+                <xs:attribute name="nullable" default="false" type="xs:boolean"/>
+                <xs:attribute name="skip" type="xs:boolean" default="false"/>
+                <xs:attribute name="logicalType" type="propertyType"/>
+                <xs:attribute name="restrictedAccess" type="xs:boolean" default="false">
+                    <xs:annotation>
+                        <xs:documentation>true - значение реквизита определяет объект ограниченного доступа
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="default"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:simpleType name="indexTypeType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="unique"/>
+            <xs:enumeration value="ordinary"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:complexType name="columnsType">
+        <xs:sequence>
+            <xs:element type="xs:string" name="column" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="constraintType">
+        <xs:sequence>
+            <xs:element type="indexTypeType" name="type"/>
+            <xs:element type="columnsType" name="columns"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="constraintsType">
+        <xs:sequence>
+            <xs:element type="constraintType" name="constraint" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="indexType">
+        <xs:sequence>
+            <xs:element type="indexTypeType" name="type"/>
+            <xs:element type="columnsType" name="columns"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="indexesType">
+        <xs:sequence>
+            <xs:element type="indexType" name="index" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="columnDescription">
+        <xs:attribute name="columnName" type="xs:string" use="required"/>
+        <xs:attribute name="description" type="xs:string"/>
+        <xs:attribute name="dataRange" type="dataRange" use="required"/>
+        <xs:attribute name="logicalType" type="propertyType"/>
+        <xs:attribute name="default" type="xs:string"/>
+    </xs:complexType>
+    <xs:complexType name="anchor">
+        <xs:complexContent>
+            <xs:extension base="baseObjectAttributes">
+                <xs:sequence>
+                    <xs:element name="group" type="groupId" minOccurs="0" maxOccurs="unbounded"/>
+                    <xs:element name="metadata" type="objectMetadata" minOccurs="0"/>
+                    <xs:element name="attribute" type="attribute" minOccurs="0" maxOccurs="unbounded"/>
+                    <xs:element type="constraintsType" name="constraints" minOccurs="0"/>
+                    <xs:element type="indexesType" name="indexes" minOccurs="0"/>
+                    <xs:element name="layout" type="layout" minOccurs="0"/>
+                    <xs:element name="description" type="xs:string" minOccurs="0"/>
+                </xs:sequence>
+                <xs:attribute name="mnemonic" type="anchorMnemonic" use="required"/>
+                <xs:attribute name="id" type="xs:long"/>
+                <xs:attribute name="identity" type="identity"/>
+                <xs:attribute name="skip" type="xs:boolean" default="false"/>
+                <xs:attribute name="accessType" type="restrictedAccessType" default="NONE"/>
+                <xs:attribute name="inheritPerm" type="anchorMnemonic" use="optional"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:complexType mixed="true" name="anchorRole">
+        <xs:sequence>
+            <xs:element name="description" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="role" type="xs:string"/>
+        <xs:attribute name="type" type="anchorMnemonic"/>
+        <xs:attribute name="identifier" type="xs:boolean"/>
+    </xs:complexType>
+    <xs:complexType name="tie">
+        <xs:sequence>
+            <xs:element name="anchorRole" type="anchorRole" minOccurs="2" maxOccurs="unbounded"/>
+            <xs:element type="constraintsType" name="constraints" minOccurs="0"/>
+            <xs:element name="knotRole" type="knotRole" minOccurs="0"/>
+            <xs:element type="indexesType" name="indexes" minOccurs="0"/>
+            <xs:group ref="baseObjectSequence"/>
+        </xs:sequence>
+        <xs:attribute name="timeRange" type="identity"/>
+        <xs:attribute name="skip" type="xs:boolean" default="false"/>
+        <xs:attribute name="descriptor" type="xs:string"/>
+        <xs:attribute name="deprecated" default="false" type="xs:boolean"/>
+    </xs:complexType>
+    <xs:complexType name="knotRole">
+        <xs:sequence>
+            <xs:element name="description" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="role" type="xs:string"/>
+        <xs:attribute name="type" type="knotAndAttrMnemonic"/>
+        <xs:attribute name="identifier" type="xs:boolean"/>
+    </xs:complexType>
+    <xs:complexType name="schema">
+        <xs:sequence>
+            <xs:element name="metadata" type="schemaMetadata"/>
+            <xs:element name="knot" type="knot" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="anchor" type="anchor" maxOccurs="676">
+                <xs:unique name="uniqueGroupId">
+                    <xs:selector xpath="group"/>
+                    <xs:field xpath="@id"/>
+                </xs:unique>
+            </xs:element>
+            <xs:element name="tie" type="tie" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="group" type="group" minOccurs="0" maxOccurs="unbounded">
+                <xs:unique name="uniqueGroupInsideGroupId">
+                    <xs:selector xpath="group"/>
+                    <xs:field xpath="@id"/>
+                </xs:unique>
+                <xs:unique name="uniquePropertyInsideGroupId">
+                    <xs:selector xpath="property"/>
+                    <xs:field xpath="@id"/>
+                </xs:unique>
+            </xs:element>
+            <xs:element name="properties" type="properties" minOccurs="0">
+                <xs:unique name="uniquePropertyId">
+                    <xs:selector xpath="property"/>
+                    <xs:field xpath="@id"/>
+                </xs:unique>
+                <xs:unique name="uniquePropertyName">
+                    <xs:selector xpath="property"/>
+                    <xs:field xpath="@namep"/>
+                </xs:unique>
+            </xs:element>
+        </xs:sequence>
+        <xs:attribute name="format" type="xs:string"/>
+        <xs:attribute name="version" type="xs:int"/>
+        <xs:attribute name="date" type="xs:date"/>
+        <xs:attribute name="time" type="xs:time"/>
+    </xs:complexType>
+    <xs:complexType name="objectMetadata">
+        <xs:attribute name="privacy" type="xs:string"/>
+        <xs:attribute name="capsule" type="xs:string"/>
+        <xs:attribute name="restatable" type="xs:boolean"/>
+        <xs:attribute name="generator" type="xs:boolean"/>
+        <xs:attribute name="idempotent" type="xs:boolean"/>
+        <xs:attribute name="deletable" type="xs:boolean"/>
+    </xs:complexType>
+    <xs:complexType name="items">
+        <xs:sequence>
+            <xs:element name="item" type="item" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="item">
+        <xs:attribute name="id" type="xs:long"/>
+        <xs:attribute name="value" type="xs:string"/>
+        <xs:attribute name="deprecated" default="false" type="xs:boolean"/>
+    </xs:complexType>
+
+    <xs:complexType name="properties">
+        <xs:sequence>
+            <xs:element name="property" type="property" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="property">
+        <xs:sequence>
+            <xs:element name="namedisp">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:minLength value="1"/>
+                        <xs:maxLength value="500"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+        </xs:sequence>
+        <xs:attribute name="id" use="required">
+            <xs:simpleType>
+                <xs:restriction base="xs:long">
+                    <xs:minInclusive value="1"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="namep" use="required">
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                    <xs:pattern value="[a-z][a-zA-Z0-9]{1,500}"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="typep" type="propertyType" use="required"/>
+        <xs:attribute name="lenp" type="xs:int"/>
+        <xs:attribute name="ord">
+            <xs:simpleType>
+                <xs:restriction base="xs:int">
+                    <xs:minInclusive value="1"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="required" type="xs:boolean" default="false"/>
+        <xs:attribute name="filter" type="xs:boolean" default="false"/>
+        <xs:attribute name="restrictedAccess" type="xs:boolean" default="false">
+            <xs:annotation>
+                <xs:documentation>true - значение реквизита определяет объект ограниченного доступа</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="version">
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                    <xs:minLength value="1"/>
+                    <xs:maxLength value="50"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="createdate" type="xs:long"/>
+        <xs:attribute name="vocabulary">
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                    <xs:minLength value="1"/>
+                    <xs:maxLength value="255"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="logical_type">
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                    <xs:minLength value="1"/>
+                    <xs:maxLength value="255"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="deprecated" default="false" type="xs:boolean"/>
+    </xs:complexType>
+
+    <xs:complexType name="group">
+        <xs:sequence>
+            <xs:element name="group" type="groupId" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="property" type="propertyId" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="id" type="xs:long" use="required"/>
+        <xs:attribute name="name" type="xs:string" use="required"/>
+        <xs:attribute name="deprecated" default="false" type="xs:boolean"/>
+    </xs:complexType>
+    <xs:complexType name="propertyId">
+        <xs:attribute name="id" type="xs:long" use="required"/>
+    </xs:complexType>
+    <xs:complexType name="groupId">
+        <xs:attribute name="id" type="xs:long" use="required"/>
+    </xs:complexType>
+    <xs:simpleType name="anchorMnemonic">
+        <xs:annotation>
+            <xs:documentation>2-char strings only</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:length value="2"/>
+            <xs:pattern value="[A-Z][A-Z]"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="knotAndAttrMnemonic">
+        <xs:annotation>
+            <xs:documentation>3-char strings only</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:length value="3"/>
+            <xs:pattern value="[A-Z][A-Z][A-Z]"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="dataRange">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="date"/>
+            <xs:enumeration value="time"/>
+            <xs:enumeration value="bigint"/>
+            <xs:enumeration value="boolean"/>
+            <xs:enumeration value="smallstring"/>
+            <xs:enumeration value="string"/>
+            <xs:enumeration value="bigstring"/>
+            <xs:enumeration value="blob"/>
+            <xs:enumeration value="clob"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="identity">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="bigint"/>
+            <xs:enumeration value="datetime"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="propertyType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="YEAR_MONTH"/>
+            <xs:enumeration value="DATE_TIME"/>
+            <xs:enumeration value="DATE"/>
+            <xs:enumeration value="TIME"/>
+            <xs:enumeration value="VARCHAR"/>
+            <xs:enumeration value="NUMBER"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="restrictedAccessType">
+        <xs:annotation>
+            <xs:documentation>Тип доступа к БО:
+                NONE - никак не регулируется ролевой моделью
+                STANDARD - регулируется ролевой моделью
+                RESTRICTED - является объектом ограниченного доступа
+                BOTH - одновременно STANDARD и RESTRICTED
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="NONE"/>
+            <xs:enumeration value="STANDARD"/>
+            <xs:enumeration value="RESTRICTED"/>
+            <xs:enumeration value="BOTH"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:group name="baseObjectSequence">
+        <xs:annotation>
+            <xs:documentation>Обобщенный объект анкорной схемы (последовательность элементов)</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="metadata" type="objectMetadata" minOccurs="0"/>
+            <xs:element name="layout" type="layout" minOccurs="0"/>
+            <xs:element name="description" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+    </xs:group>
+
+    <xs:complexType name="baseObjectAttributes">
+        <xs:annotation>
+            <xs:documentation>Обобщенный объект анкорной схемы (атрибуты)</xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="descriptor" type="xs:string" use="required"/>
+        <xs:attribute name="deprecated" default="false" type="xs:boolean"/>
+    </xs:complexType>
+
+</xs:schema>

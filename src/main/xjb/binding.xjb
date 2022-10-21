@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<bindings version="3.0" xmlns="https://jakarta.ee/xml/ns/jaxb"
+          xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+          xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <bindings schemaLocation="anchor.xsd" node="/xs:schema">
+        <schemaBindings>
+            <package name="ru.cbr.kazan.shared.orm.anchor"/>
+        </schemaBindings>
+    </bindings>
+    <globalBindings>
+        <xjc:serializable uid="202012110946"/>
+    </globalBindings>
+</bindings>
