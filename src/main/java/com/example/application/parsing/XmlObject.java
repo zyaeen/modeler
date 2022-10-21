@@ -216,174 +216,174 @@ public class XmlObject {
         }
     }
 
-    public void writeToXml(List<VisJsNode> nodes, List<VisJsEdge> edges)
-        throws TransformerException, ParserConfigurationException {
-
-        DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder builder = builderFactory.newDocumentBuilder();
-        Document newDocument = builder.newDocument();
-
-        Node importedNode = newDocument.importNode(rootXmlExample, false);
-
-        newDocument.appendChild(
-            importedNode
-        );
-
-        System.out.println(edges);
-
-        for (VisJsNode node : nodes){
-            switch (node.getType()){
-                case 1:
-
-                    Node bufferAnchorExample = newDocument.importNode(anchorXmlExample.cloneNode(true), true);
-                    NodeList attributes = ((Element) bufferAnchorExample).getElementsByTagName("attribute");
-
-                    for (int i = 0; i < attributes.getLength(); i++) {
-                        bufferAnchorExample.removeChild(
-                            attributes.item(i)
-                        );
-                    }
-
-                    bufferAnchorExample.removeChild(attributes.item(0));
-
-                    bufferAnchorExample.getAttributes().getNamedItem("mnemonic").setNodeValue(node.getMnemonic());
-                    bufferAnchorExample.getAttributes().getNamedItem("descriptor").setNodeValue(node.getLabel());
-                    ((Element) bufferAnchorExample).getElementsByTagName("layout").item(0).getAttributes().getNamedItem("x").setNodeValue(node.getX().toString());
-                    ((Element) bufferAnchorExample).getElementsByTagName("layout").item(0).getAttributes().getNamedItem("y").setNodeValue(node.getY().toString());
-                    ((Element) bufferAnchorExample).getElementsByTagName("layout").item(0).getAttributes().getNamedItem("fixed").setNodeValue(node.getFixed().toString());
-
-                    importedNode.appendChild(bufferAnchorExample);
-
-                    for (VisJsEdge edge : edges){
-                        if (edge.getFrom().equals(node.getId()) || edge.getTo().equals(node.getId())){
-
-                            Integer idOfNodeToConnect = edge.getFrom().equals(node.getId()) ? edge.getTo() : edge.getFrom();
-
-                            VisJsNode attributeNode = nodes.stream().filter(
-                                    visJsNode -> visJsNode.getId().equals(idOfNodeToConnect)
-                            ).collect(Collectors.toList()).get(0);
-
-                            if (!attributeNode.getType().equals(2) && !attributeNode.getType().equals(5)) {
-
-                                Node bufferAttributeExample = newDocument.importNode(attributeXmlExample, true);
-
-                                if (attributeNode.getType().equals(6)) {
-                                    if (bufferAttributeExample.getAttributes().getNamedItem("timeRange") != null) {
-                                        bufferAttributeExample.getAttributes().getNamedItem("timeRange").setNodeValue("datetime");
-                                    } else {
-                                        ((Element) bufferAttributeExample).setAttribute("timeRange", "datetime");
-                                    }
-                                }
-
-                                bufferAttributeExample.getAttributes().getNamedItem("mnemonic").setNodeValue(attributeNode.getMnemonic());
-                                bufferAttributeExample.getAttributes().getNamedItem("descriptor").setNodeValue(attributeNode.getLabel());
-                                ((Element) bufferAttributeExample).getElementsByTagName("layout").item(0).getAttributes().getNamedItem("x")
-                                    .setNodeValue(attributeNode.getX().toString());
-                                ((Element) bufferAttributeExample).getElementsByTagName("layout").item(0).getAttributes().getNamedItem("y")
-                                    .setNodeValue(attributeNode.getY().toString());
-                                ((Element) bufferAttributeExample).getElementsByTagName("layout").item(0).getAttributes().getNamedItem("fixed")
-                                    .setNodeValue(attributeNode.getFixed().toString());
-
-                                for(VisJsEdge visJsEdge : edges) {
-                                    if (visJsEdge.getTo().equals(attributeNode.getId()) || visJsEdge.getFrom().equals(attributeNode.getId())) {
-                                        List<VisJsNode> knotNodes = nodes.stream().filter(
-                                            visJsNode -> ((visJsNode.getId().equals(visJsEdge.getFrom()) || visJsNode.getId().equals(visJsEdge.getTo())) && visJsNode.getType().equals(3))
-                                        ).collect(Collectors.toList());
-                                        if (knotNodes.size() > 0){
-                                            if (bufferAttributeExample.getAttributes().getNamedItem("knotRange") != null) {
-                                                bufferAttributeExample.getAttributes().getNamedItem("knotRange").setNodeValue(knotNodes.get(0).getMnemonic());
-                                            } else {
-                                                ((Element) bufferAttributeExample).setAttribute("knotRange", knotNodes.get(0).getMnemonic());
-                                            }
-                                        }
-                                    }
-                                }
-
-                                bufferAnchorExample.appendChild(bufferAttributeExample);
-                            }
-                        }
-                    }
-                    break;
-
-                case 3:
-                    Node bufferExample = newDocument.importNode(knotXmlExample.cloneNode(true), true);
-                    bufferExample.getAttributes().getNamedItem("mnemonic").setNodeValue(node.getMnemonic());
-                    bufferExample.getAttributes().getNamedItem("descriptor").setNodeValue(node.getLabel());
-                    ((Element) bufferExample).getElementsByTagName("layout").item(0).getAttributes().getNamedItem("x").setNodeValue(node.getX().toString());
-                    ((Element) bufferExample).getElementsByTagName("layout").item(0).getAttributes().getNamedItem("y").setNodeValue(node.getY().toString());
-                    ((Element) bufferExample).getElementsByTagName("layout").item(0).getAttributes().getNamedItem("fixed").setNodeValue(node.getFixed().toString());
-                    importedNode.appendChild(
-                        bufferExample
-                    );
-                    break;
-
-                case 2:
-                case 5:
-                    Element tie = newDocument.createElement("tie");
-                    importedNode.appendChild(tie);
-                    if (node.getType() == 5) {
-                        tie.setAttribute("timeRange", "datetime");
-                    }
-                    for (VisJsEdge edge : edges){
-                        if (edge.getFrom().equals(node.getId()) || edge.getTo().equals(node.getId())) {
-
-                            Integer idOfNodeToConnect = edge.getFrom().equals(node.getId()) ? edge.getTo() : edge.getFrom();
-
-                            VisJsNode nodeToConnect = null;
-
-                            try {
-                                nodeToConnect = nodes.stream().filter(
-                                    visJsNode -> visJsNode.getId().equals(idOfNodeToConnect)
-                                ).collect(Collectors.toList()).get(0);
-                            } catch (Exception e){
-
-                            }
-
-
-
-                            Element childTag;
-
-                            if (nodeToConnect.getType().equals(1)) {
-                                childTag = newDocument.createElement("anchorRole");
-                            } else {
-                                childTag = newDocument.createElement("knotRole");
-                            }
-                            childTag.setAttribute("role", edge.getLabelForXml());
-                            childTag.setAttribute("type", nodeToConnect.getMnemonic().toString());
-                            childTag.setAttribute("identifier", edge.getEdgeType().toString());
-
-                            tie.appendChild(childTag);
-                        }
-                    }
-
-                    Element layout = newDocument.createElement("layout");
-                    layout.setAttribute("x", node.getX().toString());
-                    layout.setAttribute("y", node.getY().toString());
-                    layout.setAttribute("fixed", node.getFixed().toString());
-
-                    tie.appendChild(layout);
-
-                    Element metadata = newDocument.createElement("metadata");
-                    metadata.setAttribute("capsule", "dbo");
-                    metadata.setAttribute("deletable", "false");
-                    metadata.setAttribute("idempotent", "false");
-
-                    tie.appendChild(metadata);
-
-                    break;
-                default:
-                    break;
-            }
-        }
-
-
-        newDocument.normalizeDocument();
-        DOMSource source = new DOMSource(newDocument);
-        TransformerFactory transformerFactory = TransformerFactory.newInstance();
-        Transformer transformer = transformerFactory.newTransformer();
-        StreamResult result = new StreamResult("src/main/resources/xmls/usingXml.xml");
-        transformer.transform(source, result);
-
-    }
+    public void writeToXml(List<VisJsNode> nodes, List<VisJsEdge> edges){}
+//        throws TransformerException, ParserConfigurationException {
+//
+//        DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+//        DocumentBuilder builder = builderFactory.newDocumentBuilder();
+//        Document newDocument = builder.newDocument();
+//
+//        Node importedNode = newDocument.importNode(rootXmlExample, false);
+//
+//        newDocument.appendChild(
+//            importedNode
+//        );
+//
+//        System.out.println(edges);
+//
+//        for (VisJsNode node : nodes){
+//            switch (node.getType()){
+//                case 1:
+//
+//                    Node bufferAnchorExample = newDocument.importNode(anchorXmlExample.cloneNode(true), true);
+//                    NodeList attributes = ((Element) bufferAnchorExample).getElementsByTagName("attribute");
+//
+//                    for (int i = 0; i < attributes.getLength(); i++) {
+//                        bufferAnchorExample.removeChild(
+//                            attributes.item(i)
+//                        );
+//                    }
+//
+//                    bufferAnchorExample.removeChild(attributes.item(0));
+//
+//                    bufferAnchorExample.getAttributes().getNamedItem("mnemonic").setNodeValue(node.getMnemonic());
+//                    bufferAnchorExample.getAttributes().getNamedItem("descriptor").setNodeValue(node.getLabel());
+//                    ((Element) bufferAnchorExample).getElementsByTagName("layout").item(0).getAttributes().getNamedItem("x").setNodeValue(node.getX().toString());
+//                    ((Element) bufferAnchorExample).getElementsByTagName("layout").item(0).getAttributes().getNamedItem("y").setNodeValue(node.getY().toString());
+//                    ((Element) bufferAnchorExample).getElementsByTagName("layout").item(0).getAttributes().getNamedItem("fixed").setNodeValue(node.getFixed().toString());
+//
+//                    importedNode.appendChild(bufferAnchorExample);
+//
+//                    for (VisJsEdge edge : edges){
+//                        if (edge.getFrom().equals(node.getId()) || edge.getTo().equals(node.getId())){
+//
+//                            Integer idOfNodeToConnect = edge.getFrom().equals(node.getId()) ? edge.getTo() : edge.getFrom();
+//
+//                            VisJsNode attributeNode = nodes.stream().filter(
+//                                    visJsNode -> visJsNode.getId().equals(idOfNodeToConnect)
+//                            ).collect(Collectors.toList()).get(0);
+//
+//                            if (!attributeNode.getType().equals(2) && !attributeNode.getType().equals(5)) {
+//
+//                                Node bufferAttributeExample = newDocument.importNode(attributeXmlExample, true);
+//
+//                                if (attributeNode.getType().equals(6)) {
+//                                    if (bufferAttributeExample.getAttributes().getNamedItem("timeRange") != null) {
+//                                        bufferAttributeExample.getAttributes().getNamedItem("timeRange").setNodeValue("datetime");
+//                                    } else {
+//                                        ((Element) bufferAttributeExample).setAttribute("timeRange", "datetime");
+//                                    }
+//                                }
+//
+//                                bufferAttributeExample.getAttributes().getNamedItem("mnemonic").setNodeValue(attributeNode.getMnemonic());
+//                                bufferAttributeExample.getAttributes().getNamedItem("descriptor").setNodeValue(attributeNode.getLabel());
+//                                ((Element) bufferAttributeExample).getElementsByTagName("layout").item(0).getAttributes().getNamedItem("x")
+//                                    .setNodeValue(attributeNode.getX().toString());
+//                                ((Element) bufferAttributeExample).getElementsByTagName("layout").item(0).getAttributes().getNamedItem("y")
+//                                    .setNodeValue(attributeNode.getY().toString());
+//                                ((Element) bufferAttributeExample).getElementsByTagName("layout").item(0).getAttributes().getNamedItem("fixed")
+//                                    .setNodeValue(attributeNode.getFixed().toString());
+//
+//                                for(VisJsEdge visJsEdge : edges) {
+//                                    if (visJsEdge.getTo().equals(attributeNode.getId()) || visJsEdge.getFrom().equals(attributeNode.getId())) {
+//                                        List<VisJsNode> knotNodes = nodes.stream().filter(
+//                                            visJsNode -> ((visJsNode.getId().equals(visJsEdge.getFrom()) || visJsNode.getId().equals(visJsEdge.getTo())) && visJsNode.getType().equals(3))
+//                                        ).collect(Collectors.toList());
+//                                        if (knotNodes.size() > 0){
+//                                            if (bufferAttributeExample.getAttributes().getNamedItem("knotRange") != null) {
+//                                                bufferAttributeExample.getAttributes().getNamedItem("knotRange").setNodeValue(knotNodes.get(0).getMnemonic());
+//                                            } else {
+//                                                ((Element) bufferAttributeExample).setAttribute("knotRange", knotNodes.get(0).getMnemonic());
+//                                            }
+//                                        }
+//                                    }
+//                                }
+//
+//                                bufferAnchorExample.appendChild(bufferAttributeExample);
+//                            }
+//                        }
+//                    }
+//                    break;
+//
+//                case 3:
+//                    Node bufferExample = newDocument.importNode(knotXmlExample.cloneNode(true), true);
+//                    bufferExample.getAttributes().getNamedItem("mnemonic").setNodeValue(node.getMnemonic());
+//                    bufferExample.getAttributes().getNamedItem("descriptor").setNodeValue(node.getLabel());
+//                    ((Element) bufferExample).getElementsByTagName("layout").item(0).getAttributes().getNamedItem("x").setNodeValue(node.getX().toString());
+//                    ((Element) bufferExample).getElementsByTagName("layout").item(0).getAttributes().getNamedItem("y").setNodeValue(node.getY().toString());
+//                    ((Element) bufferExample).getElementsByTagName("layout").item(0).getAttributes().getNamedItem("fixed").setNodeValue(node.getFixed().toString());
+//                    importedNode.appendChild(
+//                        bufferExample
+//                    );
+//                    break;
+//
+//                case 2:
+//                case 5:
+//                    Element tie = newDocument.createElement("tie");
+//                    importedNode.appendChild(tie);
+//                    if (node.getType() == 5) {
+//                        tie.setAttribute("timeRange", "datetime");
+//                    }
+//                    for (VisJsEdge edge : edges){
+//                        if (edge.getFrom().equals(node.getId()) || edge.getTo().equals(node.getId())) {
+//
+//                            Integer idOfNodeToConnect = edge.getFrom().equals(node.getId()) ? edge.getTo() : edge.getFrom();
+//
+//                            VisJsNode nodeToConnect = null;
+//
+//                            try {
+//                                nodeToConnect = nodes.stream().filter(
+//                                    visJsNode -> visJsNode.getId().equals(idOfNodeToConnect)
+//                                ).collect(Collectors.toList()).get(0);
+//                            } catch (Exception e){
+//
+//                            }
+//
+//
+//
+//                            Element childTag;
+//
+//                            if (nodeToConnect.getType().equals(1)) {
+//                                childTag = newDocument.createElement("anchorRole");
+//                            } else {
+//                                childTag = newDocument.createElement("knotRole");
+//                            }
+//                            childTag.setAttribute("role", edge.getLabelForXml());
+//                            childTag.setAttribute("type", nodeToConnect.getMnemonic().toString());
+//                            childTag.setAttribute("identifier", edge.getEdgeType().toString());
+//
+//                            tie.appendChild(childTag);
+//                        }
+//                    }
+//
+//                    Element layout = newDocument.createElement("layout");
+//                    layout.setAttribute("x", node.getX().toString());
+//                    layout.setAttribute("y", node.getY().toString());
+//                    layout.setAttribute("fixed", node.getFixed().toString());
+//
+//                    tie.appendChild(layout);
+//
+//                    Element metadata = newDocument.createElement("metadata");
+//                    metadata.setAttribute("capsule", "dbo");
+//                    metadata.setAttribute("deletable", "false");
+//                    metadata.setAttribute("idempotent", "false");
+//
+//                    tie.appendChild(metadata);
+//
+//                    break;
+//                default:
+//                    break;
+//            }
+//        }
+//
+//
+//        newDocument.normalizeDocument();
+//        DOMSource source = new DOMSource(newDocument);
+//        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+//        Transformer transformer = transformerFactory.newTransformer();
+//        StreamResult result = new StreamResult("src/main/resources/xmls/usingXml.xml");
+//        transformer.transform(source, result);
+//
+//    }
 
 }

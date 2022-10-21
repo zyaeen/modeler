@@ -2,6 +2,7 @@ package com.example.application.views.main;
 
 
 import com.example.application.datalandscape.DomainSchema;
+import com.example.application.datalandscape.DomainsSchema;
 import com.example.application.network.VisJsEdge;
 import com.example.application.network.VisJsNode;
 import com.example.application.parsing.XmlObject;
@@ -46,14 +47,27 @@ public class VisJsComponent extends Component {
     List<VisJsNode> nodes = new ArrayList<>();
     List<VisJsEdge> edges = new ArrayList<>();
 
+    DomainSchema domainSchema = null;
+    String sourceFileName;
+
+    List<VisJsNode> anchorList = new ArrayList<>();
+    List<VisJsNode> attributeList = new ArrayList<>();
+    List<VisJsNode> knotList = new ArrayList<>();
+    List<VisJsNode> tieList = new ArrayList<>();
+
+    List<VisJsEdge> edgeList = new ArrayList<>();
+
     XmlObject xmlObject;
 
     public VisJsComponent() throws IOException, SAXException {
 
         InputStream fileData = new FileInputStream("src/main/resources/xmls/usingXml.xml");
-        readXml(fileData);
+
+//        readXml(fileData);
+
 
     }
+
     @ClientCallable
     private void displayNotification(String text) {
         Notification.show("Notification: " + text);
@@ -61,6 +75,27 @@ public class VisJsComponent extends Component {
     @ClientCallable
     private void fillComponentRequest(){
         try {
+
+            ClassLoader classLoader = getClass().getClassLoader();
+            File file = new File(classLoader.getResource("dossier.xml").getFile());
+            this.domainSchema = new DomainSchema(file);
+
+            anchorList = this.domainSchema.getAnchorList();
+            attributeList = this.domainSchema.getAttributeList();
+            tieList = this.domainSchema.getTieList();
+            knotList = this.domainSchema.getKnotList();
+            edgeList = this.domainSchema.getEdgeList();
+
+            this.nodes.addAll(anchorList);
+            this.nodes.addAll(attributeList);
+            this.nodes.addAll(tieList);
+            this.nodes.addAll(knotList);
+
+            this.edges.addAll(edgeList);
+
+            System.out.println(this.nodes);
+            System.out.println(this.edges);
+
             fillComponent();
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
@@ -135,12 +170,12 @@ public class VisJsComponent extends Component {
             }
         }
 
-
-        try {
-            xmlObject.writeToXml(nodesToDownload, edgesToDownload);
-        } catch (TransformerException | ParserConfigurationException e) {
-            throw new RuntimeException(e);
-        }
+//
+//        try {
+//            xmlObject.writeToXml(nodesToDownload, edgesToDownload);
+//        } catch (TransformerException | ParserConfigurationException e) {
+//            throw new RuntimeException(e);
+//        }
 
     }
 

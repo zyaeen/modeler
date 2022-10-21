@@ -1,6 +1,10 @@
 package com.example.application.network;
 
 
+import com.example.application.schema.Anchor;
+import com.example.application.schema.Attribute;
+import com.example.application.schema.Knot;
+import com.example.application.schema.Tie;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.ArrayList;
@@ -11,14 +15,19 @@ public class VisJsNode {
 
     @JsonIgnore
     static int idFromXml = 1;
+
+    @JsonIgnore
+    static int tieId = 1;
+
 //    @JsonIgnore
     public String mnemonic;
     public Integer id;
     public String label;
     public Integer type;
-    public Double x;
-    public Double y;
-    public Boolean fixed;
+    public Double x = 700.;
+    public Double y = 700.;
+    public Boolean fixed = false;
+    public String description;
 
     @JsonIgnore
     public List<String> tiedElements = new ArrayList<>();
@@ -30,6 +39,70 @@ public class VisJsNode {
         this.label = label;
         this.type = type;
     }
+
+    public VisJsNode(String mnemonic, String descriptor, String description){
+
+        this.mnemonic = mnemonic;
+        this.label = descriptor;
+        this.description = description;
+
+    }
+
+    public VisJsNode(Anchor anchor){
+//        this.id = idFromXml++;
+        this.type = 1;
+        this.mnemonic = anchor.getMnemonic();
+        this.label = anchor.getDescriptor();
+        this.description = anchor.getDescription();
+        if(anchor.getLayout() != null){
+            this.x = anchor.getLayout().getX();
+            this.y = anchor.getLayout().getY();
+            this.fixed = anchor.getLayout().isFixed();
+        }
+    }
+    public VisJsNode(Anchor anchor, Attribute attribute){
+//        this.id = idFromXml++;
+        this.mnemonic = anchor.getMnemonic() + "_" + attribute.getMnemonic();
+        this.label = attribute.getDescriptor();
+        this.description = attribute.getDescription();
+        if(attribute.getLayout() != null){
+            this.x = attribute.getLayout().getX();
+            this.y = attribute.getLayout().getY();
+            this.fixed = attribute.getLayout().isFixed();
+        }
+        this.type = 4;
+        if (attribute.getTimeRange() != null){
+            this.type = 6;
+        }
+
+    }
+    public VisJsNode(Knot knot){
+//        this.id = idFromXml++;
+        this.type = 3;
+        this.mnemonic = knot.getMnemonic();
+        this.label = knot.getDescriptor();
+        this.description = knot.getDescription();
+        if(knot.getLayout() != null){
+            this.x = knot.getLayout().getX();
+            this.y = knot.getLayout().getY();
+            this.fixed = knot.getLayout().isFixed();
+        }
+    }
+    public VisJsNode(Tie tie){
+        this.id = tieId;
+        this.description = tie.getDescription();
+        if(tie.getLayout() != null){
+            this.x = tie.getLayout().getX();
+            this.y = tie.getLayout().getY();
+            this.fixed = tie.getLayout().isFixed();
+        }
+        this.type = 2;
+        if (tie.getTimeRange() != null){
+            this.type = 5;
+        }
+        tieId++;
+    }
+
 
     public VisJsNode(Integer type, String label, String mnemonic, Double x, Double y, Boolean fixed) {
         this.id = idFromXml++;

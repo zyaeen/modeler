@@ -859,6 +859,9 @@ export class VisJsComponent extends LitElement {
     }
 
     fillNode(node: { [x: string]: any; }){
+        if(node['id'] == null){
+            node['id'] = node['mnemonic'];
+        }
         switch (node["type"]){
             case 1: {
                 node["color"] = {
