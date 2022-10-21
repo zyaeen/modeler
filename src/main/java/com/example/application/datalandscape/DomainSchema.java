@@ -3,16 +3,16 @@ package com.example.application.datalandscape;
 import com.example.application.schema.Schema;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-//import jakarta.xml.bind.JAXBContext;
-//import jakarta.xml.bind.JAXBElement;
-//import jakarta.xml.bind.JAXBException;
-//import jakarta.xml.bind.Unmarshaller;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Unmarshaller;
 //import org.leandi.schema.Schema;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
+//import javax.xml.bind.JAXBContext;
+//import javax.xml.bind.JAXBElement;
+//import javax.xml.bind.JAXBException;
+//import javax.xml.bind.Unmarshaller;
 import java.io.File;
 
 public class DomainSchema {

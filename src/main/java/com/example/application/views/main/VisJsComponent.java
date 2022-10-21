@@ -1,6 +1,7 @@
 package com.example.application.views.main;
 
 
+import com.example.application.datalandscape.DomainSchema;
 import com.example.application.network.VisJsEdge;
 import com.example.application.network.VisJsNode;
 import com.example.application.parsing.XmlObject;
@@ -23,6 +24,7 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
