@@ -11,6 +11,7 @@ import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Unmarshaller;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,7 +28,7 @@ public class DomainSchema {
 
     List<VisJsEdge> edgeList = new ArrayList<>();
 
-    public DomainSchema(File schemaXML) {
+    public DomainSchema(InputStream schemaXML) {
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(Schema.class);
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
@@ -40,7 +41,12 @@ public class DomainSchema {
     }
 
     public void getNodes(){
+        getAnchorAndAttribute();
+        getKnot();
+        getTie();
+    }
 
+    public void getAnchorAndAttribute(){
         for(Anchor anchor : schema.getAnchor()){
             anchorList.add(new VisJsNode(anchor));
             for(Attribute attribute : anchor.getAttribute()){
@@ -51,18 +57,44 @@ public class DomainSchema {
                 }
             }
         }
+    }
+    public void getKnot(){
         for(Knot knot : schema.getKnot()){
             knotList.add(new VisJsNode(knot));
         }
+    }
+    public void getTie(){
         for(Tie tie :schema.getTie()){
             VisJsNode tieNode = new VisJsNode(tie);
             tieList.add(tieNode);
             for(AnchorRole anchorRole : tie.getAnchorRole()){
                 edgeList.add(new VisJsEdge(tieNode.getId(), anchorRole.getType()));
             }
+            if(tie.getKnotRole() != null){
+                edgeList.add(new VisJsEdge(tieNode.getId(), tie.getKnotRole().getType()));
+            }
         }
     }
-
+    public String getAnchors() throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.writeValueAsString(this.anchorList);
+    }
+    public String getAttributes() throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.writeValueAsString(this.attributeList);
+    }
+    public String getKnots() throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.writeValueAsString(this.knotList);
+    }
+    public String getTies() throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.writeValueAsString(this.tieList);
+    }
+    public String getEdges() throws JsonProcessingException{
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.writeValueAsString(this.edgeList);
+    }
     public List<VisJsNode> getAnchorList(){
         return this.anchorList;
     }
@@ -79,8 +111,9 @@ public class DomainSchema {
         return this.edgeList;
     }
 
-    public String getAnchors () throws JsonProcessingException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.writeValueAsString(schema.getAnchor());
-    }
+
+//    public String getAnchors () throws JsonProcessingException {
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        return objectMapper.writeValueAsString(schema.getAnchor());
+//    }
 }

@@ -25,10 +25,7 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -77,27 +74,30 @@ public class VisJsComponent extends Component {
         try {
 
             ClassLoader classLoader = getClass().getClassLoader();
-            File file = new File(classLoader.getResource("dossier.xml").getFile());
-            this.domainSchema = new DomainSchema(file);
+            System.out.println(classLoader);
+//            File file = new File(classLoader.getResource("target/classes/dossier.xml").getFile());
+            InputStream inputStream = new FileInputStream("src/main/resources/dossier.xml");
+            this.domainSchema = new DomainSchema(inputStream);
 
-            anchorList = this.domainSchema.getAnchorList();
-            attributeList = this.domainSchema.getAttributeList();
-            tieList = this.domainSchema.getTieList();
-            knotList = this.domainSchema.getKnotList();
-            edgeList = this.domainSchema.getEdgeList();
+//            anchorList = this.domainSchema.getAnchorList();
+//            attributeList = this.domainSchema.getAttributeList();
+//            tieList = this.domainSchema.getTieList();
+//            knotList = this.domainSchema.getKnotList();
+//            edgeList = this.domainSchema.getEdgeList();
+//
+//            this.nodes.addAll(anchorList);
+//            this.nodes.addAll(attributeList);
+//            this.nodes.addAll(tieList);
+//            this.nodes.addAll(knotList);
+//
+//            this.edges.addAll(edgeList);
+//
+//            System.out.println(this.nodes);
+//            System.out.println(this.edges);
 
-            this.nodes.addAll(anchorList);
-            this.nodes.addAll(attributeList);
-            this.nodes.addAll(tieList);
-            this.nodes.addAll(knotList);
-
-            this.edges.addAll(edgeList);
-
-            System.out.println(this.nodes);
-            System.out.println(this.edges);
-
-            fillComponent();
-        } catch (JsonProcessingException e) {
+            sendTree();
+//            fillComponent();
+        } catch (JsonProcessingException | FileNotFoundException e) {
             throw new RuntimeException(e);
         }
     }
@@ -178,7 +178,18 @@ public class VisJsComponent extends Component {
 //        }
 
     }
+    public void sendTree() throws JsonProcessingException{
 
+        getElement().executeJs(
+            "this.getTree($0, $1, $2, $3, $4)",
+            domainSchema.getAnchors(),
+            domainSchema.getAttributes(),
+            domainSchema.getKnots(),
+            domainSchema.getTies(),
+            domainSchema.getEdges()
+        );
+
+    }
 
     public void fillComponent() throws JsonProcessingException {
 

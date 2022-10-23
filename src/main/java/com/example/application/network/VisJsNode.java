@@ -28,6 +28,7 @@ public class VisJsNode {
     public Double y = 700.;
     public Boolean fixed = false;
     public String description;
+    public Boolean isHistorical = null;
 
     @JsonIgnore
     public List<String> tiedElements = new ArrayList<>();
@@ -73,6 +74,7 @@ public class VisJsNode {
         this.type = 4;
         if (attribute.getTimeRange() != null){
             this.type = 6;
+            this.isHistorical = true;
         }
 
     }
@@ -99,6 +101,7 @@ public class VisJsNode {
         this.type = 2;
         if (tie.getTimeRange() != null){
             this.type = 5;
+            this.isHistorical = true;
         }
         tieId++;
     }

@@ -36,9 +36,9 @@ public class DataLandscapeSchema {
                                Map<String,File> domainSchemaXMLs
                                ) {
         this.name = name;
-        for (Map.Entry<String,File> me: domainSchemaXMLs.entrySet()) {
-                domainSchemaMap.put(me.getKey(),
-                        new DomainSchema(me.getValue()));
-        }
+//        for (Map.Entry<String,File> me: domainSchemaXMLs.entrySet()) {
+//                domainSchemaMap.put(me.getKey(),
+//                        new DomainSchema(me.getValue()));
+//        }
     }
 }
