@@ -74,29 +74,11 @@ public class VisJsComponent extends Component {
         try {
 
             ClassLoader classLoader = getClass().getClassLoader();
-            System.out.println(classLoader);
 //            File file = new File(classLoader.getResource("target/classes/dossier.xml").getFile());
             InputStream inputStream = new FileInputStream("src/main/resources/dossier.xml");
             this.domainSchema = new DomainSchema(inputStream);
 
-//            anchorList = this.domainSchema.getAnchorList();
-//            attributeList = this.domainSchema.getAttributeList();
-//            tieList = this.domainSchema.getTieList();
-//            knotList = this.domainSchema.getKnotList();
-//            edgeList = this.domainSchema.getEdgeList();
-//
-//            this.nodes.addAll(anchorList);
-//            this.nodes.addAll(attributeList);
-//            this.nodes.addAll(tieList);
-//            this.nodes.addAll(knotList);
-//
-//            this.edges.addAll(edgeList);
-//
-//            System.out.println(this.nodes);
-//            System.out.println(this.edges);
-
             sendTree();
-//            fillComponent();
         } catch (JsonProcessingException | FileNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -159,14 +141,14 @@ public class VisJsComponent extends Component {
 
 
                 edgesToDownload
-                    .add(
-                        new VisJsEdge(
-                                from,
-                                to,
-                                "|||",
-                                true
-                        )
-                    );
+                        .add(
+                                new VisJsEdge(
+                                        from,
+                                        to,
+                                        "|||",
+                                        true
+                                )
+                        );
             }
         }
 
@@ -181,12 +163,10 @@ public class VisJsComponent extends Component {
     public void sendTree() throws JsonProcessingException{
 
         getElement().executeJs(
-            "this.getTree($0, $1, $2, $3, $4)",
-            domainSchema.getAnchors(),
-            domainSchema.getAttributes(),
-            domainSchema.getKnots(),
-            domainSchema.getTies(),
-            domainSchema.getEdges()
+                "this.getTree($0, $1, $2)",
+                domainSchema.getAnchors(),
+                domainSchema.getKnots(),
+                domainSchema.getTies()
         );
 
     }

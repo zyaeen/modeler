@@ -26,12 +26,12 @@ export class VisJsComponent extends LitElement {
         border-style: solid; 
         border-color:  #E8EDF5; 
         border-radius: 10px;
-        height: 305px;
+        height: 350px;
         width: 100%;
       }
        #customId {
         padding: 0;
-        height: 59vh;
+        height: 70vh;
         width: 98vw;
         margin: 0;
       }
@@ -40,91 +40,70 @@ export class VisJsComponent extends LitElement {
        position: relative;
        align-items: end;
       }
-
   }
 `;
   }
 
-  @state()
-  private selectedItem?: MenuBarItem;
+
   @state()
   private selectedNodes = [];
-  @state()
-  private counter = 0;
 
   @property()
   private anchorList = [];
   @property()
   private knotList = [];
   @property()
-  private attributeList = [];
+  private attributeList: object[] = [];
   @property()
   private tieList = [];
   @property()
   private edgeList = [];
+
   @property()
   private nodeDataSet = new DataSet([]);
   @property()
   private edgeDataSet = new DataSet([]);
 
   @property()
-  private lastId = 0;
+  private lastId = 1000;
 
   @property()
   private selectedNode = null;
 
   private scale = 1;
 
-  private anchorMenuBarItem = { id: 1, component: this.createItem('anchor-add', 'lean-di-icons', '1')};
-  private attributeMenuBarItem = { id: 2, component: this.createItem('attribute-add', 'lean-di-icons', '2')}
-  private composedAttributeMenuBarItem = { id: 3, component: this.createItem('attribute-composed-add', 'lean-di-icons', '2') }
-  private historicalAttributeMenuBarItem = { id: 3, component: this.createItem('attribute-his-add', 'lean-di-icons', '2') }
-  private tieWithAnchorMenuBarItem = { id: 3, component: this.createItem('tie-a-add', 'lean-di-icons', '2') }
-  private tieMenuBarItem ={ id: 3, component: this.createItem('tie-add', 'lean-di-icons', '2') }
-  private historicalTieWithAnchorMenuBarItem ={ id: 3, component: this.createItem('tie-his-a-add', 'lean-di-icons', '2') }
-  private historicalTieMenuBarItem = { id: 3, component: this.createItem('tie-his-add', 'lean-di-icons', '2') }
+  private anchorMenuBarItem = {id: 1, component: this.createItem('anchor-add', 'lean-di-icons', '1')};
+  private attributeMenuBarItem = {id: 2, component: this.createItem('attribute-add', 'lean-di-icons', '2')}
+  private composedAttributeMenuBarItem = {id: 3, component: this.createItem('attribute-composed-add', 'lean-di-icons', '2')}
+  private historicalAttributeMenuBarItem = {id: 3, component: this.createItem('attribute-his-add', 'lean-di-icons', '2')}
+  private tieWithAnchorMenuBarItem = {id: 3, component: this.createItem('tie-a-add', 'lean-di-icons', '2')}
+  private tieMenuBarItem = {id: 3, component: this.createItem('tie-add', 'lean-di-icons', '2')}
+  private historicalTieWithAnchorMenuBarItem = {id: 3, component: this.createItem('tie-his-a-add', 'lean-di-icons', '2')}
+  private historicalTieMenuBarItem = {id: 3, component: this.createItem('tie-his-add', 'lean-di-icons', '2')}
 
   @state()
-  public itemsForAnchorsMenuBar = [
-    this.anchorMenuBarItem
-  ];
+  public itemsForAnchorsMenuBar = [this.anchorMenuBarItem];
   @state()
   private itemsForZoomAndSearchMenuBar = [
-    { id: 1, component: this.createItem('search-plus', 'vaadin', '4')},
-    { id: 2, component: this.createItem('search-minus', 'vaadin', '5')},
-    { id: 3, component: this.createItem('search', 'vaadin', '6') },
-    { id: 4, component: this.createItem('download', 'lumo', '7') },
-
+    {id: 1, component: this.createItem('search-plus', 'vaadin', '4')},
+    {id: 2, component: this.createItem('search-minus', 'vaadin', '5')},
+    {id: 3, component: this.createItem('search', 'vaadin', '6')},
+    {id: 4, component: this.createItem('download', 'lumo', '7')},
   ];
 
-  @state()
-  private nodes?: any;
-  @state()
-  private edges?: any;
-  @state()
-  private loadedNodes?: any;
   @property()
   public historicalAttributes = [];
   @state()
   private historicalTies = [];
   @state()
-  private faberge = [];
+  private fabergeNodes = [];
   @state()
-  private checked = [];
-  @state()
-  private loadedEdges?: any;
-  @state()
-  private isThis = this;
-  @state()
-  private host?: any;
+  private fixedNodes = [];
 
   @property()
   private network!: Network;
 
   private $server?: VisJsComponentServerInterface;
-
-  @property({attribute:true})
-  private test?: Object;
 
   @property()
   private mnemonic = "";
@@ -135,127 +114,119 @@ export class VisJsComponent extends LitElement {
   @property()
   private mneAndDescriptorVisibility = 'hidden';
   @property()
-  private DescriptionVisibility = 'hidden'
+  private descriptionVisibility = 'hidden'
   @property()
-  private CheckBoxesVisibility = 'hidden';
-  @property()
-  private hisCheckBoxValue : boolean = true;
-  @property()
-  private tieCheckBoxValue : boolean = false;
+  private checkBoxesVisibility = 'hidden';
   @property()
   private checkBoxValues = []
 
-  @property()
-  private it = ['122 31 1 23123 1 2131 121212  ','2131']
-
   render() {
     return html`
-          <div style="position: absolute; z-index: 1; background-color: transparent;">
-              <vaadin-horizontal-layout style="width: 100%;">
-                  <vaadin-vertical-layout style="width: 50vw">
-                      <vaadin-menu-bar
-                              .items="${this.itemsForAnchorsMenuBar}"
-                              @item-selected="${this.itemSelected}"
-                              theme="icon"
-                              style=" background-color: hsla(0, 0%, 100%, 0.3);"
-                      >
-                      </vaadin-menu-bar>
-                  </vaadin-vertical-layout>
-                  <vaadin-vertical-layout style="width: 48vw; align-items: flex-end">
-                      <vaadin-menu-bar
-                              .items="${this.itemsForZoomAndSearchMenuBar}"
-                              @item-selected="${this.itemSelected}"
-                              theme="icon"
-                              style=" background-color: hsla(0, 0%, 100%, 0.3);"
-                      >
-                      </vaadin-menu-bar>
-                  </vaadin-vertical-layout>
-              </vaadin-horizontal-layout>
+      <div style="position: absolute; z-index: 1; background-color: transparent;">
+        <vaadin-horizontal-layout style="width: 100%;">
+          <vaadin-vertical-layout style="width: 50vw">
+            <vaadin-menu-bar
+                .items="${this.itemsForAnchorsMenuBar}"
+                theme="icon"
+                style=" background-color: hsla(0, 0%, 100%, 0.3);"
+            >
+            </vaadin-menu-bar>
+          </vaadin-vertical-layout>
+          <vaadin-vertical-layout style="width: 48vw; align-items: flex-end">
+            <vaadin-menu-bar
+                .items="${this.itemsForZoomAndSearchMenuBar}"
+                theme="icon"
+                style=" background-color: hsla(0, 0%, 100%, 0.3);"
+            >
+            </vaadin-menu-bar>
+          </vaadin-vertical-layout>
+        </vaadin-horizontal-layout>
+      </div>
+      <div id="customId"></div>
+      <div id="bottomPanel">
+        <vaadin-horizontal-layout theme="spacing">
+          <div style="width: 20%">
+            <vaadin-vertical-layout theme="spacing-padding">
+              <span>Описание объекта</span>
+              <vaadin-text-field label="Мнемоник"
+                                 theme="text-field-width"
+                                 value="${this.mnemonic}"
+                                 style="visibility: ${this.mneAndDescriptorVisibility}"
+                                 @value-changed="${this.mnemonicChanged}"
+              >
+              </vaadin-text-field>
+              <vaadin-text-field label="Дескриптор"
+                                 theme="text-field-width"
+                                 value="${this.descriptor}"
+                                 style="visibility: ${this.mneAndDescriptorVisibility}"
+                                 @value-changed="${this.descriptorChanged}"
+              />
+              </vaadin-text-field>
+              <vaadin-text-area label="Описание"
+                                theme="text-field-width"
+                                value="${this.description}"
+                                style="visibility: ${this.descriptionVisibility}"
+                                @value-changed="${this.descriptionChanged}"
+                                caret="20"
+              />
+              </vaadin-text-area>
+            </vaadin-vertical-layout>
           </div>
-          <div id="customId"></div>
-          <div id="bottomPanel">
-              <vaadin-horizontal-layout theme="spacing">
-                  <div style="width: 20%">
-                      <vaadin-vertical-layout theme="spacing-padding">
-                          <span>Описание объекта</span>
-                          <vaadin-text-field label="Мнемоник"
-                                             theme="text-field-width"
-                                             value = "${this.mnemonic}"
-                                             style="visibility: ${this.mneAndDescriptorVisibility}"
-                                             @value-changed="${this.mnemonicChanged}"
-                          >
-                          </vaadin-text-field>
-                          <vaadin-text-field label="Дескриптор" 
-                                             theme="text-field-width"
-                                             value="${this.descriptor}"
-                                             style="visibility: ${this.mneAndDescriptorVisibility}"
-                                             @value-changed="${this.descriptorChanged}"
-                          />
-                          </vaadin-text-field>
-                          <vaadin-text-area label="Описание" 
-                                            theme="text-field-width"
-                                            value="${this.description}"
-                                            style="visibility: ${this.DescriptionVisibility}"
-                                            @value-changed="${this.descriptionChanged}"
-                                            caret="20"
-                          />
-                          </vaadin-text-area>
-                      </vaadin-vertical-layout>
-                  </div>
-                  <div style="width: 20%">
-                      <vaadin-vertical-layout theme="spacing-padding">
-                          <span>Опции объекта</span>
-                          <br>
-                          <vaadin-checkbox-group                                                  
-                                  .value="${this.checkBoxValues}"
-                                  @value-changed="${this.checkBoxChanged}"
-                          >
-                              <vaadin-checkbox label="Исторический" 
-                                               theme="vertical"
-                                               style="visibility: ${this.CheckBoxesVisibility}"
-                                               value="0"
-                              >
-                              </vaadin-checkbox>
-                              <vaadin-checkbox label="Кнотированный"
-                                               theme="vertical"
-                                               style="visibility: ${this.CheckBoxesVisibility}"
-                                               value="1"
-                              >
-                              </vaadin-checkbox>                    
-                          <vaadin-checkbox-group>
-
-                      </vaadin-vertical-layout>
-                  </div>
-                  <div style="width: 60%">
-                      <vaadin-vertical-layout theme="spacing-padding"">
-                      <span>Значения</span>
-                      <vaadin-grid>
-                          <vaadin-grid-column path="firstName"></vaadin-grid-column>
-                          <vaadin-grid-column path="lastName"></vaadin-grid-column>
-                          <vaadin-grid-column path="email"></vaadin-grid-column>
-                          <vaadin-grid-column path="profession"></vaadin-grid-column>
-                      </vaadin-grid>
-                      </vaadin-vertical-layout>
-                  </div>
-              </vaadin-horizontal-layout>
+          <div style="width: 20%">
+            <vaadin-vertical-layout theme="spacing-padding">
+              <span>Опции объекта</span>
+              <br>
+              <vaadin-checkbox-group
+                  .value="${this.checkBoxValues}"
+                  @value-changed="${this.checkBoxChanged}"
+              >
+                <vaadin-checkbox label="Исторический"
+                                 theme="vertical"
+                                 style="visibility: ${this.checkBoxesVisibility}"
+                                 value="0"
+                >
+                </vaadin-checkbox>
+                <vaadin-checkbox label="Кнотированный"
+                                 theme="vertical"
+                                 style="visibility: ${this.checkBoxesVisibility}"
+                                 value="1"
+                >
+                </vaadin-checkbox>
+                <vaadin-checkbox-group>
+            </vaadin-vertical-layout>
           </div>
-      `
+          <div style="width: 60%">
+            <vaadin-vertical-layout theme="spacing-padding"
+            ">
+            <span>Значения</span>
+            <vaadin-grid>
+              <vaadin-grid-column path="firstName"></vaadin-grid-column>
+              <vaadin-grid-column path="lastName"></vaadin-grid-column>
+              <vaadin-grid-column path="email"></vaadin-grid-column>
+              <vaadin-grid-column path="profession"></vaadin-grid-column>
+            </vaadin-grid>
+            </vaadin-vertical-layout>
+          </div>
+        </vaadin-horizontal-layout>
+      </div>
+    `
   }
 
   protected firstUpdated(_changedProperties: PropertyValues) {
     super.firstUpdated(_changedProperties);
     this.initTree();
     this.$server?.fillComponentRequest();
+    this.lastId = 1000;
   }
 
-  initTree(){
+  initTree() {
 
     const data = {
       nodes: this.nodeDataSet,
       edges: this.edgeDataSet,
     };
     const options = {
-      height: '500',
+
       width: '100%',
       interaction: {
         keyboard: true,
@@ -263,436 +234,783 @@ export class VisJsComponent extends LitElement {
       }
     };
     this.network = new Network(
-      this.shadowRoot!.getElementById("customId")!,
-      data,
-      options
+        this.shadowRoot!.getElementById("customId")!,
+        data,
+        options
     );
+    this.network.moveTo({scale: 0.25})
   }
+
   private clickAction() {
     this.$server!.displayNotification("Click on button");
   }
-  checkBoxChanged(e: CustomEvent){
-    console.log(e.detail.value)
-    if(this.selectedNode != null){
+
+  checkBoxChanged(e: CustomEvent) {
+
+    let values = e.detail.value.sort();
+
+    try {
+      let nodeId = this.network.getSelectedNodes();
+      let node = this.nodeDataSet.get(nodeId)[0]
+
+      if(this.selectedNode != null) {
+
+        this.attributeChangeTimeRange(values, node);
+        this.tieChangeTimeRange(values, node);
+        this.attributeChangeKnotRange(values, node);
+        this.tieChangeKnotRange(values, node);
+
+        this.checkBoxValues = values;
+
+      }
+
+    } catch (e) {
+    }
+
+
+    // if (this.selectedNode != null) {
+    //   // @ts-ignore
+    //   let node = this.network.body.data.nodes._data[this.selectedNode];
+    //
+    //
+    //   if(this.checkBoxValues != e.detail.value){
+    //       // this.checkBoxValues = e.detail.value;
+    //
+    //       if(e.detail.value.includes('0') ){
+    //           if(node['type'] == 4){
+    //               node['type'] = 6;
+    //           } else if(node['type'] == 2) {
+    //               node['type'] = 5;
+    //           }
+    //           node = this.fillNode(node);
+    //           // @ts-ignore
+    //           this.network.body.data.nodes.update(node);
+    //           if(e.detail.value.includes('1')){
+    //               this.addNode(3, false);
+    //           } else {
+    //               let connectedNodes = this.network.getConnectedNodes(this.selectedNode);
+    //
+    //               for(let index in connectedNodes){
+    //                   // @ts-ignore
+    //                   let nodeToCheck = this.network.body.data.nodes._data[connectedNodes[index]];
+    //                   if(nodeToCheck['type'] == 3) {
+    //                       let connectedEdges = this.network.getConnectedEdges(nodeToCheck['id']);
+    //                       if(connectedEdges.length > 1){
+    //                           for(let edgeIndex in connectedEdges){
+    //                               // @ts-ignore
+    //                               if(connectedEdges[edgeIndex]['from'] == this.selectedNode
+    //                                   // @ts-ignore
+    //                                   || connectedEdges[edgeIndex]['to'] == this.selectedNode){
+    //                                   // @ts-ignore
+    //                                   this.network.body.data.edges.remove(connectedEdges[edgeIndex]);
+    //                               }
+    //                           }
+    //                       } else {
+    //                           // @ts-ignore
+    //                           this.network.body.data.nodes.remove(nodeToCheck['id']);
+    //                       }
+    //                   }
+    //               }
+    //           }
+    //
+    //       } else  {
+    //           if(node['type'] == 6){
+    //               // @ts-ignore
+    //               this.historicalAttributes.splice(this.historicalAttributes.indexOf(node['id']), 1);
+    //               node['type'] = 4;
+    //           } else if(node['type'] == 5) {
+    //               this.historicalTies.splice(this.historicalTies.indexOf(node['id']), 1);
+    //               node['type'] = 2;
+    //           }
+    //           node = this.fillNode(node);
+    //           // @ts-ignore
+    //           this.network.body.data.nodes.update(node);
+    //           if(e.detail.value.includes('1')){
+    //               this.addNode(3, false);
+    //           } else {
+    //               let connectedNodes = this.network.getConnectedNodes(this.selectedNode);
+    //
+    //               for(let index in connectedNodes){
+    //                   // @ts-ignore
+    //                   let nodeToCheck = this.network.body.data.nodes._data[connectedNodes[index]];
+    //                   if(nodeToCheck['type'] == 3) {
+    //                       let connectedEdges = this.network.getConnectedEdges(nodeToCheck['id']);
+    //                       if(connectedEdges.length > 1){
+    //                           for(let edgeIndex in connectedEdges){
+    //                               // @ts-ignore
+    //                               if(connectedEdges[edgeIndex]['from'] == this.selectedNode
+    //                                   // @ts-ignore
+    //                                   || connectedEdges[edgeIndex]['to'] == this.selectedNode){
+    //                                   // @ts-ignore
+    //                                   this.network.body.data.edges.remove(connectedEdges[edgeIndex]);
+    //                               }
+    //                           }
+    //                       } else {
+    //                           // @ts-ignore
+    //                           this.network.body.data.nodes.remove(nodeToCheck['id']);
+    //                       }
+    //                   }
+    //               }
+    //           }
+    //
+    //       }
+    //       // @ts-ignore
+    //
+    //       this.checkBoxValues = e.detail.value;
+    //   }
+    // }
+  }
+
+  attributeChangeKnotRange(values: any, node: any){
+    if(values.includes('1') && node['knotRange'] == null && node['type'] == 4){
       // @ts-ignore
-      let node = this.network.body.data.nodes._data[this.selectedNode];
-
-      console.log(node)
-
-
-      // if(this.checkBoxValues != e.detail.value){
-      //     // this.checkBoxValues = e.detail.value;
-      //
-      //     if(e.detail.value.includes('0') ){
-      //         if(node['type'] == 4){
-      //             node['type'] = 6;
-      //         } else if(node['type'] == 2) {
-      //             node['type'] = 5;
-      //         }
-      //         node = this.fillNode(node);
-      //         // @ts-ignore
-      //         this.network.body.data.nodes.update(node);
-      //         if(e.detail.value.includes('1')){
-      //             this.addNode(3, false);
-      //         } else {
-      //             let connectedNodes = this.network.getConnectedNodes(this.selectedNode);
-      //
-      //             for(let index in connectedNodes){
-      //                 // @ts-ignore
-      //                 let nodeToCheck = this.network.body.data.nodes._data[connectedNodes[index]];
-      //                 if(nodeToCheck['type'] == 3) {
-      //                     let connectedEdges = this.network.getConnectedEdges(nodeToCheck['id']);
-      //                     if(connectedEdges.length > 1){
-      //                         for(let edgeIndex in connectedEdges){
-      //                             // @ts-ignore
-      //                             if(connectedEdges[edgeIndex]['from'] == this.selectedNode
-      //                                 // @ts-ignore
-      //                                 || connectedEdges[edgeIndex]['to'] == this.selectedNode){
-      //                                 // @ts-ignore
-      //                                 this.network.body.data.edges.remove(connectedEdges[edgeIndex]);
-      //                             }
-      //                         }
-      //                     } else {
-      //                         // @ts-ignore
-      //                         this.network.body.data.nodes.remove(nodeToCheck['id']);
-      //                     }
-      //                 }
-      //             }
-      //         }
-      //
-      //     } else  {
-      //         if(node['type'] == 6){
-      //             // @ts-ignore
-      //             this.historicalAttributes.splice(this.historicalAttributes.indexOf(node['id']), 1);
-      //             node['type'] = 4;
-      //         } else if(node['type'] == 5) {
-      //             this.historicalTies.splice(this.historicalTies.indexOf(node['id']), 1);
-      //             node['type'] = 2;
-      //         }
-      //         node = this.fillNode(node);
-      //         // @ts-ignore
-      //         this.network.body.data.nodes.update(node);
-      //         if(e.detail.value.includes('1')){
-      //             this.addNode(3, false);
-      //         } else {
-      //             let connectedNodes = this.network.getConnectedNodes(this.selectedNode);
-      //
-      //             for(let index in connectedNodes){
-      //                 // @ts-ignore
-      //                 let nodeToCheck = this.network.body.data.nodes._data[connectedNodes[index]];
-      //                 if(nodeToCheck['type'] == 3) {
-      //                     let connectedEdges = this.network.getConnectedEdges(nodeToCheck['id']);
-      //                     if(connectedEdges.length > 1){
-      //                         for(let edgeIndex in connectedEdges){
-      //                             // @ts-ignore
-      //                             if(connectedEdges[edgeIndex]['from'] == this.selectedNode
-      //                                 // @ts-ignore
-      //                                 || connectedEdges[edgeIndex]['to'] == this.selectedNode){
-      //                                 // @ts-ignore
-      //                                 this.network.body.data.edges.remove(connectedEdges[edgeIndex]);
-      //                             }
-      //                         }
-      //                     } else {
-      //                         // @ts-ignore
-      //                         this.network.body.data.nodes.remove(nodeToCheck['id']);
-      //                     }
-      //                 }
-      //             }
-      //         }
-      //
-      //     }
-      //     // @ts-ignore
-      //
-      //     this.checkBoxValues = e.detail.value;
-      // }
+      let knot = this.addKnot();
+      node['knotRange'] = knot['mnemonic'];
+      // @ts-ignore
+      this.nodeDataSet.update([node]);
+    }
+    if(!values.includes('1') && node['knotRange'] != null && node['type'] == 4){
+      // @ts-ignore
+      const knot = this.knotList.filter(knotNode => knotNode['id'] == node['knotRange']);
+      if(this.network.getConnectedNodes(knot[0]['id']).length == 1){
+        this.nodeDataSet.remove(knot[0]['id']);
+      }
+      // @ts-ignore
+      this.knotList.splice(this.knotList.indexOf(knot));
+      node['knotRange'] = null;
+      // @ts-ignore
+      this.nodeDataSet.update([node]);
     }
   }
-  descriptorChanged(e: CustomEvent){
-    if(this.selectedNode != null){
+  tieChangeKnotRange(values: any, node: any){
+    if(values.includes('1') && node['knotRole'] == null && node['type'] == 2){
+      // @ts-ignore
+      let knot = this.addKnot();
+      node['knotRole'] = {
+        description: knot['description'],
+        type: knot['mnemonic'],
+        identifier: true,
+        role: "role"
+      };
+      // @ts-ignore
+      this.nodeDataSet.update([node]);
+    }
+    if(!values.includes('1') && node['knotRole'] != null && node['type'] == 2){
+      // @ts-ignore
+      const knot = this.knotList.filter(knotNode => knotNode['id'] == node['knotRole']['type']);
+      const connectedEdgesId = this.network.getConnectedEdges(knot[0]['id']);
+      if(connectedEdgesId.length == 1){
+        this.nodeDataSet.remove(knot[0]['id']);
+        // @ts-ignore
+        this.knotList.splice(this.knotList.indexOf(knot));
+        // @ts-ignore
+        this.fixedNodes.splice(this.fixedNodes.indexOf(knot[0]['id']));
+      }
+      for(let index in connectedEdgesId){
+        this.deleteEdge(node, connectedEdgesId[index], knot);
+      }
+
+      node['knotRole'] = null;
+      // @ts-ignore
+      this.nodeDataSet.update([node]);
+    }
+  }
+
+  deleteEdge(node: any, edgeId: any, knot: any){
+    let edge = this.edgeDataSet.get(edgeId);
+    // @ts-ignore
+    if((edge['from'] == node['id'] && edge['to'] == knot[0]['id']) || (edge['from']== knot[0]['id'] && edge['to'] == node['id'])){
+      // @ts-ignore
+      this.edgeDataSet.remove(edge['id']);
+      let edgeToDel = this.edgeList.filter(e => (e['from'] == node['id'] && e['to'] == knot[0]['id']) || (e['from']== knot[0]['id'] && e['to'] == node['id']));
+      // @ts-ignore
+      this.edgeList.splice(edgeToDel, 1);
+    }
+  }
+
+  addKnot(){
+    let mnemonic = randomBytes(2).toString('hex').substring(0, 3);
+
+    let node = {
+      "id": mnemonic,
+      "label": "KnotExample",
+      "descriptor": "KnotExample",
+      "description": "Knot Example Description",
+      "mnemonic": mnemonic,
+      "type": 3,
+      "x": 0,
+      "y": 0,
+      "fixed": false,
+    }
+    node = this.fillKnotFigure(node);
+    // @ts-ignore
+    this.knotList.push(node);
+    // @ts-ignore
+    this.nodeDataSet.add([node]);
+    this.connectNodes(node);
+    return node;
+  }
+
+  attributeChangeTimeRange(values: any, node: any){
+    if(values.includes('0') && node['timeRange'] == null && node['type'] == 4){
+      // @ts-ignore
+      node['timeRange'] = 'bigint';
+      // @ts-ignore
+      this.nodeDataSet.update([node]);
+      // @ts-ignore
+      this.historicalAttributes.push(node['id']);
+    }
+    if(!values.includes('0') && node['timeRange'] != null && node['type'] == 4){
+      // @ts-ignore
+      node['timeRange'] = null;
+      // @ts-ignore
+      this.nodeDataSet.update([node]);
+      // @ts-ignore
+      this.historicalAttributes.splice(this.historicalAttributes.indexOf(node['id']), 1);
+    }
+  }
+  tieChangeTimeRange(values: any, node: any){
+    if(values.includes('0') && node['timeRange'] == null && node['type'] == 2){
+      // @ts-ignore
+      node['timeRange'] = 'bigint';
+      // @ts-ignore
+      this.nodeDataSet.update([node]);
+      // @ts-ignore
+      this.historicalTies.push(node['id']);
+    }
+    if(!values.includes('0') && node['timeRange'] != null && node['type'] == 2){
+      // @ts-ignore
+      node['timeRange'] = null;
+      // @ts-ignore
+      this.nodeDataSet.update([node]);
+      // @ts-ignore
+      this.historicalTies.splice(this.historicalTies.indexOf(node['id']), 1);
+    }
+  }
+
+  descriptorChanged(e: CustomEvent) {
+    if (this.selectedNode != null) {
       // @ts-ignore
       let node = this.network.body.data.nodes._data[this.selectedNode];
-
-      if(this.descriptor != e.detail.value){
+      let nodePosition = this.network.getPositions([node['id']]);
+      if (this.descriptor != e.detail.value) {
         this.descriptor = e.detail.value;
         node['label'] = this.descriptor;
-        // @ts-ignore
-        this.network.body.data.nodes.update(node);
+        node['x'] = nodePosition[node['id']].x;
+        node['y'] = nodePosition[node['id']].y;
+        this.nodeDataSet.update(node)
       }
     }
   }
-  mnemonicChanged(e: CustomEvent){
-    if(this.selectedNode != null){
+  mnemonicChanged(e: CustomEvent) {
+    if (this.selectedNode != null) {
       // @ts-ignore
       let node = this.network.body.data.nodes._data[this.selectedNode];
-      if(this.mnemonic != e.detail.value) {
+      let nodePosition = this.network.getPositions([node['id']]);
+      if (this.mnemonic != e.detail.value) {
         this.mnemonic = e.detail.value;
         node['mnemonic'] = this.mnemonic;
-        // @ts-ignore
-        this.network.body.data.nodes.update(node);
+        node['x'] = nodePosition[node['id']].x;
+        node['y'] = nodePosition[node['id']].y;
+        this.nodeDataSet.update(node)
       }
     }
   }
-  descriptionChanged(e: CustomEvent){
-    // if(this.selectedNode != null){
-    //     // @ts-ignore
-    //     let node = this.network.body.data.nodes._data[this.selectedNode];
-    //     this.description = e.detail.value;
-    //     node['description'] = this.description;
-    //     // @ts-ignore
-    //     this.network.body.data.nodes.update(node);
-    // }
+  descriptionChanged(e: CustomEvent) {
+    if(this.selectedNode != null){
+
+      // @ts-ignore
+      let node = this.network.body.data.nodes._data[this.selectedNode];
+      let nodePosition = this.network.getPositions([node['id']]);
+      if (this.description != e.detail.value) {
+        this.description = e.detail.value;
+        node['description'] = this.description;
+        node['x'] = nodePosition[node['id']].x;
+        node['y'] = nodePosition[node['id']].y;
+        this.nodeDataSet.update(node)
+      }
+    }
   }
 
   createItem(iconName: string, iconRepo: string, id: string) {
 
     const item = document.createElement('vaadin-context-menu-item');
-    const ic = new Icon();
-    ic.setAttribute('icon', `${iconRepo}:${iconName}`)
+    const icon = new Icon();
+    icon.setAttribute('icon', `${iconRepo}:${iconName}`)
 
     item.setAttribute('id', String(id))
     item.setAttribute('theme', "icon")
 
-    if(iconName == 'search-plus'){
+    if (iconName == 'search-plus') {
       item.onclick = () => {
         this.scale = this.scale * 1.5;
         this.network.moveTo({scale: this.scale});
       };
     }
-    if(iconName === 'search-minus'){
+    if (iconName === 'search-minus') {
       item.onclick = () => {
         this.scale = this.scale / 1.5;
         this.network.moveTo({scale: this.scale});
       };
     }
-    if(iconName === 'anchor-add'){
-      item.onclick = () =>{
-        // window.addEdge(`""`);
-        this.addNode(1, false);
-      };
-    }
-    if(iconName === 'tie-add'){
-      item.onclick = () => {
-        // window.addEdge(`""`);
-        this.addNode(2, false);
-      };
-    }
-    if(iconName === 'tie-his-add'){
-      item.onclick = () => {
-        this.addNode(5, false)
-      }
-    }
-    if(iconName === 'tie-a-add'){
-      item.onclick = () =>{
-        // window.addEdge(`""`);
-        this.addNode(2, true);
-      };
-    }
-    if(iconName === 'tie-his-a-add'){
-      item.onclick = () => {
-        this.addNode(5, true)
-      }
-    }
-    if(iconName === 'attribute-add'){
-      item.onclick = () =>{
-        // window.addEdge(`""`);
-        this.addNode(4, false);
-      };
-    }
-    if(iconName === 'attribute-his-add'){
-      item.onclick = () => {
-        this.addNode(6, false)
-      }
-    }
-    if(iconName === 'download'){
+
+    if (iconName === 'download') {
       item.onclick = () => {
         this.download()
       }
     }
-    if(iconName === 'attribute-composed-add'){
-      item.onclick = () => {
-        this.addNode(8, false)
-      }
+
+    if (iconName === 'anchor-add') {
+      item.onclick = () => this.addAnchor();
+    }
+    if (iconName === 'tie-add') {
+      item.onclick = () => this.addTie();
+    }
+    if (iconName === 'tie-his-add') {
+      item.onclick = () => this.addHistoricalTie();
+    }
+    if (iconName === 'tie-a-add') {
+      item.onclick = () => this.addAnchoredTie();
+    }
+    if (iconName === 'tie-his-a-add') {
+      item.onclick = () => this.addAnchoredHistoricalTie();
+    }
+    if (iconName === 'attribute-add') {
+      item.onclick = () => this.addAttribute();
+    }
+    if (iconName === 'attribute-his-add') {
+      item.onclick = () => this.addHistoricalAttribute();
+    }
+    if (iconName === 'attribute-composed-add') {
+      item.onclick = () => this.addComposedAttribute();
     }
 
-    item.appendChild(ic);
+    item.appendChild(icon);
     return item;
   }
 
-  download(){
+  addAnchor(){
+    let mnemonic = randomBytes(2).toString('hex').substring(0, 2);
+    let node = {
+      "id": mnemonic,
+      "label": "AnchorExample",
+      "descriptor": "AnchorExample",
+      "description": "Anchor Example Description",
+      "mnemonic": mnemonic,
+      "type": 1,
+      "x": 0,
+      "y": 0,
+      "fixed": false
+    }
+    node = this.fillAnchorFigure(node);
+    // @ts-ignore
+    this.anchorList.push(node);
+    // @ts-ignore
+    this.nodeDataSet.add([node]);
+    this.connectNodes(node);
+    this.itemsForAnchorsMenuBar = [this.anchorMenuBarItem]
+    return node;
+  }
+  addTie(){
+    this.lastId++;
+    let mnemonic = this.lastId.toString();
+    let node = {
+      "id": mnemonic,
+      "label": null,
+      "descriptor": null,
+      "description": "Tie Example Description",
+      "mnemonic": mnemonic,
+      "type": 2,
+      "x": 0,
+      "y": 0,
+      "fixed": false
+    }
+    node = this.fillTieFigure(node);
+    // @ts-ignore
+    this.tieList.push(node);
+    // @ts-ignore
+    this.nodeDataSet.add([node]);
+    this.connectNodes(node);
+    this.itemsForAnchorsMenuBar = [this.anchorMenuBarItem]
+    return node;
+  }
+  addHistoricalTie(){
+    this.lastId++;
+    let mnemonic = this.lastId.toString();
+    let node = {
+      "id": mnemonic,
+      "label": null,
+      "descriptor": null,
+      "description": "Tie Example Description",
+      "mnemonic": mnemonic,
+      "type": 2,
+      "x": 0,
+      "y": 0,
+      "fixed": false,
+      "timeRange": "bigint"
+    }
+    node = this.fillTieFigure(node);
+    // @ts-ignore
+    this.tieList.push(node);
+    // @ts-ignore
+    this.nodeDataSet.add([node]);
+    this.connectNodes(node);
+    this.itemsForAnchorsMenuBar = [this.anchorMenuBarItem]
+    return node;
+  }
+  addAnchoredTie(){
+    let tie = this.addTie();
+    let anchor = this.addAnchor();
+    let edge = this.fillEdge(tie['id'], anchor['id']);
+    // @ts-ignore
+    this.edgeDataSet.add([edge]);
+    // @ts-ignore
+    // this.edgeList.push(edge);
+    this.itemsForAnchorsMenuBar = [this.anchorMenuBarItem]
+  }
+  addAnchoredHistoricalTie(){
+    let tie = this.addHistoricalTie();
+    let anchor = this.addAnchor();
+    let edge = this.fillEdge(tie['id'], anchor['id']);
+    // @ts-ignore
+    this.edgeDataSet.add([edge]);
+    // @ts-ignore
+    // this.edgeList.push(edge);
+    this.itemsForAnchorsMenuBar = [this.anchorMenuBarItem]
+  }
+  addAttribute(){
+    let mnemonic = randomBytes(2).toString('hex').substring(0, 3);
+    let node = {
+      "id": this.network.getSelectedNodes()[0].toString() + "_" + mnemonic,
+      "label": "AttributeExample",
+      "descriptor": "AttributeExample",
+      "description": "Attribute Example Description",
+      "mnemonic": mnemonic,
+      "type": 4,
+      "x": 0,
+      "y": 0,
+      "fixed": false
+    }
+    node = this.fillAttributeFigure(node);
+    // @ts-ignore
+    this.attributeList.push(node);
+    // @ts-ignore
+    this.nodeDataSet.add([node]);
+    this.connectNodes(node);
+    this.itemsForAnchorsMenuBar = [this.anchorMenuBarItem]
+    return node;
+  }
+  addHistoricalAttribute(){
+    let mnemonic = randomBytes(2).toString('hex').substring(0, 3);
+    let node = {
+      "id": this.network.getSelectedNodes()[0].toString() + "_" + mnemonic,
+      "label": "AttributeExample",
+      "descriptor": "AttributeExample",
+      "description": "Attribute Example Description",
+      "mnemonic": mnemonic,
+      "type": 4,
+      "x": 0,
+      "y": 0,
+      "fixed": false,
+      "timeRange": "bigint"
+    }
+    node = this.fillAttributeFigure(node);
+    // @ts-ignore
+    this.attributeList.push(node);
+    // @ts-ignore
+    this.nodeDataSet.add([node]);
+    this.connectNodes(node);
+    this.itemsForAnchorsMenuBar = [this.anchorMenuBarItem]
+    return node;
+  }
+  addComposedAttribute(){
+    let mnemonic = randomBytes(2).toString('hex').substring(0, 3);
+    let node = {
+      "id": this.network.getSelectedNodes()[0].toString() + "_" + mnemonic,
+      "label": "AttributeExample",
+      "descriptor": "AttributeExample",
+      "description": "Attribute Example Description",
+      "mnemonic": mnemonic,
+      "type": 4,
+      "x": 0,
+      "y": 0,
+      "fixed": false,
+      "innerColumn": [""]
+    }
+    node = this.fillAttributeFigure(node);
+    // @ts-ignore
+    this.attributeList.push(node);
+    // @ts-ignore
+    this.nodeDataSet.add([node]);
+    this.connectNodes(node);
+    this.itemsForAnchorsMenuBar = [this.anchorMenuBarItem]
+    return node;
+  }
+
+  connectNodes(node: any){
+    for (let i = 0; i < this.network.getSelectedNodes().length; i++) {
+      try {
+        let edge = this.fillEdge(node['id'], this.network.getSelectedNodes()[i].toString());
+        // @ts-ignore
+        this.edgeDataSet.add([edge]);
+        // @ts-ignore
+        // this.edgeList.push(edge);
+        // @ts-ignore
+      } catch (err) {
+        console.log(err)
+      }
+    }
+    if(node['type'] != 3 && node['type'] != 4){
+      this.network.unselectAll();
+      this.selectedNode = null;
+      this.checkBoxValues = [];
+      this.checkBoxesVisibility = 'hidden';
+    }
+
+  }
+
+  download() {
     this.$server!.addNodesAndEdges(
-      // @ts-ignore
-      JSON.stringify(this.network.body.data.nodes._data),
-      // @ts-ignore
-      JSON.stringify(this.network.body.data.edges._data),
+        // @ts-ignore
+        JSON.stringify(this.network.body.data.nodes._data),
+        // @ts-ignore
+        JSON.stringify(this.network.body.data.edges._data),
     );
   };
 
-  createUpload(){
-    let item = new Upload();
-
-    item.nodrop = true;
-
-    item.i18n.addFiles.many = 'Load scheme from XML';
-
-    item.i18n.addFiles.one = 'Load scheme from XML';
-
-    item.headers = '{"Content-Type": "application/xml"}'
-
-    item.target = 'http://localhost:8080/count'
-    return item;
-  }
-
-  itemSelected(e: MenuBarItemSelectedEvent) {
-    this.selectedItem = e.detail.value;
-  }
-
-  allNodesIsTypedAs(nodeType: any){
+  allNodesIsTypedAs(nodeType: any) {
     // @ts-ignore
     let array = this.network.getSelectedNodes().filter(node => this.network.body.nodes[node].options.type != nodeType);
     return array.length == 0;
   }
 
-  init(element: any, edges: any, nodes: any) {
+  getTree(anchors: string, knots: string, ties: string) {
 
-    this.getNodesAndEdges(edges, nodes);
+    this.getKnots(knots);
+    this.getAnchors(anchors);
+    this.getTies(ties);
 
-    const data = {
-      nodes: this.nodes,
-      edges: this.edges,
-    };
-    const options = {
-      height: '500',
-      width: '100%',
-      interaction: {
-        keyboard: true,
-        multiselect: true
-      }
-    };
-    this.network = new Network(
-      this.shadowRoot!.getElementById("customId")!,
-      data,
-      options
-    );
+    this.edgeDataSet.add(this.edgeList)
 
     this.initEvents();
 
   }
 
-  getTree(anchors: string, attributes: string, knots: string, ties: string, edges: string){
-
-    this.fillAnchorList(anchors);
-    this.fillKnotList(knots);
-    this.fillTieList(ties);
-    this.fillAttributeList(attributes);
-    this.fillEdgeList(edges);
-
-    this.initEvents();
-
-  }
-
-  fillAnchorList(anchors: string){
+  getAnchors(anchors: string) {
     this.anchorList = JSON.parse(anchors);
     // @ts-ignore
-    this.anchorList = this.anchorList.map(node => this.fillAnchor(node));
+    this.anchorList = this.anchorList.map(node => this.parseAnchor(node));
     this.nodeDataSet.add(this.anchorList);
-  }
-  fillAnchor(anchor: object){
     // @ts-ignore
-    if(anchor['id'] == null){
-      // @ts-ignore
-      anchor['id'] = anchor['mnemonic'];
+    this.nodeDataSet.add(this.attributeList)
+  }
+  parseAnchor(anchor: object | any) {
+
+    anchor = this.parseNodeMainData(anchor);
+    anchor = this.parseNodeLayout(anchor);
+    anchor = this.fillAnchorFigure(anchor);
+
+    this.getAttributes(anchor);
+
+    return anchor;
+  }
+
+  getAttributes(anchor: object | any) {
+    for (let attributeIndex in anchor['attribute']) {
+      let attribute = anchor['attribute'][attributeIndex];
+      attribute = this.parseAttribute(attribute, anchor);
+      this.fillEdge(anchor['id'], attribute['id']);
+      this.attributeList.push(attribute);
+    }
+  }
+  parseAttribute(attribute: object | any, anchor: object | any) {
+
+    attribute = this.parseNodeMainData(attribute, anchor);
+    attribute = this.parseNodeLayout(attribute, anchor);
+    attribute = this.fillAttributeFigure(attribute);
+
+    this.getKnot(attribute);
+
+    return attribute;
+  }
+  getKnot(attribute: object | any) {
+    if (attribute['knotRange'] != null) {
+      this.fillEdge(attribute['id'], attribute['knotRange']);
+    }
+  }
+
+  getKnots(knots: string) {
+    this.knotList = JSON.parse(knots);
+    // @ts-ignore
+    this.knotList = this.knotList.map(node => this.parseKnot(node));
+    this.nodeDataSet.add(this.knotList)
+  }
+  parseKnot(knot: object | any) {
+    knot = this.parseNodeMainData(knot);
+    knot = this.parseNodeLayout(knot);
+    knot = this.fillKnotFigure(knot);
+
+    return knot;
+  }
+
+  getTies(ties: string) {
+    this.tieList = JSON.parse(ties);
+    // @ts-ignore
+    this.tieList = this.tieList.map(node => this.parseTie(node));
+    this.nodeDataSet.add(this.tieList)
+  }
+  parseTie(tie: object | any) {
+    tie = this.parseNodeMainData(tie);
+    tie = this.parseNodeLayout(tie);
+    tie = this.fillTieFigure(tie);
+
+    this.getConnections(tie);
+
+    return tie;
+  }
+  getConnections(tie: object | any) {
+    for (let anchorIndex in tie['anchorRole']) {
+      let anchorRole = tie['anchorRole'][anchorIndex];
+      this.fillEdge(tie['id'], anchorRole['type']);
+    }
+    if (tie['knotRole'] != null) {
+      let knotRole = tie['knotRole'];
+      this.fillEdge(tie['id'], knotRole['type']);
+    }
+  }
+
+  fillEdge(idFrom: string, idTo: string) {
+    let edge = {
+      'from': idFrom,
+      'to': idTo,
+      'color': {
+        'color': "#000000"
+      },
+      'length': 200
+
     }
     // @ts-ignore
-    anchor["color"] = {
+    this.edgeList.push(edge)
+    return edge;
+  }
+
+  parseNodeMainData(node: object | any, parentNode?: object | any) {
+    if (node['mnemonic'] == null) {
+      node['id'] = this.lastId.toString();
+      node['_id'] = null;
+      this.lastId++;
+    } else {
+
+      if (parentNode != null) {
+        node['id'] = parentNode['mnemonic'] + "_" + node['mnemonic'];
+      } else {
+        node['id'] = node['mnemonic']
+      }
+
+      node['_id'] = node['id'];
+    }
+    node['label'] = node['descriptor'];
+    return node;
+  }
+  parseNodeLayout(node: object | any, motherNode?: object | any) {
+    if(motherNode != null && motherNode['layout'] != null){
+      node['fixed'] = false;
+      node['x'] = motherNode['layout']["x"] * 1.5 + Math.random() * 200;
+      node['y'] = motherNode['layout']["y"] * 1.5 + Math.random() * 200;
+    } else{
+      if (node['layout'] != null) {
+        if (node['layout']["fixed"] === true) {
+          node['fixed'] = node['layout']["fixed"];
+          node['x'] = node['layout']["x"];
+          node['y'] = node['layout']["y"];
+          // @ts-ignore
+          this.fixedNodes.push(node["id"]);
+        }
+      } else {
+        node['fixed'] = false;
+        node['x'] = 700;
+        node['y'] = 700;
+      }
+    }
+
+
+    return node;
+  }
+
+  fillAnchorFigure(node: object | any) {
+    node["color"] = {
       border: "#f66",
       background: "#f66"
     };
-    // @ts-ignore
-    anchor["shape"] = "square";
-    // @ts-ignore
-    if (anchor["fixed"] === true) {
-      // @ts-ignore
-      this.checked.push(anchor["id"]);
-    }
-    return anchor;
+    node['_group'] = node['group'];
+    delete node['group'];
+    node["shape"] = "square";
+    node['type'] = 1;
+    return node;
   }
-  fillKnotList(knots: string){
-    this.knotList = JSON.parse(knots);
-    // @ts-ignore
-    this.knotList = this.knotList.map(node => this.fillKnot(node));
-    this.nodeDataSet.add(this.knotList);
-  }
-  fillKnot(knot: object){
-    // @ts-ignore
-    if(knot['id'] == null){
-      // @ts-ignore
-      knot['id'] = knot['mnemonic'];
-    }
-    // @ts-ignore
-    knot["color"] = {
+  fillAttributeFigure(node: object | any) {
+    node["color"] = {
       border: "#f66",
       background: '#ffffff'
     };
     // @ts-ignore
-    knot["borderWidth"] = 2;
+    node["borderWidth"] = 2;
     // @ts-ignore
-    knot["shape"] = "square";
+    node["shape"] = "dot";
+    node['type'] = 4;
+    if(node['innerColumn'] != null){
+      if (node["innerColumn"].length != 0) {
+        // @ts-ignore
+        this.fabergeNodes.push(node["id"]);
+      }
+    }
+    if (node["timeRange"] != null) {
+      // @ts-ignore
+      this.historicalAttributes.push(node["id"]);
+    }
+    return node;
+  }
+  fillKnotFigure(node: object | any) {
+    node["color"] = {
+      border: "#f66",
+      background: '#ffffff'
+    };
     // @ts-ignore
-    knot["scaling"] =  {
+    node["borderWidth"] = 2;
+    // @ts-ignore
+    node["shape"] = "square";
+    // @ts-ignore
+    node["scaling"] = {
       label: {
         enabled: true,
         min: 50,
         max: 50
       }
     };
-    // @ts-ignore
-    if (knot["fixed"] === true) {
-      // @ts-ignore
-      this.checked.push(knot["id"]);
-    }
-    return knot;
+    node['type'] = 3;
+    // let selectedNodes = this.network.getSelectedNodes();
+    // if(selectedNodes.length != 0){
+    //   node['x'] = this.network.getPositions(selectedNodes[0])[selectedNodes[0]].x;
+    //   node['y'] = this.network.getPositions(selectedNodes[0])[selectedNodes[0]].y;
+    // }
+    return node;
   }
-  fillTieList(ties: string){
-    this.tieList = JSON.parse(ties);
-    // @ts-ignore
-    this.tieList = this.tieList.map(node => this.fillTie(node));
-    this.nodeDataSet.add(this.tieList);
-  }
-  fillTie(tie: object){
-    // @ts-ignore
-    if(tie['id'] == null){
-      // @ts-ignore
-      tie['id'] = tie['mnemonic'];
-    }
-    // @ts-ignore
-    tie["color"] =  {
+  fillTieFigure(node: object | any) {
+    node["color"] = {
       border: "#c0c0c0",
       background: '#c0c0c0'
     };
     // @ts-ignore
-    tie["shape"] = "diamond";
+    node["shape"] = "diamond";
+    node['type'] = 2;
     // @ts-ignore
-    if(tie['isHistorical']){
+    if (node["timeRange"] != null) {
       // @ts-ignore
-      this.historicalTies.push(tie["id"]);
+      this.historicalTies.push(node["id"]);
     }
-    // @ts-ignore
-    if (tie["fixed"] === true) {
-      // @ts-ignore
-      this.checked.push(tie["id"]);
-    }
-    return tie;
-  }
-  fillAttributeList(attributes: string){
-    this.attributeList = JSON.parse(attributes);
-    // @ts-ignore
-    this.attributeList = this.attributeList.map(node => this.fillAttribute(node));
-    this.nodeDataSet.add(this.attributeList);
-  }
-  fillAttribute(attribute: object){
-    // @ts-ignore
-    if(attribute['id'] == null){
-      // @ts-ignore
-      attribute['id'] = attribute['mnemonic'];
-    }
-    // @ts-ignore
-    attribute["color"] = {
-      border: "#f66",
-      background: '#ffffff'
-    };
-    // @ts-ignore
-    attribute["borderWidth"] = 2;
-    // @ts-ignore
-    attribute["shape"] = "dot";
-    // @ts-ignore
-    if(attribute['isHistorical']){
-      // @ts-ignore
-      this.historicalAttributes.push(attribute["id"]);
-    }
-    // @ts-ignore
-    if (attribute["fixed"] === true) {
-      // @ts-ignore
-      this.checked.push(attribute["id"]);
-    }
-    return attribute;
-  }
-  fillEdgeList(edges: string){
-    this.edgeList = JSON.parse(edges);
-    // @ts-ignore
-    this.edgeList = this.edgeList.map(edge => this.fillEdgeO(edge));
-    this.edgeDataSet.add(this.edgeList);
-  }
-  fillEdgeO(edge: object){
-    // @ts-ignore
-    edge['color'] = {'color': "#000000"};
-    return edge;
+    return node;
   }
 
-  fillNetwork(edges: any, nodes: any) {
-
-    this.init('', edges, nodes);
-
-  }
 
   initEvents(){
 
@@ -705,13 +1023,12 @@ export class VisJsComponent extends LitElement {
         ctx.strokeStyle = '#f66';
         ctx.lineWidth = 2;
         ctx.circle(
-          nodePosition[this.historicalAttributes[step]].x,
-          nodePosition[this.historicalAttributes[step]].y,
-          15
+            nodePosition[this.historicalAttributes[step]].x,
+            nodePosition[this.historicalAttributes[step]].y,
+            15
         );
         ctx.stroke();
       }
-
       for (step = 0; step < this.historicalTies.length; step++) {
         nodePosition = this.network.getPositions([this.historicalTies[step]]);
         ctx.strokeStyle = '#ffffff';
@@ -720,90 +1037,94 @@ export class VisJsComponent extends LitElement {
         ctx.stroke();
 
       }
-      for (step = 0; step < this.checked.length; step++) {
-        nodePosition = this.network.getPositions([this.checked[step]]);
+      for (step = 0; step < this.fixedNodes.length; step++) {
+        nodePosition = this.network.getPositions([this.fixedNodes[step]]);
         ctx.strokeStyle = '#000000';
         ctx.lineWidth = 4;
+
         ctx.circle(
-          nodePosition[this.checked[step]].x,
-          nodePosition[this.checked[step]].y,
-          2
+            nodePosition[this.fixedNodes[step]].x,
+            nodePosition[this.fixedNodes[step]].y,
+            2
         );
+
         ctx.stroke();
 
       }
-      for (step = 0; step < this.faberge.length; step++) {
-        nodePosition = this.network.getPositions([this.faberge[step]]);
-        ctx.strokeStyle = '#f66';
+      for (step = 0; step < this.fabergeNodes.length; step++) {
+        nodePosition = this.network.getPositions([this.fabergeNodes[step]]);
+        if(this.selectedNodes.includes(this.fabergeNodes[step])){
+          ctx.strokeStyle = '#2B7CE9'
+          ctx.fillStyle = '#D2E5FF'
+        }
+        else {
+          ctx.strokeStyle = '#f66';
+          ctx.fillStyle='#ffffff'
+        }
         ctx.lineWidth = 2;
         ctx.circle(
-          nodePosition[this.faberge[step]].x + 35,
-          nodePosition[this.faberge[step]].y,
-          25
+            nodePosition[this.fabergeNodes[step]].x + 35,
+            nodePosition[this.fabergeNodes[step]].y,
+            25
         );
-        ctx.fillStyle='#ffffff'
         ctx.fill()
         ctx.stroke();
       }
-
     });
     this.network.on("selectNode", (params) => {
-      this.switchCaseMenuBar(params);
-      this.fillWorkplace(params)
-    });
-    this.network.on("deselectNode", (params) => {
-
-
 
       const selectedNodeId = params.nodes[0];
       // @ts-ignore
+      this.selectedNodes.push(selectedNodeId)
+      this.selectedNode = selectedNodeId;
+      // @ts-ignore
+      const node = this.network.body.nodes[selectedNodeId];
+      console.log(node)
+      this.switchCaseMenuBar(node);
+      this.fillWorkplace(params);
+
+    });
+    this.network.on("deselectNode", (params) => {
+
+      const selectedNodeId = params.nodes[0];
+      // @ts-ignore
+      this.selectedNodes.splice(this.selectedNodes.indexOf(selectedNodeId), 1);
+      // @ts-ignore
       const node = this.network.body.nodes[selectedNodeId];
 
-      if (this.network.getSelectedNodes().length == 1){
-        this.fillItemList(node.options.type);
-      } else if(this.network.getSelectedNodes().length == 0) {
-        this.fillItemList(0);
-      }
-      else if (this.allNodesIsTypedAs(node.options.type)
-        && this.network.getSelectedNodes().length > 1){
-        if(node.options.type == 1){
-          this.fillItemList(7);
-        }
-      } else {
-        this.fillItemList(3);
-      }
+      this.switchCaseMenuBar(node);
 
       this.checkBoxValues = [];
-      this.CheckBoxesVisibility = 'hidden';
+      this.checkBoxesVisibility = 'hidden';
 
       // this.description = "";
       // this.descriptor = "";
       // this.mnemonic = "";
 
       this.mneAndDescriptorVisibility = 'hidden';
-      this.DescriptionVisibility = 'hidden';
+      this.descriptionVisibility = 'hidden';
+
 
 
 
     });
     this.network.on( 'doubleClick', (properties) => {
       const ids = properties.nodes;
-      console.log("SS")
       if (ids.length > 0) {
         // @ts-ignore
         const node = this.network.body.data.nodes._data[ids[0]];
         // @ts-ignore
-        if (this.checked.includes(ids[0])) {
+        if (this.fixedNodes.includes(ids[0])) {
           // @ts-ignore
           node["fixed"] = false;
           // @ts-ignore
           this.network.body.data.nodes.update(node);
           // @ts-ignore
-          const index = this.checked.indexOf(ids[0]);
-          this.checked.splice(index, 1);
+          const index = this.fixedNodes.indexOf(ids[0]);
+          this.fixedNodes.splice(index, 1);
         } else {
           // @ts-ignore
-          this.checked.push(ids[0]);
+          this.fixedNodes.push(ids[0]);
           node["fixed"] = true;
           const pos = this.network.getPositions([ids[0]]);
           node["x"] = pos[ids[0]].x;
@@ -842,11 +1163,22 @@ export class VisJsComponent extends LitElement {
     });
     this.network.on('dragStart', (params) => {
 
-      if(params.nodes.length != 0){
-        this.switchCaseMenuBar(params);
-        this.fillWorkplace(params)
+      const selectedNodeId = params.nodes[0];
+
+      let node = null;
+
+      if(selectedNodeId != null){
+        // @ts-ignore
+        this.selectedNodes.push(selectedNodeId)
+        this.selectedNode = selectedNodeId;
+        // @ts-ignore
+        node = this.network.body.nodes[selectedNodeId];
       }
 
+      if(params.nodes.length != 0){
+        this.switchCaseMenuBar(node);
+        this.fillWorkplace(params)
+      }
 
       const ids = params.nodes;
       if (ids.length > 0) {
@@ -864,7 +1196,7 @@ export class VisJsComponent extends LitElement {
       const ids = properties.nodes;
       if (ids.length > 0) {
         // @ts-ignore
-        if (this.checked.includes(ids[0])) {
+        if (this.fixedNodes.includes(ids[0])) {
           // @ts-ignore
           const node = this.network.body.data.nodes._data[ids[0]];
           node["fixed"] = true;
@@ -878,25 +1210,18 @@ export class VisJsComponent extends LitElement {
     });
   }
 
-  switchCaseMenuBar(properties: any){
-    const selectedNodeId = properties.nodes[0];
-
-    console.log(selectedNodeId);
-
-    // @ts-ignore
-    const node = this.network.body.nodes[selectedNodeId];
-
-    this.selectedNode = selectedNodeId;
+  switchCaseMenuBar(node: any){
 
     if (this.network.getSelectedNodes().length == 1){
       this.fillItemList(node.options.type);
-    } else if (this.allNodesIsTypedAs(node.options.type)
-      && this.network.getSelectedNodes().length > 1){
-
+    } else if(this.network.getSelectedNodes().length == 0) {
+      this.fillItemList(0);
+    }
+    else if (this.allNodesIsTypedAs(node.options.type)
+        && this.network.getSelectedNodes().length > 1){
       if(node.options.type == 1){
         this.fillItemList(7);
       }
-
     } else {
       this.fillItemList(3);
     }
@@ -911,15 +1236,12 @@ export class VisJsComponent extends LitElement {
 
     this.mnemonic = node.options.mnemonic;
     this.descriptor = node.options.label;
-    // this.shadowRoot.getElementById('field').selectionStart;
-
-
-    // this.description = node.options.description;
+    this.description = node.options.description;
 
     this.checkBoxValues = [];
 
-    if(node.options.type != 3 && node.options.type != 1){
-      this.CheckBoxesVisibility = 'visible';
+    if(node.options.type != 3 && node.options.type != 1 && properties.nodes.length == 1){
+      this.checkBoxesVisibility = 'visible';
 
       let connectedNodes = this.network.getConnectedNodes(selectedNodeId);
       for(let id in connectedNodes){
@@ -931,31 +1253,43 @@ export class VisJsComponent extends LitElement {
         }
       }
 
-      if (node.options.type == 5 || node.options.type == 6) {
+      if (node.options.timeRange != null) {
         // @ts-ignore
         this.checkBoxValues.push('0')
       }
 
     } else {
-      this.CheckBoxesVisibility = 'hidden';
+      this.checkBoxesVisibility = 'hidden';
     }
 
 
   }
 
   fillItemList(nodeType: any){
+
     switch (nodeType){
       case 0: {
         this.mneAndDescriptorVisibility = 'visible';
-        this.DescriptionVisibility = 'visible';
+        this.descriptionVisibility = 'visible';
         this.itemsForAnchorsMenuBar = [
           this.anchorMenuBarItem
         ];
         break;
       }
+      case 7:{
+        this.mneAndDescriptorVisibility = 'hidden';
+        this.descriptionVisibility = 'hidden';
+        this.itemsForAnchorsMenuBar = [
+          this.tieMenuBarItem,
+          this.tieWithAnchorMenuBarItem,
+          this.historicalTieMenuBarItem,
+          this.historicalTieWithAnchorMenuBarItem
+        ];
+        break;
+      }
       case 1: {
         this.mneAndDescriptorVisibility = 'visible';
-        this.DescriptionVisibility = 'visible';
+        this.descriptionVisibility = 'visible';
         this.itemsForAnchorsMenuBar = [
           this.attributeMenuBarItem,
           this.composedAttributeMenuBarItem,
@@ -968,7 +1302,7 @@ export class VisJsComponent extends LitElement {
       case 2:
       case 5: {
         this.mneAndDescriptorVisibility = 'hidden';
-        this.DescriptionVisibility = 'visible';
+        this.descriptionVisibility = 'visible';
         this.itemsForAnchorsMenuBar = [
           this.anchorMenuBarItem
         ];
@@ -978,273 +1312,11 @@ export class VisJsComponent extends LitElement {
       case 4:
       case 6: {
         this.mneAndDescriptorVisibility = 'visible';
-        this.DescriptionVisibility = 'visible';
+        this.descriptionVisibility = 'visible';
         this.itemsForAnchorsMenuBar = [];
         break;
       }
-      case 7:{
-        this.mneAndDescriptorVisibility = 'hidden';
-        this.DescriptionVisibility = 'hidden';
-        this.itemsForAnchorsMenuBar = [
-          this.tieMenuBarItem,
-          this.tieWithAnchorMenuBarItem,
-          this.historicalTieMenuBarItem,
-          this.historicalTieWithAnchorMenuBarItem
-        ];
-        break;
-      }
     }
-  }
-
-  getNodesAndEdges(edges: string, nodes: string){
-    // @ts-ignore
-    this.lastId = Math.max(...JSON.parse(nodes).map(node => node.id));
-
-
-    this.loadedNodes = JSON.parse(nodes);
-    this.historicalAttributes = [];
-    this.historicalTies = [];
-    this.faberge = [];
-
-    this.checked = [];
-
-    let step;
-    for (step = 0; step < this.loadedNodes.length; step++) {
-      this.loadedNodes[step] = this.fillNode(this.loadedNodes[step]);
-    }
-
-    this.nodes = new DataSet(this.loadedNodes);
-
-    this.loadedEdges = JSON.parse(edges);
-    for (step = 0; step < this.loadedEdges.length; step++) {
-      this.loadedEdges[step] = this.fillEdge(this.loadedEdges[step]);
-    }
-
-    this.edges = new DataSet(this.loadedEdges);
-  }
-
-  redraw(element: any, edges: string, nodes: string) {
-
-    this.getNodesAndEdges(edges, nodes);
-
-    // @ts-ignore
-    this.network.body.data.edges.clear();
-    // @ts-ignore
-    this.network.body.data.nodes.clear();
-    // @ts-ignore
-    this.network.body.data.edges.update(
-      this.loadedEdges
-    );
-    // @ts-ignore
-    this.network.body.data.nodes.update(
-      this.loadedNodes
-    );
-
-    this.network.unselectAll();
-  }
-
-  fillEdge(edge: any){
-    edge['color'] = {'color': "#000000"};
-    return edge;
-  }
-
-  fillNode(node: { [x: string]: any; }){
-    if(node['id'] == null){
-      node['id'] = node['mnemonic'];
-    }
-    switch (node["type"]){
-      case 1: {
-        node["color"] = {
-          border: "#f66",
-          background: "#f66"
-        };
-        node["shape"] = "square";
-        break
-      }
-      case 2:{
-        node["color"] =  {
-          border: "#c0c0c0",
-          background: '#c0c0c0'
-        };
-        node["shape"] = "diamond";
-        break
-      }
-      case 3: {
-        node["color"] = {
-          border: "#f66",
-          background: '#ffffff'
-        };
-        node["borderWidth"] = 2;
-        node["shape"] = "square";
-        node["scaling"] =  {
-          label: {
-            enabled: true,
-            min: 50,
-            max: 50
-          }
-        };
-        break
-      }
-      case 4: {
-        node["color"] = {
-          border: "#f66",
-          background: '#ffffff'
-        };
-        node["borderWidth"] = 2;
-        node["shape"] = "dot";
-        break
-      }
-      case 5: {
-        node["color"] = {
-          border: "#c0c0c0",
-          background: '#c0c0c0'
-        };
-        node["borderWidth"] = 2;
-        node["shape"] = "diamond";
-        node["scaling"] =  {
-          label: {
-            enabled: true,
-            min: 50,
-            max: 50
-          }
-        };
-        // @ts-ignore
-        this.historicalTies.push(node["id"])
-        break
-      }
-      case 6: {
-        node["color"] = {
-          border: "#f66",
-          background: '#ffffff'
-        };
-        node["borderWidth"] = 2;
-        node["shape"] = "dot";
-        // @ts-ignore
-        this.historicalAttributes.push(node["id"]);
-        break
-      }
-      case 8: {
-        node["color"] = {
-          border: "#f66",
-          background: '#ffffff'
-        };
-        node["borderWidth"] = 2;
-        node["shape"] = "dot";
-
-        // @ts-ignore
-        this.faberge.push(node["id"]);
-        break
-      }
-    }
-    if (node["fixed"] === true) {
-      // @ts-ignore
-      this.checked.push(node["id"]);
-    }
-    return node;
-  }
-
-  addEdge(newNode: string, newEdge: string){
-
-    let node = JSON.parse(newNode);
-    let edge = JSON.parse(newEdge);
-
-    if (node != null){
-      node = this.fillNode(node);
-    }
-    if (edge != null){
-      edge = this.fillEdge(edge);
-    }
-    try {
-      // @ts-ignore
-      this.network.body.data.nodes.update(node)
-    } catch (err) {
-      console.log(err);
-    }
-    try {
-      // @ts-ignore
-      this.network.body.data.edges.update(edge)
-    } catch (err) {
-      console.log(err);
-    }
-  }
-
-  addNode(nodeType: any, isAnchored: boolean){
-
-    this.lastId = this.lastId + 1;
-    let node = {
-      "id": this.lastId,
-      "label": "Example",
-      "mnemonic": randomBytes(2).toString('hex'),
-      "type": nodeType,
-      "x": 0,
-      "y": 0,
-      "fixed": false
-    }
-
-    let idFrom = this.lastId;
-
-    // @ts-ignore
-    node = this.fillNode(node);
-
-    try {
-      // @ts-ignore
-      this.network.body.data.nodes.update(node)
-    } catch (err) {
-      console.log(err);
-    }
-
-    if (isAnchored){
-      this.lastId = this.lastId + 1;
-      let node = {
-        "id": this.lastId,
-        "label": "AnchorExample",
-        "mnemonic": randomBytes(20).toString('hex'),
-        "type": 1,
-        "x": 0,
-        "y": 0,
-        "fixed": false
-      }
-      let idTo = this.lastId;
-
-      let edge = {
-        "from": idFrom,
-        "to": idTo
-      }
-      // @ts-ignore
-      node = this.fillNode(node);
-      edge = this.fillEdge(edge);
-
-      try {
-        // @ts-ignore
-        this.network.body.data.nodes.update(node);
-        // @ts-ignore
-        this.network.body.data.edges.update(edge);
-      } catch (err) {
-        console.log(err);
-      }
-
-    }
-
-    for (let i = 0; i < this.network.getSelectedNodes().length; i++) {
-      try {
-        let edge = {
-          "from": idFrom,
-          "to": this.network.getSelectedNodes()[i]
-        }
-        edge = this.fillEdge(edge);
-        // @ts-ignore
-        this.network.body.data.edges.update(edge);
-      } catch (err) {
-        console.log(err)
-      }
-    }
-
-    this.network.unselectAll();
-
-    this.selectedNode = null;
-    this.checkBoxValues = [];
-    this.CheckBoxesVisibility = 'hidden';
-
   }
 
   getCoordinates(){
