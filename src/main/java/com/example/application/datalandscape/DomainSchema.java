@@ -21,13 +21,6 @@ public class DomainSchema {
     }
     Schema schema;
 
-    List<VisJsNode> anchorList = new ArrayList<>();
-    List<VisJsNode> attributeList = new ArrayList<>();
-    List<VisJsNode> knotList = new ArrayList<>();
-    List<VisJsNode> tieList = new ArrayList<>();
-
-    List<VisJsEdge> edgeList = new ArrayList<>();
-
     public DomainSchema(InputStream schemaXML) {
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(Schema.class);
