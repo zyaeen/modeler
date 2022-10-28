@@ -75,6 +75,8 @@ export class VisJsComponent extends LitElement {
   @property()
   private edgeList = [];
 
+  private metadataKeys = ["privacy", "capsule", "restatable", "generator", "idempotent", "deletable"]
+
   @property()
   private idMap = {};
   @property()
@@ -1029,6 +1031,24 @@ export class VisJsComponent extends LitElement {
   }
   layoutDataChanged(e: CustomEvent){
 
+    if (this.selectedNode != null) {
+      // @ts-ignore
+      let node = this.network.body.data.nodes._data[this.selectedNode];
+
+      console.log(node)
+
+        if(this.metadataKeys.includes(e.target.name) && node[e.target.name] != e.detail.value){
+          node['metadata'][e.target.name] = e.detail.value;
+          this.nodeDataSet.update([node]);
+          this.activeNode = node;
+        } else if (node[e.target.name] != e.detail.value) {
+          node[e.target.name] = e.detail.value;
+          this.nodeDataSet.update([node]);
+          this.activeNode = node;
+        }
+
+    }
+
   }
   createGridItem(iconName: string, iconRepo: string, id: string) {
 
@@ -1616,7 +1636,7 @@ export class VisJsComponent extends LitElement {
       this.selectedNode = selectedNodeId;
       // @ts-ignore
       const node = this.network.body.nodes[selectedNodeId];
-
+      console.log(node)
       if (this.network.getSelectedNodes().length > 1){
         this.activeNode = null;
       }
@@ -1647,7 +1667,7 @@ export class VisJsComponent extends LitElement {
       this.mneAndDescriptorVisibility = 'none';
       this.descriptionVisibility = 'none';
 
-
+      this.activeNode = null;
 
 
     });
