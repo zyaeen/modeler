@@ -34,9 +34,14 @@ export class VisJsComponent extends LitElement {
 
       }
       [theme="spacing-padding"] {
-        padding: 15px; 
         height: 350px;
         width: 100%;
+        padding-top: 0;
+      }
+      [theme="spacing-xs padding"]{
+        padding-top: 0;
+                height: 350px;
+
       }
       [theme="border-styling"]{
         border-style: solid; 
@@ -47,14 +52,18 @@ export class VisJsComponent extends LitElement {
       }
        #customId {
         padding: 0;
-        height: 62vh;
+        height: 97vh;
         width: 98vw;
         margin: 0;
       }
       #bottomPanel {
-       padding-bottom: 10px; 
-       position: relative;
-       align-items: end;
+        position: absolute; 
+        z-index: 2; 
+        left: 20px;
+        bottom: 10px;
+        width: 98%;
+        height: 400px;
+         background-color: white; 
       }
   }
 `;
@@ -93,10 +102,58 @@ export class VisJsComponent extends LitElement {
   @property()
   private selectedNode = null;
 
+
+
   @property()
-  private activeNode = null;
+  private privacy = "";
+  @property()
+  private timeRange = "";
+  @property()
+  private _id = ""
+  @property()
+  private accessType = ""
+  @property()
+  private deprecated = false
+  @property()
+  private identity = ""
+  @property()
+  private inheritPerm = ""
+  @property()
+  private capsule = ""
+  @property()
+  private generator = false
+  @property()
+  private idempotent = false
+  @property()
+  private restatable = false
+  @property()
+  private deletable = false
+  @property()
+  private skip = false
+  @property()
+  private dataRange = ""
+  @property()
+  private included = false
+  @property()
+  private columnName = ""
+  @property()
+  private nullable = false;
+  @property()
+  private restrictedAccess = false
+  @property()
+  private _group = ""
+  @property()
+  private knotRole = ""
+  @property()
+  private knotRange = ""
+  @property()
+  private transactional = false;
+
 
   private scale = 1;
+
+  @property()
+  private pinAll = false;
 
   private anchorMenuBarItem = {id: 1, component: this.createItem('anchor-add', 'lean-di-icons', '1')};
   private attributeMenuBarItem = {id: 2, component: this.createItem('attribute-add', 'lean-di-icons', '2')}
@@ -111,6 +168,7 @@ export class VisJsComponent extends LitElement {
   public itemsForAnchorsMenuBar = [this.anchorMenuBarItem];
   @state()
   private itemsForZoomAndSearchMenuBar = [
+    {id: 0, component: this.createItem('pin', 'vaadin', '4')},
     {id: 1, component: this.createItem('search-plus', 'vaadin', '4')},
     {id: 2, component: this.createItem('search-minus', 'vaadin', '5')},
     {id: 3, component: this.createItem('search', 'vaadin', '6'), children: [{ component: this.createSearchTextBox()}] },
@@ -125,6 +183,8 @@ export class VisJsComponent extends LitElement {
   private fabergeNodes = [];
   @state()
   private fixedNodes = [];
+  @state()
+  private transAnchors = [];
 
   @property()
   private network!: Network;
@@ -151,33 +211,31 @@ export class VisJsComponent extends LitElement {
 
   render() {
     return html`
-      <div style="position: absolute; z-index: 1; background-color: transparent;">
-        <vaadin-horizontal-layout style="width: 100%;">
-          <vaadin-vertical-layout style="width: 50vw">
+      <div style="position: absolute; z-index: 1; background-color: transparent; left: 20px">
             <vaadin-menu-bar
                 .items="${this.itemsForAnchorsMenuBar}"
                 theme="icon"
                 style=" background-color: hsla(0, 0%, 100%, 0.3);"
             >
-            </vaadin-menu-bar>
-          </vaadin-vertical-layout>
-          <vaadin-vertical-layout style="width: 48vw; align-items: flex-end">
+            </vaadin-menu-bar>  
+      </div>
+      <div style="position: absolute; z-index: 1; background-color: transparent; right: 20px">
             <vaadin-menu-bar
                 .items="${this.itemsForZoomAndSearchMenuBar}"
                 theme="icon"
                 style=" background-color: hsla(0, 0%, 100%, 0.3);"
             >
             </vaadin-menu-bar>
-          </vaadin-vertical-layout>
-        </vaadin-horizontal-layout>
       </div>
       <div id="customId"></div>
-      <div id="bottomPanel" theme="border-styling">
+      <div id="bottomPanel" 
+           theme="border-styling" 
+           style="display: ${this.mneAndDescriptorVisibility == 'none' && this.descriptionVisibility == 'none' ? 'none' : 'flex'};"
+      >
 
-        <vaadin-horizontal-layout theme="spacing-xs padding">
+        <vaadin-horizontal-layout theme="spacing-xs padding" style="width: 100%; margin-top: 15px;">
 
-          <div style="width: 15%">
-            <vaadin-vertical-layout theme="spacing-padding">
+            <vaadin-vertical-layout theme="spacing-xs padding" style="width: 15%;">
               <vaadin-text-field label="Мнемоник"
                                  class="text-field-width"
                                  value="${this.mnemonic}"
@@ -195,28 +253,27 @@ export class VisJsComponent extends LitElement {
               <vaadin-text-area label="Описание"
                                 class="text-field-width"
                                 value="${this.description}"
-                                style="display: ${this.descriptionVisibility}; min-height: 120px; max-height: 120px;"
+                                style="display: ${this.descriptionVisibility}; max-height: 120px;"
                                 @value-changed="${this.descriptionChanged}"
                                 caret="20"
               />
               </vaadin-text-area>
             </vaadin-vertical-layout>
-          </div>
 
 
-          <vaadin-horizontal-layout style="width: 85%; display: ${this.attributeLayout}" theme="spacing-xs padding" style="">
+          <vaadin-horizontal-layout style="width: 85%; display: ${this.attributeLayout}" theme="spacing-xs padding">
 
 
             <vaadin-vertical-layout theme="spacing-xs padding">
               <vaadin-text-field label="TimeRange" name="timeRange"
                                  class="text-field-width"
-                                 value="${this.activeNode != null && this.activeNode.timeRange ? this.activeNode.timeRange : "" }"
+                                 value="${this.timeRange}"
                                  @value-changed="${this.layoutDataChanged}"
               />
               </vaadin-text-field>
               <vaadin-text-field label="KnotRange" name="knotRange"
                                  class="text-field-width"
-                                 value="${this.activeNode != null && this.activeNode.knotRange ? this.activeNode.knotRange : "" }"
+                                 value="${this.knotRange}"
                                  @value-changed="${this.layoutDataChanged}"
               />
               </vaadin-text-field>
@@ -241,40 +298,40 @@ export class VisJsComponent extends LitElement {
             <vaadin-vertical-layout theme="spacing-xs padding">
               <vaadin-text-field label="DataRange" name="dataRange"
                                  class="text-field-width"
-                                 value="${this.activeNode != null && this.activeNode.dataRange ? this.activeNode.dataRange : "" }"
+                                 value="${this.dataRange }"
                                  @value-changed="${this.layoutDataChanged}"
               />
               </vaadin-text-field>
               <vaadin-text-field label="Column Name" name="columnName"
                                  class="text-field-width"
-                                 value="${this.activeNode != null && this.activeNode.columnName ? this.activeNode.columnName : "" }"
+                                 value="${this.columnName}"
                                  @value-changed="${this.layoutDataChanged}"
               />
               </vaadin-text-field>
               <br>
               <vaadin-checkbox @checked-changed="${this.layoutDataChanged}"
                                label="Deprecated" name="deprecated"
-                               .checked=${this.activeNode != null && this.activeNode.deprecated != null ? this.activeNode.deprecated : false}
+                               .checked=${this.deprecated}
               >
               </vaadin-checkbox>
               <vaadin-checkbox @checked-changed="${this.layoutDataChanged}"
                                label="Skip" name="skip"
-                               .checked=${this.activeNode != null && this.activeNode.skip != null ? this.activeNode.skip : false}
+                               .checked=${this.skip}
               >
               </vaadin-checkbox>
               <vaadin-checkbox @checked-changed="${this.layoutDataChanged}"
                                label="Nullable" name="nullable"
-                               .checked=${this.activeNode != null && this.activeNode.nullable != null ? this.activeNode.nullable : false}
+                               .checked=${this.nullable}
               >
               </vaadin-checkbox>
               <vaadin-checkbox @checked-changed="${this.layoutDataChanged}"
                                label="Restricted Access"
-                               .checked=${this.activeNode != null && this.activeNode.restrictedAccess != null ? this.activeNode.restrictedAccess : false}
+                               .checked=${this.restrictedAccess}
               >
               </vaadin-checkbox>
               <vaadin-checkbox @checked-changed="${this.layoutDataChanged}"
                                label="Included" name="included"
-                               .checked=${this.activeNode != null && this.activeNode.included != null ? this.activeNode.included : false}
+                               .checked=${this.included}
               >
               </vaadin-checkbox>
             </vaadin-vertical-layout>
@@ -284,35 +341,35 @@ export class VisJsComponent extends LitElement {
             <vaadin-vertical-layout theme="spacing-xs padding">
               <vaadin-text-field label="Privacy" name="privacy"
                                  class="text-field-width"
-                                 value="${this.activeNode != null && this.activeNode.metadata != null  ? this.activeNode.metadata.privacy : "" }"
+                                 value="${this.privacy}"
                                  @value-changed="${this.layoutDataChanged}"
               />
               </vaadin-text-field>
               <vaadin-text-field label="Capsule" name="capsule"
                                  class="text-field-width"
-                                 value="${this.activeNode != null && this.activeNode.metadata != null  ? this.activeNode.metadata.capsule : "" }"
+                                 value="${this.capsule }"
                                  @value-changed="${this.layoutDataChanged}"
               />
               </vaadin-text-field>
               <br>
               <vaadin-checkbox @checked-changed="${this.layoutDataChanged}"
                                label="Restatable" name="restatable"
-                               .checked=${this.activeNode != null && this.activeNode.metadata!= null ? this.activeNode.metadata.restatable : false}
+                               .checked=${this.restatable}
               >
               </vaadin-checkbox>
               <vaadin-checkbox @checked-changed="${this.layoutDataChanged}"
                                label="Generator" name="generator"
-                               .checked=${this.activeNode != null && this.activeNode.metadata != null ? this.activeNode.metadata.generator : false}
+                               .checked=${this.generator}
               >
               </vaadin-checkbox>
               <vaadin-checkbox @checked-changed="${this.layoutDataChanged}"
                                label="Idempotent" name="idempotent"
-                               .checked=${this.activeNode != null && this.activeNode.metadata != null ? this.activeNode.metadata.included : false}
+                               .checked=${this.idempotent}
               >
               </vaadin-checkbox>
               <vaadin-checkbox @checked-changed="${this.layoutDataChanged}"
                                label="Deletable" name="deletable"
-                               .checked=${this.activeNode != null && this.activeNode.metadata != null ? this.activeNode.metadata.deletable : false}
+                               .checked=${this.deletable}
               >
               </vaadin-checkbox>
             </vaadin-vertical-layout>
@@ -340,19 +397,19 @@ export class VisJsComponent extends LitElement {
             <vaadin-vertical-layout theme="spacing-xs padding">
               <vaadin-text-field label="Id" name="_id"
                                  class="text-field-width"
-                                 value="${this.activeNode != null ? this.activeNode._id : "" }"
+                                 value="${this._id }"
                                  @value-changed="${this.layoutDataChanged}"
               />
               </vaadin-text-field>
               <vaadin-text-field label="Identity" name="identity"
                                  class="text-field-width"
-                                 value="${this.activeNode != null ? this.activeNode.identity : "" }"
+                                 value="${this.identity}"
                                  @value-changed="${this.layoutDataChanged}"
               />
               </vaadin-text-field>
               <vaadin-text-field label="InheritPermission" name="inheritPerm"
                                  class="text-field-width"
-                                 value="${this.activeNode != null ? this.activeNode.inheritPerm : "" }"
+                                 value="${this.inheritPerm }"
                                  @value-changed="${this.layoutDataChanged}"
               />
               </vaadin-text-field>
@@ -362,25 +419,30 @@ export class VisJsComponent extends LitElement {
             <vaadin-vertical-layout theme="spacing-xs padding">
               <vaadin-text-field label="Group" name="_group"
                                  class="text-field-width"
-                                 value="${this.activeNode != null && this.activeNode._group != null && this.activeNode._group.length != 0 && this.activeNode.type == 1 ? this.activeNode._group[0].id : "" }"
+                                 value="${this._group }"
                                  @value-changed="${this.layoutDataChanged}"
               />
               </vaadin-text-field>
               <vaadin-text-field label="Access Type" name="accessType"
                                  class="text-field-width"
-                                 value="${this.activeNode != null ? this.activeNode.accessType : "" }"
+                                 value="${this.accessType }"
                                  @value-changed="${this.layoutDataChanged}"
               />
               </vaadin-text-field>
               <br>
               <vaadin-checkbox @checked-changed="${this.layoutDataChanged}"
                                label="Deprecated" name="deprecated"
-                               .checked=${this.activeNode != null && this.activeNode.deprecated != null ? this.activeNode.deprecated : false}
+                               .checked=${this.deprecated}
               >
               </vaadin-checkbox>
               <vaadin-checkbox @checked-changed="${this.layoutDataChanged}"
                                label="Skip" name="skip"
-                               .checked=${this.activeNode != null && this.activeNode.skip != null ? this.activeNode.skip : false}
+                               .checked=${this.skip}
+              >
+              </vaadin-checkbox>
+              <vaadin-checkbox @checked-changed="${this.layoutDataChanged}"
+                               label="Transactional" name="transactional"
+                               .checked=${this.transactional}
               >
               </vaadin-checkbox>
             </vaadin-vertical-layout>
@@ -390,35 +452,35 @@ export class VisJsComponent extends LitElement {
             <vaadin-vertical-layout theme="spacing-xs padding">
               <vaadin-text-field label="Privacy" name="privacy"
                                  class="text-field-width"
-                                 value="${this.activeNode != null && this.activeNode.metadata != null  ? this.activeNode.metadata.privacy : "" }"
+                                 value="${this.privacy }"
                                  @value-changed="${this.layoutDataChanged}"
               />
               </vaadin-text-field>
               <vaadin-text-field label="Capsule" name="capsule"
                                  class="text-field-width"
-                                 value="${this.activeNode != null && this.activeNode.metadata ? this.activeNode.metadata.capsule : "" }"
+                                 value="${this.capsule }"
                                  @value-changed="${this.layoutDataChanged}"
               />
               </vaadin-text-field>
               <br>
               <vaadin-checkbox @checked-changed="${this.layoutDataChanged}"
                                label="Restatable" name="restatable"
-                               .checked=${this.activeNode != null && this.activeNode.metadata!= null ? this.activeNode.metadata.restatable : false}
+                               .checked=${this.restatable}
               >
               </vaadin-checkbox>
               <vaadin-checkbox @checked-changed="${this.layoutDataChanged}"
                                label="Generator" name="generator"
-                               .checked=${this.activeNode != null && this.activeNode.metadata != null ? this.activeNode.metadata.generator : false}
+                               .checked=${this.generator}
               >
               </vaadin-checkbox>
               <vaadin-checkbox @checked-changed="${this.layoutDataChanged}"
                                label="Idempotent" name="idempotent"
-                               .checked=${this.activeNode != null && this.activeNode.metadata != null ? this.activeNode.metadata.included : false}
+                               .checked=${this.idempotent}
               >
               </vaadin-checkbox>
               <vaadin-checkbox @checked-changed="${this.layoutDataChanged}"
                                label="Deletable" name="deletable"
-                               .checked=${this.activeNode != null && this.activeNode.metadata != null ? this.activeNode.metadata.deletable : false}
+                               .checked=${this.deletable}
               >
               </vaadin-checkbox>
             </vaadin-vertical-layout>
@@ -449,67 +511,64 @@ export class VisJsComponent extends LitElement {
             <vaadin-vertical-layout theme="spacing-xs padding">
               <vaadin-text-field label="DataRange" name="dataRange"
                                  class="text-field-width"
-                                 value="${this.activeNode != null ? this.activeNode.dataRange : "" }"
+                                 value="${this.dataRange }"
                                  @value-changed="${this.layoutDataChanged}"
               />
               </vaadin-text-field>
               <vaadin-text-field label="Identity" name="identity"
                                  class="text-field-width"
-                                 value="${this.activeNode != null ? this.activeNode.identity : "" }"
+                                 value="${this.identity}"
                                  @value-changed="${this.layoutDataChanged}"
               />
               </vaadin-text-field>
-            </vaadin-vertical-layout>
-
-
-            <vaadin-vertical-layout theme="spacing-xs padding">
               <br>
               <vaadin-checkbox @checked-changed="${this.layoutDataChanged}"
                                label="Deprecated" name="deprecated"
-                               .checked=${this.activeNode != null && this.activeNode.deprecated != null ? this.activeNode.deprecated : false}
+                               .checked=${this.deprecated}
               >
               </vaadin-checkbox>
               <vaadin-checkbox @checked-changed="${this.layoutDataChanged}"
                                label="Skip" name="skip"
-                               .checked=${this.activeNode != null && this.activeNode.skip != null ? this.activeNode.skip : false}
+                               .checked=${this.skip}
               >
               </vaadin-checkbox>
             </vaadin-vertical-layout>
 
+            
 
 
             <vaadin-vertical-layout theme="spacing-xs padding">
               <vaadin-text-field label="Privacy" name="privacy"
                                  class="text-field-width"
-                                 value="${this.activeNode != null && this.activeNode.metadata ? this.activeNode.metadata.privacy : "" }"
+                                 value="${this.privacy }"
                                  @value-changed="${this.layoutDataChanged}"
               />
               </vaadin-text-field>
               <vaadin-text-field label="Capsule" name="capsule"
                                  class="text-field-width"
-                                 value="${this.activeNode != null && this.activeNode.metadata ? this.activeNode.metadata.capsule : "" }"
+                                 value="${this.capsule }"
                                  @value-changed="${this.layoutDataChanged}"
               />
               </vaadin-text-field>
               <br>
               <vaadin-checkbox @checked-changed="${this.layoutDataChanged}"
                                label="Restatable" name="restatable"
-                               .checked=${this.activeNode != null && this.activeNode.metadata!= null ? this.activeNode.metadata.restatable : false}
+                               .checked=${this.restatable}
               >
               </vaadin-checkbox>
               <vaadin-checkbox @checked-changed="${this.layoutDataChanged}"
                                label="Generator" name="generator"
-                               .checked=${this.activeNode != null && this.activeNode.metadata != null ? this.activeNode.metadata.generator : false}
+                               .checked=${this.generator}
               >
               </vaadin-checkbox>
               <vaadin-checkbox @checked-changed="${this.layoutDataChanged}"
                                label="Idempotent" name="idempotent"
-                               .checked=${this.activeNode != null && this.activeNode.metadata != null ? this.activeNode.metadata.included : false}
+                               .checked=${this.idempotent}
               >
               </vaadin-checkbox>
               <vaadin-checkbox @checked-changed="${this.layoutDataChanged}"
                                label="Deletable" name="deletable"
-                               .checked=${this.activeNode != null && this.activeNode.metadata != null ? this.activeNode.metadata.deletable : false}
+                               .checked=${this.deletable}
               >
               </vaadin-checkbox>
             </vaadin-vertical-layout>
@@ -537,19 +596,20 @@ export class VisJsComponent extends LitElement {
             <vaadin-vertical-layout theme="spacing-xs padding">
               <vaadin-text-field label="TimeRange" name="timeRange"
                                  class="text-field-width"
-                                 value="${this.activeNode != null ? this.activeNode.timeRange : ""}"
+                                 value="${this.timeRange}"
                                  @value-changed="${this.layoutDataChanged}"
               />
               </vaadin-text-field>
               <vaadin-text-field label="KnotRole" name="knotRole"
                                  class="text-field-width"
-                                 value="${this.activeNode != null && this.activeNode.knotRole != null && this.activeNode.type == 2 ? this.activeNode.knotRole.type : "" }"
+                                 value="${this.knotRole}"
                                  @value-changed="${this.layoutDataChanged}"
               />
               </vaadin-text-field>
               <vaadin-checkbox-group
                   .value="${this.checkBoxValues}"
                   @value-changed="${this.checkBoxChanged}"
+                  style="margin-bottom: 0; padding-bottom: 0"
               >
                 <br>
                 <vaadin-checkbox label="Исторический"
@@ -562,57 +622,52 @@ export class VisJsComponent extends LitElement {
                                  value="1"
                 >
                 </vaadin-checkbox>
-                <vaadin-checkbox-group>
-            </vaadin-vertical-layout>
-
-
-            <vaadin-vertical-layout theme="spacing-xs padding">
-              <br>
+                </vaadin-checkbox-group>
               <vaadin-checkbox @checked-changed="${this.layoutDataChanged}"
                                label="Deprecated" name="deprecated"
-                               .checked=${this.activeNode != null && this.activeNode.deprecated != null ? this.activeNode.deprecated : false}
+                               .checked=${this.deprecated}
               >
               </vaadin-checkbox>
               <vaadin-checkbox @checked-changed="${this.layoutDataChanged}"
                                label="Skip" name="skip"
-                               .checked=${this.activeNode != null && this.activeNode.skip != null ? this.activeNode.skip : false}
+                               .checked=${this.skip}
               >
               </vaadin-checkbox>
             </vaadin-vertical-layout>
-
+            
 
             <vaadin-vertical-layout theme="spacing-xs padding">
               <vaadin-text-field label="Privacy" name="privacy"
                                  class="text-field-width"
-                                 value="${this.activeNode != null && this.activeNode.metadata ? this.activeNode.metadata.privacy : "" }"
+                                 value="${this.privacy }"
                                  @value-changed="${this.layoutDataChanged}"
               />
               </vaadin-text-field>
               <vaadin-text-field label="Capsule" name="capsule"
                                  class="text-field-width"
-                                 value="${this.activeNode != null && this.activeNode.metadata ? this.activeNode.metadata.capsule : "" }"
+                                 value="${this.capsule }"
                                  @value-changed="${this.layoutDataChanged}"
               />
               </vaadin-text-field>
               <br>
               <vaadin-checkbox @checked-changed="${this.layoutDataChanged}"
                                label="Restatable" name="restatable"
-                               .checked=${this.activeNode != null && this.activeNode.metadata!= null ? this.activeNode.metadata.restatable : false}
+                               .checked=${this.restatable}
               >
               </vaadin-checkbox>
               <vaadin-checkbox @checked-changed="${this.layoutDataChanged}"
                                label="Generator" name="generator"
-                               .checked=${this.activeNode != null && this.activeNode.metadata != null ? this.activeNode.metadata.generator : false}
+                               .checked=${this.generator}
               >
               </vaadin-checkbox>
               <vaadin-checkbox @checked-changed="${this.layoutDataChanged}"
                                label="Idempotent" name="idempotent"
-                               .checked=${this.activeNode != null && this.activeNode.metadata != null ? this.activeNode.metadata.included : false}
+                               .checked=${this.idempotent}
               >
               </vaadin-checkbox>
               <vaadin-checkbox @checked-changed="${this.layoutDataChanged}"
                                label="Deletable" name="deletable"
-                               .checked=${this.activeNode != null && this.activeNode.metadata != null ? this.activeNode.metadata.deletable : false}
+                               .checked=${this.deletable}
               >
               </vaadin-checkbox>
             </vaadin-vertical-layout>
@@ -704,48 +759,6 @@ export class VisJsComponent extends LitElement {
             }
             break;
           }
-            // case 3: {
-            //   let checkedNodes = [];
-            //   let focusedNode = null;
-            //   for (let attributeIndex in this.attributeList) {
-            //     // @ts-ignore
-            //     if (this.attributeList[attributeIndex]['mnemonic'] == item.value) {
-            //       // @ts-ignore
-            //       checkedNodes.push(this.attributeList[attributeIndex]['id']);
-            //       focusedNode = this.attributeList[attributeIndex];
-            //       this.attributeList[attributeIndex] = this.setPositions(this.attributeList[attributeIndex]);
-            //     }
-            //   }
-            //   for (let knotIndex in this.knotList) {
-            //     if (this.knotList[knotIndex]['mnemonic'] == item.value) {
-            //       // @ts-ignore
-            //       this.knotList[knotIndex] = this.setPositions(this.knotList[knotIndex]);
-            //       focusedNode = this.knotList[knotIndex];
-            //       checkedNodes.push(this.knotList[knotIndex]['id']);
-            //     }
-            //   }
-            //
-            //   if (focusedNode != null) {
-            //     this.network.selectNodes(checkedNodes);
-            //     this.network.moveTo({
-            //       position: {
-            //         x: focusedNode['x'],
-            //         y: focusedNode['y'],
-            //       }
-            //     });
-            //   }
-            //
-            //
-            //   break;
-            // }
-            // case 4: {
-            //   for (let tieIndex in this.tieList) {
-            //     if (this.tieList[tieIndex]['mnemonic'] == item.value) {
-            //       this.network.selectNodes([this.tieList[tieIndex]['id']]);
-            //       break;
-            //     }
-            //   }
-            // }
         }
       }
       catch (e){
@@ -760,21 +773,21 @@ export class VisJsComponent extends LitElement {
 
   private employeeRenderer: GridColumnBodyLitRenderer<Person> = (person) => {
     return html`
-      <vaadin-horizontal-layout style="align-items: center;" theme="spacing">
-        <vaadin-icon
-            icon='${person.libName}:${person.iconName}'
-        >
-        </vaadin-icon>
-      </vaadin-horizontal-layout>
+        <vaadin-horizontal-layout style="align-items: center;" theme="spacing">
+            <vaadin-icon
+                    icon='${person.libName}:${person.iconName}'
+            >
+            </vaadin-icon>
+        </vaadin-horizontal-layout>
     `;
   };
 
   private statusRenderer: GridColumnBodyLitRenderer<Person> = ({ iconName }) => {
     return html`
-      <vaadin-text-field
-          value="${iconName}"
-          @value-changed="${this.descriptorChanged}"
-      ></vaadin-text-field>
+        <vaadin-text-field
+                value="${iconName}"
+                @value-changed="${this.descriptorChanged}"
+        ></vaadin-text-field>
     `;
   };
 
@@ -806,8 +819,17 @@ export class VisJsComponent extends LitElement {
       interaction: {
         keyboard: true,
         multiselect: true
+      },
+      physics: {
+        enabled: true,
+        stabilization: {
+          enabled: false
+        }
       }
     };
+
+
+
     this.network = new Network(
         this.shadowRoot!.getElementById("customId")!,
         data,
@@ -835,7 +857,7 @@ export class VisJsComponent extends LitElement {
         this.attributeChangeKnotRange(values, node);
         this.tieChangeKnotRange(values, node);
 
-
+        this.fillMetadata(node)
 
         this.checkBoxValues = values;
 
@@ -877,8 +899,6 @@ export class VisJsComponent extends LitElement {
     if(values.includes('1') && node['knotRole'] == null && node['type'] == 2){
       // @ts-ignore
       let knot = this.addKnot();
-
-
 
       node['knotRole'] = {
         description: knot['description'],
@@ -1001,6 +1021,7 @@ export class VisJsComponent extends LitElement {
     }
   }
   mnemonicChanged(e: CustomEvent) {
+
     if (this.selectedNode != null) {
       // @ts-ignore
       let node = this.network.body.data.nodes._data[this.selectedNode];
@@ -1031,23 +1052,126 @@ export class VisJsComponent extends LitElement {
   }
   layoutDataChanged(e: CustomEvent){
 
-    if (this.selectedNode != null) {
+    if(this.selectedNode != null){
+      // @ts-ignore
+      switch (e.target.name) {
+        case 'timeRange' : {
+          this.timeRange = e.detail.value;
+          break;
+        }
+        case 'privacy' : {
+          this.privacy = e.detail.value;
+          break;
+        }
+        case '_id' : {
+          this._id = e.detail.value;
+          break;
+        }
+        case 'accessType' : {
+          this.accessType = e.detail.value;
+          break;
+        }
+        case 'deprecated' : {
+          this.deprecated = e.detail.value;
+          break;
+        }
+        case 'identity' : {
+          this.identity = e.detail.value;
+          break;
+        }
+        case 'inheritPerm' : {
+          this.inheritPerm = e.detail.value;
+          break;
+        }
+        case 'capsule' : {
+          this.capsule = e.detail.value;
+          break;
+        }
+        case 'generator' : {
+          this.generator = e.detail.value;
+          break;
+        }
+        case 'idempotent' : {
+          this.idempotent = e.detail.value;
+          break;
+        }
+        case 'restatable' : {
+          this.restatable = e.detail.value;
+          break;
+        }
+        case 'deletable' : {
+          this.deletable = e.detail.value;
+          break;
+        }
+        case 'skip' : {
+          this.skip = e.detail.value;
+          break;
+        }
+        case 'dataRange' : {
+          this.dataRange = e.detail.value;
+          break;
+        }
+        case 'included' : {
+          this.included = e.detail.value;
+          break;
+        }
+        case 'columnName' : {
+          this.columnName = e.detail.value;
+          break;
+        }
+        case 'nullable' : {
+          this.nullable = e.detail.value;
+          break;
+        }
+        case 'restrictedAccess' : {
+          this.restrictedAccess = e.detail.value;
+          break;
+        }
+        case '_group' : {
+          this._group = e.detail.value;
+          break;
+        }
+        case 'knotRole' : {
+          this.knotRole = e.detail.value;
+          break;
+        }
+        case 'knotRange' : {
+          this.knotRange = e.detail.value;
+          break;
+        }
+        case 'transactional' : {
+          this.transactional = e.detail.value;
+          break;
+        }
+      }
+
       // @ts-ignore
       let node = this.network.body.data.nodes._data[this.selectedNode];
+      let nodePosition = this.network.getPositions([node['id']]);
 
-      console.log(node)
 
-        if(this.metadataKeys.includes(e.target.name) && node[e.target.name] != e.detail.value){
-          node['metadata'][e.target.name] = e.detail.value;
-          this.nodeDataSet.update([node]);
-          this.activeNode = node;
-        } else if (node[e.target.name] != e.detail.value) {
-          node[e.target.name] = e.detail.value;
-          this.nodeDataSet.update([node]);
-          this.activeNode = node;
+      if(this.metadataKeys.includes(e.target.name)){
+        if(node.metadata != null){
+          node.metadata[e.target.name] = e.detail.value;
+        } else {
+          node['metadata'] = {}
+          node.metadata[e.target.name] = e.detail.value;
         }
+      } else if (e.target.name=='_group') {
+        node[e.target.name] = [
+          {
+            id: e.target.value
+          }
+        ]
+      } else {
+        node[e.target.name] = e.detail.value;
+      }
+      node['x'] = nodePosition[node['id']].x;
+      node['y'] = nodePosition[node['id']].y;
+      this.nodeDataSet.update(node)
 
     }
+
 
   }
   createGridItem(iconName: string, iconRepo: string, id: string) {
@@ -1073,6 +1197,32 @@ export class VisJsComponent extends LitElement {
     item.setAttribute('id', String(id))
     item.setAttribute('theme', "icon")
 
+    if (iconName == 'pin') {
+      item.onclick = () => {
+
+        if(this.pinAll){
+
+
+          this.nodeDataSet.forEach(node => {
+            if(!this.fixedNodes.includes(node.id)){
+              this.nodeDataSet.update({id: node.id, fixed: true});
+              this.fixedNodes.push(node.id)
+            }
+          });
+
+          this.pinAll = false;
+        } else {
+          this.nodeDataSet.forEach(node => {
+            if(this.fixedNodes.includes(node.id)){
+              this.nodeDataSet.update({id: node.id, fixed: false});
+              this.fixedNodes.splice(this.fixedNodes.indexOf(node.id), 1);
+            }
+          });
+          this.pinAll = true;
+        }
+
+      };
+    }
     if (iconName == 'search-plus') {
       item.onclick = () => {
         if(this.network.getScale() * 1.3 <= 1.5){
@@ -1489,7 +1639,10 @@ export class VisJsComponent extends LitElement {
         node['y'] = 700;
       }
     }
-
+    if(node['transactional'] != null && node['transactional'] == true){
+      // @ts-ignore
+      this.transAnchors.push(node['id']);
+    }
 
     return node;
   }
@@ -1606,6 +1759,16 @@ export class VisJsComponent extends LitElement {
         );
 
         ctx.stroke();
+      }
+      for (step = 0; step < this.transAnchors.length; step++) {
+        nodePosition = this.network.getPositions([this.transAnchors[step]]);
+        ctx.strokeStyle = '#000000';
+        ctx.font = "30px arial";
+        ctx.fillText(
+            "TX",
+            nodePosition[this.transAnchors[step]].x,
+            nodePosition[this.transAnchors[step]].y - 35,
+        );
 
       }
       for (step = 0; step < this.fabergeNodes.length; step++) {
@@ -1630,18 +1793,19 @@ export class VisJsComponent extends LitElement {
     });
     this.network.on("selectNode", (params) => {
 
+
+
       const selectedNodeId = params.nodes[0];
       // @ts-ignore
       this.selectedNodes.push(selectedNodeId)
       this.selectedNode = selectedNodeId;
       // @ts-ignore
       const node = this.network.body.nodes[selectedNodeId];
-      console.log(node)
-      if (this.network.getSelectedNodes().length > 1){
-        this.activeNode = null;
-      }
-
-      this.activeNode = node.options;
+      // if (this.network.getSelectedNodes().length > 1){
+      //   this.activeNode = null;
+      // }
+      //
+      // this.activeNode = node.options;
 
       this.switchCaseMenuBar(node);
       this.fillWorkplace(params);
@@ -1649,11 +1813,14 @@ export class VisJsComponent extends LitElement {
     });
     this.network.on("deselectNode", (params) => {
 
+
       const selectedNodeId = params.nodes[0];
       // @ts-ignore
       this.selectedNodes.splice(this.selectedNodes.indexOf(selectedNodeId), 1);
       // @ts-ignore
       const node = this.network.body.nodes[selectedNodeId];
+
+      // this.unFillMetadata();
 
       this.switchCaseMenuBar(node);
 
@@ -1667,7 +1834,6 @@ export class VisJsComponent extends LitElement {
       this.mneAndDescriptorVisibility = 'none';
       this.descriptionVisibility = 'none';
 
-      this.activeNode = null;
 
 
     });
@@ -1799,10 +1965,58 @@ export class VisJsComponent extends LitElement {
     }
   }
 
+  fillMetadata(node){
+
+    this.timeRange = node.timeRange != null ? node.timeRange : "";
+    this.privacy = node.metadata != null ? node.metadata.privacy : "";
+    this._id = node._id != null ? node._id : "";
+    this.accessType = node.accessType != null ? node.accessType : "";
+    this.deprecated = node.deprecated != null ? node.deprecated : false;
+    this.identity =  node.identity != null ? node.identity : "";
+    this.inheritPerm = node.inheritPerm != null ? node.inheritPerm : "";
+    this.capsule = node.metadata != null ? node.metadata.capsule : "";
+    this.generator = node.metadata != null && node.metadata.generator != null ? node.metadata.generator : false;
+    this.idempotent = node.metadata != null && node.metadata.idempotent != null ? node.metadata.idempotent : false;
+    this.restatable =  node.metadata != null && node.metadata.restatable != null ? node.metadata.restatable : false;
+    this.deletable = node.metadata != null && node.metadata.deletable != null ? node.metadata.deletable : false;
+    this.skip = node.skip != null ? node.skip : false;
+    this.dataRange = node.dataRange != null ? node.dataRange : "";
+    this.included = node.included != null ? node.included : false;
+    this.columnName = node.columnName != null ? node.columnName : false;
+    this.nullable = node.nullable != null ? node.nullable : false;
+    this.restrictedAccess = node.restrictedAccess != null ? node.restrictedAccess : false;
+    this._group = node._group != null ? (node._group.length != 0 ? node._group[0].id : "") : "";
+    this.knotRole = node.knotRole != null ? node.knotRole.type : "";
+    this.knotRange = node.knotRange != null ? node.knotRange : "";
+    this.transactional = node.transactional;
+  }
+
+  unFillMetadata(){
+    this.timeRange = "";
+    this.privacy = "";
+    this._id = "";
+    this.accessType =  "";
+    this.deprecated =  false;
+    this.identity =  "";
+    this.inheritPerm = "";
+    this.capsule = "";
+    this.generator = false;
+    this.idempotent = false;
+    this.restatable =   false;
+    this.deletable =  false;
+    this.skip = false;
+    this.dataRange = "";
+    this.included = false;
+    this.columnName = "";
+    this.nullable =  false;
+    this.restrictedAccess =  false;
+    this._group = "";
+    this.knotRole = "";
+    this.knotRange =  "";
+  }
+
   fillWorkplace(properties: any){
     const selectedNodeId = properties.nodes[0].toString();
-    // this.$server!.workplaceFillComponent(selectedNodeId);
-
     // @ts-ignore
     const node = this.network.body.nodes[selectedNodeId];
 
@@ -1810,7 +2024,7 @@ export class VisJsComponent extends LitElement {
     this.descriptor = node.options.label;
     this.description = node.options.description;
 
-    this.checkBoxValues = [];
+    this.fillMetadata(node.options);
 
     if(node.options.type != 3 && node.options.type != 1 && properties.nodes.length == 1){
       this.checkBoxesVisibility = 'flex';
