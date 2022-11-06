@@ -1,7 +1,5 @@
 package com.example.application.datalandscape;
 
-import com.example.application.network.VisJsEdge;
-import com.example.application.network.VisJsNode;
 import com.example.application.schema.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,8 +10,6 @@ import jakarta.xml.bind.Unmarshaller;
 
 import java.io.File;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 public class DomainSchema {
     public Schema getSchema() {
@@ -25,7 +21,7 @@ public class DomainSchema {
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(Schema.class);
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            JAXBElement<Schema> e =  (JAXBElement<Schema> )unmarshaller.unmarshal(schemaXML);
+            JAXBElement<Schema> e =  (JAXBElement<Schema>) unmarshaller.unmarshal(schemaXML);
             schema = e.getValue();
         } catch (JAXBException e) {
             throw new RuntimeException(e);

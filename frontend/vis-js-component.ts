@@ -1930,8 +1930,5 @@ export class VisJsComponent extends LitElement {
 }
 
 interface VisJsComponentServerInterface {
-  displayNotification(text: string): void;
   fillComponentRequest(): void;
-  workplaceFillComponent(text: string): void;
-  addNodesAndEdges(stringOfNodes: string, stringOfEdges: string): void;
 }
