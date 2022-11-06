@@ -1,26 +1,17 @@
-import { css, html, LitElement } from 'lit';
-import { customElement, state, property  } from 'lit/decorators';
+import {css, html, LitElement, PropertyValues} from 'lit';
+import {customElement, property, state} from 'lit/decorators';
 import '@vaadin/menu-bar';
-import { MenuBarItem, MenuBarItemSelectedEvent } from '@vaadin/menu-bar';
 import {createTemplate} from "Frontend/getIcons";
 import {Icon} from "@vaadin/icon";
-import {Upload} from "@vaadin/upload";
-import { DataSet, Network } from "vis";
+import {DataSet, Edge, IdType, Network, Node} from "vis";
 import '@vaadin/vertical-layout';
-import {PropertyValues} from "lit";
 import {randomBytes} from "crypto";
-import {columnBodyRenderer, GridColumnBodyLitRenderer} from "@vaadin/grid/lit";
 import {TextField} from "@vaadin/text-field";
-import {TextFieldValueChangedEvent} from "@vaadin/text-field";
-import {CheckboxGroupValueChangedEvent} from "@vaadin/checkbox-group";
 import {CheckboxCheckedChangedEvent} from "@vaadin/checkbox";
 
 const template = createTemplate();
 document.head.appendChild(template.content);
-type Person = {
-  iconName: string;
-  libName: string;
-};
+
 
 @customElement('custom-tag')
 export class VisJsComponent extends LitElement {
@@ -45,13 +36,6 @@ export class VisJsComponent extends LitElement {
                 height: 350px;
 
       }
-      [theme="border-styling"]{
-        border-style: solid; 
-        border-color:  #006AF5; 
-        border-radius: 3px;
-        border-width: 1px;
-        
-      }
        #customId {
         padding: 0;
         height: 97vh;
@@ -65,93 +49,88 @@ export class VisJsComponent extends LitElement {
         bottom: 10px;
         width: 98%;
         height: 400px;
-         background-color: white; 
+        background-color: white; 
+        border-style: solid; 
+        border-color:  #006AF5; 
+        border-radius: 3px;
+        border-width: 1px;
       }
   }
 `;
   }
 
+
   @state()
-  private selectedNodes = [];
+  private selectedNodes : IdType[] = [];
 
   @property()
-  private anchorList = [];
+  private anchorList :Node[] = [];
   @property()
-  private knotList = [];
+  private knotList : Node[] = [];
   @property()
-  private attributeList: object[] = [];
+  private attributeList: Node[] = [];
   @property()
-  private tieList = [];
+  private tieList: Node[] = [];
   @property()
-  private edgeList = [];
+  private edgeList: Edge[] = [];
 
   private metadataKeys = ["privacy", "capsule", "restatable", "generator", "idempotent", "deletable"]
 
   @property()
-  private labelMap = {};
-
+  private nodeDataSet = new DataSet<Node>([]);
   @property()
-  private nodeDataSet = new DataSet([]);
-  @property()
-  private edgeDataSet = new DataSet([]);
+  private edgeDataSet = new DataSet<Edge>([]);
 
   @property()
   private lastId = 1000;
 
   @property()
-  private selectedNode = null;
+  private selectedNode : IdType | null  = null;
 
   @property()
-  private privacy = "";
+  private privacy : string | null = "";
   @property()
-  private _id = ""
+  private timeRange : string | null = "";
   @property()
-  private accessType = ""
+  private _id : string | null= ""
   @property()
-  private deprecated = false
+  private accessType : string | null = ""
   @property()
-  private identity = ""
+  private deprecated : boolean | null = false
   @property()
-  private inheritPerm = ""
+  private identity : string | null = ""
   @property()
-  private capsule = ""
+  private inheritPerm : string | null = ""
   @property()
-  private generator = false
+  private capsule : string | null = ""
   @property()
-  private idempotent = false
+  private generator : boolean | null = false
   @property()
-  private restatable = false
+  private idempotent : boolean | null = false
   @property()
-  private deletable = false
+  private restatable : boolean | null = false
   @property()
-  private skip = false
+  private deletable : boolean | null = false
   @property()
-  private dataRange = ""
+  private skip : boolean | null = false
   @property()
-  private included = false
+  private dataRange : string | null = ""
   @property()
-  private columnName = ""
+  private included : boolean | null = false
   @property()
-  private nullable = false;
+  private columnName : string | null = ""
   @property()
-  private restrictedAccess = false
+  private nullable : boolean | null = false;
   @property()
-  private _group = ""
+  private restrictedAccess : boolean | null = false
   @property()
-  private knotRole = ""
+  private _group : string | null | object = ""
   @property()
-  private knotRange = ""
+  private knotRole : string | null | object = ""
   @property()
-  private timeRange = "";
+  private knotRange : string | null = ""
   @property()
-  private knotRoleChecked = false;
-  @property()
-  private knotRangeChecked = false;
-  @property()
-  private timeRangeChecked = false;
-  @property()
-  private transactional = false;
-
+  private transactional : boolean | null = false;
 
   private scale = 1;
 
@@ -179,15 +158,15 @@ export class VisJsComponent extends LitElement {
   ];
 
   @property()
-  public historicalAttributes = [];
+  public historicalAttributes : string[] = [];
   @state()
-  private historicalTies = [];
+  private historicalTies : string[] = [];
   @state()
-  private fabergeNodes = [];
+  private fabergeNodes : string[] = [];
   @state()
-  private fixedNodes = [];
+  private fixedNodes : string[] = [];
   @state()
-  private transAnchors = [];
+  private transAnchors : string[] = [];
 
   @property()
   private network!: Network;
@@ -195,508 +174,504 @@ export class VisJsComponent extends LitElement {
   private $server?: VisJsComponentServerInterface;
 
   @property()
-  private mnemonic = "";
+  private mnemonic : string | null = "";
   @property()
-  private descriptor = "";
+  private descriptor : string | null = "";
   @property()
-  private description = "";
+  private description : string | null = "";
   @property()
-  private mneAndDescriptorVisibility = 'none';
+  private mneAndDescriptorVisibility : string = 'none';
   @property()
-  private descriptionVisibility = 'none'
-  @property()
-  private checkBoxesVisibility = 'none';
-
+  private descriptionVisibility : string = 'none'
 
   render() {
     return html`
-        <div style="position: absolute; z-index: 1; background-color: transparent; left: 20px">
-            <vaadin-menu-bar
-                    .items="${this.itemsForAnchorsMenuBar}"
-                    theme="icon"
-                    style=" background-color: hsla(0, 0%, 100%, 0.3);"
-            >
-            </vaadin-menu-bar>
-        </div>
-        <div style="position: absolute; z-index: 1; background-color: transparent; right: 20px">
-            <vaadin-menu-bar
-                    .items="${this.itemsForZoomAndSearchMenuBar}"
-                    theme="icon"
-                    style=" background-color: hsla(0, 0%, 100%, 0.3);"
-            >
-            </vaadin-menu-bar>
-        </div>
-        <div id="customId"></div>
-        <div id="bottomPanel"
-             theme="border-styling"
-             style="display: ${this.mneAndDescriptorVisibility == 'none' && this.descriptionVisibility == 'none' ? 'none' : 'flex'};"
+      <div style="position: absolute; z-index: 1; background-color: transparent; left: 20px">
+        <vaadin-menu-bar
+            .items="${this.itemsForAnchorsMenuBar}"
+            theme="icon"
+            style=" background-color: hsla(0, 0%, 100%, 0.3);"
         >
+        </vaadin-menu-bar>
+      </div>
+      <div style="position: absolute; z-index: 1; background-color: transparent; right: 20px">
+        <vaadin-menu-bar
+            .items="${this.itemsForZoomAndSearchMenuBar}"
+            theme="icon"
+            style=" background-color: hsla(0, 0%, 100%, 0.3);"
+        >
+        </vaadin-menu-bar>
+      </div>
+      <div id="customId"></div>
+      <div id="bottomPanel"
+           style="display: ${this.mneAndDescriptorVisibility == 'none' && this.descriptionVisibility == 'none' ? 'none' : 'flex'};"
+      >
 
-            <vaadin-horizontal-layout theme="spacing-xs padding" style="width: 100%; margin-top: 15px;">
+        <vaadin-horizontal-layout theme="spacing-xs padding" style="width: 100%; margin-top: 15px;">
 
-                <vaadin-vertical-layout theme="spacing-xs padding" style="width: 15%;">
-                    <vaadin-text-field label="Мнемоник"
-                                       class="text-field-width"
-                                       value="${this.mnemonic}"
-                                       style="display: ${this.mneAndDescriptorVisibility}"
-                                       @value-changed="${this.mnemonicChanged}"
-                    >
-                    </vaadin-text-field>
-                    <vaadin-text-field label="Дескриптор"
-                                       class="text-field-width"
-                                       value="${this.descriptor}"
-                                       style="display: ${this.mneAndDescriptorVisibility}"
-                                       @value-changed="${this.descriptorChanged}"
-                    >
-                    </vaadin-text-field>
-                    <vaadin-text-area label="Описание"
-                                      class="text-field-width"
-                                      value="${this.description}"
-                                      style="display: ${this.descriptionVisibility}; max-height: 120px;"
-                                      @value-changed="${this.descriptionChanged}"
-                                      caret="20"
-                    >
-                    </vaadin-text-area>
+          <vaadin-vertical-layout theme="spacing-xs padding" style="width: 15%;">
+            <vaadin-text-field label="Мнемоник"
+                               class="text-field-width"
+                               value="${this.mnemonic}"
+                               style="display: ${this.mneAndDescriptorVisibility}"
+                               @value-changed="${this.mnemonicChanged}"
+            >
+            </vaadin-text-field>
+            <vaadin-text-field label="Дескриптор"
+                               class="text-field-width"
+                               value="${this.descriptor}"
+                               style="display: ${this.mneAndDescriptorVisibility}"
+                               @value-changed="${this.descriptorChanged}"
+            >
+            </vaadin-text-field>
+            <vaadin-text-area label="Описание"
+                              class="text-field-width"
+                              value="${this.description}"
+                              style="display: ${this.descriptionVisibility}; max-height: 120px;"
+                              @value-changed="${this.descriptionChanged}"
+                              caret="20"
+            >
+            </vaadin-text-area>
+          </vaadin-vertical-layout>
+
+
+          <vaadin-horizontal-layout style="width: 85%; display: ${this.attributeLayout}" theme="spacing-xs padding">
+
+
+            <vaadin-vertical-layout theme="spacing-xs padding">
+              <vaadin-combo-box label="TimeRange" name="timeRange"
+                                class="text-field-width"
+                                value="${this.timeRange}"
+                                .items="${['DATETIME', 'BIGINT']}"
+                                @selected-item-changed="${this.comboBoxChanged}"
+              >
+
+              </vaadin-combo-box>
+              <vaadin-text-field label="KnotRange" name="knotRange"
+                                 class="text-field-width"
+                                 value="${this.knotRange}"
+                                 readonly
+              >
+              </vaadin-text-field>
+              <br>
+              <vaadin-checkbox @checked-changed="${ this.histCheckBoxChanged }"
+                               label="Исторический"
+                               .checked = "${this.timeRange != null && this.timeRange != ""}"
+              >
+              </vaadin-checkbox>
+              <vaadin-checkbox @checked-changed="${ this.knotRangeCheckBoxChanged }"
+                               label="Кнотированный"
+                               .checked = "${this.knotRange != null && this.knotRange != ""}"
+              >
+              </vaadin-checkbox>
+
+            </vaadin-vertical-layout>
+
+
+            <vaadin-vertical-layout theme="spacing-xs padding">
+              <vaadin-text-field label="DataRange" name="dataRange"
+                                 class="text-field-width"
+                                 value="${this.dataRange}"
+                                 @value-changed="${this.layoutDataChanged}"
+              >
+              </vaadin-text-field>
+              <vaadin-text-field label="Column Name" name="columnName"
+                                 class="text-field-width"
+                                 value="${this.columnName}"
+                                 @value-changed="${this.layoutDataChanged}"
+              >
+              </vaadin-text-field>
+              <br>
+              <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
+                               label="Deprecated" name="deprecated"
+                               .checked=${this.deprecated}
+              >
+              </vaadin-checkbox>
+              <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
+                               label="Skip" name="skip"
+                               .checked=${this.skip}
+              >
+              </vaadin-checkbox>
+              <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
+                               label="Nullable" name="nullable"
+                               .checked=${this.nullable}
+              >
+              </vaadin-checkbox>
+              <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
+                               label="Restricted Access"
+                               .checked=${this.restrictedAccess}
+              >
+              </vaadin-checkbox>
+              <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
+                               label="Included" name="included"
+                               .checked=${this.included}
+              >
+              </vaadin-checkbox>
+            </vaadin-vertical-layout>
+
+
+
+            <vaadin-vertical-layout theme="spacing-xs padding">
+              <vaadin-text-field label="Privacy" name="privacy"
+                                 class="text-field-width"
+                                 value="${this.privacy}"
+                                 @value-changed="${this.layoutDataChanged}"
+              >
+              </vaadin-text-field>
+              <vaadin-text-field label="Capsule" name="capsule"
+                                 class="text-field-width"
+                                 value="${this.capsule }"
+                                 @value-changed="${this.layoutDataChanged}"
+              >
+              </vaadin-text-field>
+              <br>
+              <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
+                               label="Restatable" name="restatable"
+                               .checked=${this.restatable}
+              >
+              </vaadin-checkbox>
+              <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
+                               label="Generator" name="generator"
+                               .checked=${this.generator}
+              >
+              </vaadin-checkbox>
+              <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
+                               label="Idempotent" name="idempotent"
+                               .checked=${this.idempotent}
+              >
+              </vaadin-checkbox>
+              <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
+                               label="Deletable" name="deletable"
+                               .checked=${this.deletable}
+              >
+              </vaadin-checkbox>
+            </vaadin-vertical-layout>
+
+
+            <vaadin-vertical-layout style="width: 100%">
+              <vaadin-tabsheet style="width: 100%">
+                <vaadin-tabs theme="equal-width-tabs">
+                  <vaadin-tab>Индексы</vaadin-tab>
+                </vaadin-tabs>
+
+                <vaadin-vertical-layout theme="padding">
+                  <p>"323"</p>
                 </vaadin-vertical-layout>
 
-
-                <vaadin-horizontal-layout style="width: 85%; display: ${this.attributeLayout}" theme="spacing-xs padding">
-
-
-                    <vaadin-vertical-layout theme="spacing-xs padding">
-                      <vaadin-combo-box label="TimeRange" name="timeRange"
-                                         class="text-field-width"
-                                         value="${this.timeRange}"
-                                        .items="${['DATETIME', 'BIGINT']}"
-                                        @selected-item-changed="${this.comboBoxChanged}"
-                      >
-                          
-                      </vaadin-combo-box>
-                      <vaadin-text-field label="KnotRange" name="knotRange"
-                                         class="text-field-width"
-                                         value="${this.knotRange}"
-                                         readonly
-                      >
-                      </vaadin-text-field>
-                      <br>
-                      <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) => this.histCheckBoxChanged(e) }"
-                                       label="Исторический"
-                                       .checked = "${this.timeRangeChecked}"
-                      >
-                      </vaadin-checkbox>
-                      <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) => this.knotRangeCheckBoxChanged(e) }"
-                                       label="Кнотированный"
-                                       .checked = "${this.knotRangeChecked}"
-                      >
-                      </vaadin-checkbox>
-
-                    </vaadin-vertical-layout>
+              </vaadin-tabsheet>
+            </vaadin-vertical-layout>
 
 
-                    <vaadin-vertical-layout theme="spacing-xs padding">
-                        <vaadin-text-field label="DataRange" name="dataRange"
-                                           class="text-field-width"
-                                           value="${this.dataRange }"
-                                           @value-changed="${this.layoutDataChanged}"
-                        >
-                        </vaadin-text-field>
-                        <vaadin-text-field label="Column Name" name="columnName"
-                                           class="text-field-width"
-                                           value="${this.columnName}"
-                                           @value-changed="${this.layoutDataChanged}"
-                        >
-                        </vaadin-text-field>
-                        <br>
-                        <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
-                                         label="Deprecated" name="deprecated"
-                                         .checked=${this.deprecated}
-                        >
-                        </vaadin-checkbox>
-                        <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
-                                         label="Skip" name="skip"
-                                         .checked=${this.skip}
-                        >
-                        </vaadin-checkbox>
-                        <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
-                                         label="Nullable" name="nullable"
-                                         .checked=${this.nullable}
-                        >
-                        </vaadin-checkbox>
-                        <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
-                                         label="Restricted Access"
-                                         .checked=${this.restrictedAccess}
-                        >
-                        </vaadin-checkbox>
-                        <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
-                                         label="Included" name="included"
-                                         .checked=${this.included}
-                        >
-                        </vaadin-checkbox>
-                    </vaadin-vertical-layout>
+          </vaadin-horizontal-layout>
+
+          <vaadin-horizontal-layout style="width: 85%; display: ${this.anchorLayout}" theme="spacing-xs padding">
+
+
+            <vaadin-vertical-layout theme="spacing-xs padding">
+              <vaadin-text-field label="Id" name="_id"
+                                 class="text-field-width"
+                                 value="${this._id }"
+                                 @value-changed="${this.layoutDataChanged}"
+              >
+              </vaadin-text-field>
+              <vaadin-text-field label="Identity" name="identity"
+                                 class="text-field-width"
+                                 value="${this.identity}"
+                                 @value-changed="${this.layoutDataChanged}"
+              >
+              </vaadin-text-field>
+              <vaadin-text-field label="InheritPermission" name="inheritPerm"
+                                 class="text-field-width"
+                                 value="${this.inheritPerm }"
+                                 @value-changed="${this.layoutDataChanged}"
+              >
+              </vaadin-text-field>
+            </vaadin-vertical-layout>
+
+
+            <vaadin-vertical-layout theme="spacing-xs padding">
+              <vaadin-text-field label="Group" name="_group"
+                                 class="text-field-width"
+                                 value="${this._group }"
+                                 @value-changed="${this.layoutDataChanged}"
+              >
+              </vaadin-text-field>
+              <vaadin-text-field label="Access Type" name="accessType"
+                                 class="text-field-width"
+                                 value="${this.accessType }"
+                                 @value-changed="${this.layoutDataChanged}"
+              >
+              </vaadin-text-field>
+              <br>
+              <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
+                               label="Deprecated" name="deprecated"
+                               .checked=${this.deprecated}
+              >
+              </vaadin-checkbox>
+              <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
+                               label="Skip" name="skip"
+                               .checked=${this.skip}
+              >
+              </vaadin-checkbox>
+              <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
+                               label="Transactional" name="transactional"
+                               .checked=${this.transactional}
+              >
+              </vaadin-checkbox>
+            </vaadin-vertical-layout>
 
 
 
-                    <vaadin-vertical-layout theme="spacing-xs padding">
-                        <vaadin-text-field label="Privacy" name="privacy"
-                                           class="text-field-width"
-                                           value="${this.privacy}"
-                                           @value-changed="${this.layoutDataChanged}"
-                        >
-                        </vaadin-text-field>
-                        <vaadin-text-field label="Capsule" name="capsule"
-                                           class="text-field-width"
-                                           value="${this.capsule }"
-                                           @value-changed="${this.layoutDataChanged}"
-                        >
-                        </vaadin-text-field>
-                        <br>
-                        <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
-                                         label="Restatable" name="restatable"
-                                         .checked=${this.restatable}
-                        >
-                        </vaadin-checkbox>
-                        <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
-                                         label="Generator" name="generator"
-                                         .checked=${this.generator}
-                        >
-                        </vaadin-checkbox>
-                        <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
-                                         label="Idempotent" name="idempotent"
-                                         .checked=${this.idempotent}
-                        >
-                        </vaadin-checkbox>
-                        <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
-                                         label="Deletable" name="deletable"
-                                         .checked=${this.deletable}
-                        >
-                        </vaadin-checkbox>
-                    </vaadin-vertical-layout>
-
-
-                    <vaadin-vertical-layout style="width: 100%">
-                        <vaadin-tabsheet style="width: 100%">
-                            <vaadin-tabs theme="equal-width-tabs">
-                                <vaadin-tab>Индексы</vaadin-tab>
-                            </vaadin-tabs>
-
-                            <vaadin-vertical-layout theme="padding">
-                                <p>"323"</p>
-                            </vaadin-vertical-layout>
-
-                        </vaadin-tabsheet>
-                    </vaadin-vertical-layout>
-
-
-                </vaadin-horizontal-layout>
-
-                <vaadin-horizontal-layout style="width: 85%; display: ${this.anchorLayout}" theme="spacing-xs padding">
-
-
-                    <vaadin-vertical-layout theme="spacing-xs padding">
-                        <vaadin-text-field label="Id" name="_id"
-                                           class="text-field-width"
-                                           value="${this._id }"
-                                           @value-changed="${this.layoutDataChanged}"
-                        >
-                        </vaadin-text-field>
-                        <vaadin-text-field label="Identity" name="identity"
-                                           class="text-field-width"
-                                           value="${this.identity}"
-                                           @value-changed="${this.layoutDataChanged}"
-                        >
-                        </vaadin-text-field>
-                        <vaadin-text-field label="InheritPermission" name="inheritPerm"
-                                           class="text-field-width"
-                                           value="${this.inheritPerm }"
-                                           @value-changed="${this.layoutDataChanged}"
-                        >
-                        </vaadin-text-field>
-                    </vaadin-vertical-layout>
-
-
-                    <vaadin-vertical-layout theme="spacing-xs padding">
-                        <vaadin-text-field label="Group" name="_group"
-                                           class="text-field-width"
-                                           value="${this._group }"
-                                           @value-changed="${this.layoutDataChanged}"
-                        >
-                        </vaadin-text-field>
-                        <vaadin-text-field label="Access Type" name="accessType"
-                                           class="text-field-width"
-                                           value="${this.accessType }"
-                                           @value-changed="${this.layoutDataChanged}"
-                        >
-                        </vaadin-text-field>
-                        <br>
-                        <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
-                                         label="Deprecated" name="deprecated"
-                                         .checked=${this.deprecated}
-                        >
-                        </vaadin-checkbox>
-                        <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
-                                         label="Skip" name="skip"
-                                         .checked=${this.skip}
-                        >
-                        </vaadin-checkbox>
-                        <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
-                                         label="Transactional" name="transactional"
-                                         .checked=${this.transactional}
-                        >
-                        </vaadin-checkbox>
-                    </vaadin-vertical-layout>
+            <vaadin-vertical-layout theme="spacing-xs padding">
+              <vaadin-text-field label="Privacy" name="privacy"
+                                 class="text-field-width"
+                                 value="${this.privacy }"
+                                 @value-changed="${this.layoutDataChanged}"
+              >
+              </vaadin-text-field>
+              <vaadin-text-field label="Capsule" name="capsule"
+                                 class="text-field-width"
+                                 value="${this.capsule }"
+                                 @value-changed="${this.layoutDataChanged}"
+              >
+              </vaadin-text-field>
+              <br>
+              <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
+                               label="Restatable" name="restatable"
+                               .checked=${this.restatable}
+              >
+              </vaadin-checkbox>
+              <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
+                               label="Generator" name="generator"
+                               .checked=${this.generator}
+              >
+              </vaadin-checkbox>
+              <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
+                               label="Idempotent" name="idempotent"
+                               .checked=${this.idempotent}
+              >
+              </vaadin-checkbox>
+              <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
+                               label="Deletable" name="deletable"
+                               .checked=${this.deletable}
+              >
+              </vaadin-checkbox>
+            </vaadin-vertical-layout>
 
 
 
-                    <vaadin-vertical-layout theme="spacing-xs padding">
-                        <vaadin-text-field label="Privacy" name="privacy"
-                                           class="text-field-width"
-                                           value="${this.privacy }"
-                                           @value-changed="${this.layoutDataChanged}"
-                        >
-                        </vaadin-text-field>
-                        <vaadin-text-field label="Capsule" name="capsule"
-                                           class="text-field-width"
-                                           value="${this.capsule }"
-                                           @value-changed="${this.layoutDataChanged}"
-                        >
-                        </vaadin-text-field>
-                        <br>
-                        <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
-                                         label="Restatable" name="restatable"
-                                         .checked=${this.restatable}
-                        >
-                        </vaadin-checkbox>
-                        <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
-                                         label="Generator" name="generator"
-                                         .checked=${this.generator}
-                        >
-                        </vaadin-checkbox>
-                        <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
-                                         label="Idempotent" name="idempotent"
-                                         .checked=${this.idempotent}
-                        >
-                        </vaadin-checkbox>
-                        <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
-                                         label="Deletable" name="deletable"
-                                         .checked=${this.deletable}
-                        >
-                        </vaadin-checkbox>
-                    </vaadin-vertical-layout>
+            <vaadin-vertical-layout style="width: 100%">
+              <vaadin-tabsheet style="width: 100%">
+                <vaadin-tabs theme="equal-width-tabs">
+                  <vaadin-tab>Динамика</vaadin-tab>
+                  <vaadin-tab>Статика</vaadin-tab>
+                  <vaadin-tab>Индексы</vaadin-tab>
+                </vaadin-tabs>
+
+                <vaadin-vertical-layout theme="padding">
+                  <p>"323"</p>
+                </vaadin-vertical-layout>
+
+              </vaadin-tabsheet>
+            </vaadin-vertical-layout>
 
 
+          </vaadin-horizontal-layout>
 
-                    <vaadin-vertical-layout style="width: 100%">
-                        <vaadin-tabsheet style="width: 100%">
-                            <vaadin-tabs theme="equal-width-tabs">
-                                <vaadin-tab>Динамика</vaadin-tab>
-                                <vaadin-tab>Статика</vaadin-tab>
-                                <vaadin-tab>Индексы</vaadin-tab>
-                            </vaadin-tabs>
-
-                            <vaadin-vertical-layout theme="padding">
-                                <p>"323"</p>
-                            </vaadin-vertical-layout>
-
-                        </vaadin-tabsheet>
-                    </vaadin-vertical-layout>
+          <vaadin-horizontal-layout style="width: 85%; display: ${this.knotLayout}" theme="spacing-xs padding">
 
 
-                </vaadin-horizontal-layout>
-
-                <vaadin-horizontal-layout style="width: 85%; display: ${this.knotLayout}" theme="spacing-xs padding">
-
-
-                    <vaadin-vertical-layout theme="spacing-xs padding">
-                        <vaadin-text-field label="DataRange" name="dataRange"
-                                           class="text-field-width"
-                                           value="${this.dataRange }"
-                                           @value-changed="${this.layoutDataChanged}"
-                        >
-                        </vaadin-text-field>
-                        <vaadin-text-field label="Identity" name="identity"
-                                           class="text-field-width"
-                                           value="${this.identity}"
-                                           @value-changed="${this.layoutDataChanged}"
-                        >
-                        </vaadin-text-field>
-                        <br>
-                        <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
-                                         label="Deprecated" name="deprecated"
-                                         .checked=${this.deprecated}
-                        >
-                        </vaadin-checkbox>
-                        <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
-                                         label="Skip" name="skip"
-                                         .checked=${this.skip}
-                        >
-                        </vaadin-checkbox>
-                    </vaadin-vertical-layout>
+            <vaadin-vertical-layout theme="spacing-xs padding">
+              <vaadin-text-field label="DataRange" name="dataRange"
+                                 class="text-field-width"
+                                 value="${this.dataRange }"
+                                 @value-changed="${this.layoutDataChanged}"
+              >
+              </vaadin-text-field>
+              <vaadin-text-field label="Identity" name="identity"
+                                 class="text-field-width"
+                                 value="${this.identity}"
+                                 @value-changed="${this.layoutDataChanged}"
+              >
+              </vaadin-text-field>
+              <br>
+              <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
+                               label="Deprecated" name="deprecated"
+                               .checked=${this.deprecated}
+              >
+              </vaadin-checkbox>
+              <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
+                               label="Skip" name="skip"
+                               .checked=${this.skip}
+              >
+              </vaadin-checkbox>
+            </vaadin-vertical-layout>
 
 
 
 
-                    <vaadin-vertical-layout theme="spacing-xs padding">
-                        <vaadin-text-field label="Privacy" name="privacy"
-                                           class="text-field-width"
-                                           value="${this.privacy }"
-                                           @value-changed="${this.layoutDataChanged}"
-                        >
-                        </vaadin-text-field>
-                        <vaadin-text-field label="Capsule" name="capsule"
-                                           class="text-field-width"
-                                           value="${this.capsule }"
-                                           @value-changed="${this.layoutDataChanged}"
-                        >
-                        </vaadin-text-field>
-                        <br>
-                        <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
-                                         label="Restatable" name="restatable"
-                                         .checked=${this.restatable}
-                        >
-                        </vaadin-checkbox>
-                        <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
-                                         label="Generator" name="generator"
-                                         .checked=${this.generator}
-                        >
-                        </vaadin-checkbox>
-                        <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
-                                         label="Idempotent" name="idempotent"
-                                         .checked=${this.idempotent}
-                        >
-                        </vaadin-checkbox>
-                        <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
-                                         label="Deletable" name="deletable"
-                                         .checked=${this.deletable}
-                        >
-                        </vaadin-checkbox>
-                    </vaadin-vertical-layout>
+            <vaadin-vertical-layout theme="spacing-xs padding">
+              <vaadin-text-field label="Privacy" name="privacy"
+                                 class="text-field-width"
+                                 value="${this.privacy }"
+                                 @value-changed="${this.layoutDataChanged}"
+              >
+              </vaadin-text-field>
+              <vaadin-text-field label="Capsule" name="capsule"
+                                 class="text-field-width"
+                                 value="${this.capsule }"
+                                 @value-changed="${this.layoutDataChanged}"
+              >
+              </vaadin-text-field>
+              <br>
+              <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
+                               label="Restatable" name="restatable"
+                               .checked=${this.restatable}
+              >
+              </vaadin-checkbox>
+              <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
+                               label="Generator" name="generator"
+                               .checked=${this.generator}
+              >
+              </vaadin-checkbox>
+              <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
+                               label="Idempotent" name="idempotent"
+                               .checked=${this.idempotent}
+              >
+              </vaadin-checkbox>
+              <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
+                               label="Deletable" name="deletable"
+                               .checked=${this.deletable}
+              >
+              </vaadin-checkbox>
+            </vaadin-vertical-layout>
 
 
-                    <vaadin-vertical-layout style="width: 100%">
-                        <vaadin-tabsheet style="width: 100%">
-                            <vaadin-tabs theme="equal-width-tabs">
-                                <vaadin-tab>Items</vaadin-tab>
-                            </vaadin-tabs>
+            <vaadin-vertical-layout style="width: 100%">
+              <vaadin-tabsheet style="width: 100%">
+                <vaadin-tabs theme="equal-width-tabs">
+                  <vaadin-tab>Items</vaadin-tab>
+                </vaadin-tabs>
 
-                            <vaadin-vertical-layout theme="padding">
-                                <p>"323"</p>
-                            </vaadin-vertical-layout>
+                <vaadin-vertical-layout theme="padding">
+                  <p>"323"</p>
+                </vaadin-vertical-layout>
 
-                        </vaadin-tabsheet>
-                    </vaadin-vertical-layout>
-
-
-                </vaadin-horizontal-layout>
-
-                <vaadin-horizontal-layout style="width: 85%; display: ${this.tieLayout}" theme="spacing-xs padding">
+              </vaadin-tabsheet>
+            </vaadin-vertical-layout>
 
 
-                    <vaadin-vertical-layout theme="spacing-xs padding">
-                        <vaadin-combo-box label="TimeRange" name="timeRange"
-                                          class="text-field-width"
-                                          value="${this.timeRange}"
-                                          .items="${['DATETIME', 'BIGINT']}"
-                                          @selected-item-changed="${this.comboBoxChanged}"
-                        >
-                        </vaadin-combo-box>
-                        <vaadin-text-field label="KnotRole" name="knotRole"
-                                           class="text-field-width"
-                                           value="${this.knotRole}"
-                                           readonly
-                        >
-                        </vaadin-text-field>
-                      <br>
-                      <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) => this.histCheckBoxChanged(e) }"
-                                       label="Исторический"
-                                       .checked = "${this.timeRangeChecked}"
-                      >
-                      </vaadin-checkbox>
-                      <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) => this.knotRoleCheckBoxChanged(e) }"
-                                       label="Кнотированный"
-                                       .checked = "${this.knotRoleChecked}"
-                      >
-                      </vaadin-checkbox>
-                      <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
-                                       label="Deprecated" name="deprecated"
-                                       .checked=${this.deprecated}
-                      >
-                      </vaadin-checkbox>
-                      <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
-                                       label="Skip" name="skip"
-                                       .checked=${this.skip}
-                      >
-                      </vaadin-checkbox>
-                    </vaadin-vertical-layout>
+          </vaadin-horizontal-layout>
+
+          <vaadin-horizontal-layout style="width: 85%; display: ${this.tieLayout}" theme="spacing-xs padding">
 
 
-                    <vaadin-vertical-layout theme="spacing-xs padding">
-                        <vaadin-text-field label="Privacy" name="privacy"
-                                           class="text-field-width"
-                                           value="${this.privacy }"
-                                           @value-changed="${this.layoutDataChanged}"
-                        >
-                        </vaadin-text-field>
-                        <vaadin-text-field label="Capsule" name="capsule"
-                                           class="text-field-width"
-                                           value="${this.capsule }"
-                                           @value-changed="${this.layoutDataChanged}"
-                        >
-                        </vaadin-text-field>
-                        <br>
-                        <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
-                                         label="Restatable" name="restatable"
-                                         .checked=${this.restatable}
-                        >
-                        </vaadin-checkbox>
-                        <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
-                                         label="Generator" name="generator"
-                                         .checked=${this.generator}
-                        >
-                        </vaadin-checkbox>
-                        <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
-                                         label="Idempotent" name="idempotent"
-                                         .checked=${this.idempotent}
-                        >
-                        </vaadin-checkbox>
-                        <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
-                                         label="Deletable" name="deletable"
-                                         .checked=${this.deletable}
-                        >
-                        </vaadin-checkbox>
-                    </vaadin-vertical-layout>
+            <vaadin-vertical-layout theme="spacing-xs padding">
+              <vaadin-combo-box label="TimeRange" name="timeRange"
+                                class="text-field-width"
+                                value="${this.timeRange}"
+                                .items="${['DATETIME', 'BIGINT']}"
+                                @selected-item-changed="${this.comboBoxChanged}"
+              >
+              </vaadin-combo-box>
+              <vaadin-text-field label="KnotRole" name="knotRole"
+                                 class="text-field-width"
+                                 value="${this.knotRole}"
+                                 readonly
+              >
+              </vaadin-text-field>
+              <br>
+              <vaadin-checkbox @checked-changed="${ this.histCheckBoxChanged }"
+                               label="Исторический"
+                               .checked = "${this.timeRange != null && this.timeRange != ""}"
+              >
+              </vaadin-checkbox>
+              <vaadin-checkbox @checked-changed="${ this.knotRoleCheckBoxChanged }"
+                               label="Кнотированный"
+                               .checked = "${this.knotRole != null && this.knotRole != ""}"
+              >
+              </vaadin-checkbox>
+              <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
+                               label="Deprecated" name="deprecated"
+                               .checked=${this.deprecated}
+              >
+              </vaadin-checkbox>
+              <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
+                               label="Skip" name="skip"
+                               .checked=${this.skip}
+              >
+              </vaadin-checkbox>
+            </vaadin-vertical-layout>
+
+
+            <vaadin-vertical-layout theme="spacing-xs padding">
+              <vaadin-text-field label="Privacy" name="privacy"
+                                 class="text-field-width"
+                                 value="${this.privacy }"
+                                 @value-changed="${this.layoutDataChanged}"
+              >
+              </vaadin-text-field>
+              <vaadin-text-field label="Capsule" name="capsule"
+                                 class="text-field-width"
+                                 value="${this.capsule }"
+                                 @value-changed="${this.layoutDataChanged}"
+              >
+              </vaadin-text-field>
+              <br>
+              <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
+                               label="Restatable" name="restatable"
+                               .checked=${this.restatable}
+              >
+              </vaadin-checkbox>
+              <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
+                               label="Generator" name="generator"
+                               .checked=${this.generator}
+              >
+              </vaadin-checkbox>
+              <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
+                               label="Idempotent" name="idempotent"
+                               .checked=${this.idempotent}
+              >
+              </vaadin-checkbox>
+              <vaadin-checkbox @checked-changed="${ (e: CheckboxCheckedChangedEvent) =>  this.layoutDataChanged(e) }"
+                               label="Deletable" name="deletable"
+                               .checked=${this.deletable}
+              >
+              </vaadin-checkbox>
+            </vaadin-vertical-layout>
 
 
 
-                    <vaadin-vertical-layout style="width: 100%">
-                        <vaadin-tabsheet style="width: 100%">
-                            <vaadin-tabs theme="equal-width-tabs">
-                                <vaadin-tab>Индексы</vaadin-tab>
-                            </vaadin-tabs>
+            <vaadin-vertical-layout style="width: 100%">
+              <vaadin-tabsheet style="width: 100%">
+                <vaadin-tabs theme="equal-width-tabs">
+                  <vaadin-tab>Индексы</vaadin-tab>
+                </vaadin-tabs>
 
-                            <vaadin-vertical-layout theme="padding">
-                                <p>"323"</p>
-                            </vaadin-vertical-layout>
+                <vaadin-vertical-layout theme="padding">
+                  <p>"323"</p>
+                </vaadin-vertical-layout>
 
-                        </vaadin-tabsheet>
-                    </vaadin-vertical-layout>
-
-
-                </vaadin-horizontal-layout>
+              </vaadin-tabsheet>
+            </vaadin-vertical-layout>
 
 
-            </vaadin-horizontal-layout>
-        </div>
+          </vaadin-horizontal-layout>
+
+
+        </vaadin-horizontal-layout>
+      </div>
     `
   }
 
   @property()
-  private attributeLayout = 'none';
+  private attributeLayout : string = 'none';
   @property()
-  private anchorLayout = 'none';
+  private anchorLayout : string = 'none';
   @property()
-  private tieLayout = 'none';
+  private tieLayout : string = 'none';
   @property()
-  private knotLayout = 'none';
+  private knotLayout : string = 'none';
 
   setAnchorLayout(){
     this.anchorLayout = 'flex';
@@ -737,15 +712,15 @@ export class VisJsComponent extends LitElement {
     let item = new TextField();
     item.placeholder = "Имя анкера или мнемоник";
     item.style.width='300px';
-
     item.oninput = () => {
       try {
         switch (item.value.length) {
           case 2: {
             for (let anchorIndex = 0; anchorIndex < this.anchorList.length; anchorIndex++) {
+              // @ts-ignore
               if (this.anchorList[anchorIndex]['mnemonic'] == item.value) {
-                this.network.focus(this.anchorList[anchorIndex]['id'], {animation: true});
-                this.network.selectNodes([this.anchorList[anchorIndex]['id']]);
+                this.network.focus(this.anchorList[anchorIndex]['id']!, {animation: true});
+                this.network.selectNodes([this.anchorList[anchorIndex]['id']!]);
               }
             }
             break;
@@ -753,21 +728,19 @@ export class VisJsComponent extends LitElement {
         }
       }
       catch (e){
-
       }
     }
     return item;
   }
 
-  knotRoleCheckBoxChanged(e: CheckboxCheckedChangedEvent){
+  knotRoleCheckBoxChanged(e: CustomEvent){
 
     if(this.selectedNode != null ){
       let nodeId = this.network.getSelectedNodes();
-      let node = this.nodeDataSet.get(nodeId)[0]
+      let node : { [key: string]: any } = this.nodeDataSet.get(nodeId)[0];
 
-      if((node['knotRole'] !== null && node['knotRole'] != "") != e.detail.value){
+      if((node['knotRole'] != null && node['knotRole'] != "") != e.detail.value){
         if(e.detail.value){
-
           let knot = this.addKnot();
           node['knotRole'] = {
             description: knot['description'],
@@ -775,139 +748,107 @@ export class VisJsComponent extends LitElement {
             identifier: true,
             role: "role"
           };
-          // @ts-ignore
-          try {
-            this.nodeDataSet.update([node]);
-          } catch (e) {
-            console.log(e)
-          }
+          this.nodeDataSet.update([node]);
           this.knotRole = knot['mnemonic'];
-
         } else {
-          // @ts-ignore
           const knot = this.knotList.filter(knotNode => knotNode['id'] == node['knotRole']['type'] || knotNode['id'] == node['knotRole']);
-          const connectedEdgesId = this.network.getConnectedEdges(knot[0]['id']);
+          const connectedEdgesId = this.network.getConnectedEdges(knot[0]['id']!);
 
           if(connectedEdgesId.length == 1){
-            this.nodeDataSet.remove(knot[0]['id']);
-            // @ts-ignore
-            this.knotList.splice(this.knotList.indexOf(knot));
-            // @ts-ignore
-            this.fixedNodes.splice(this.fixedNodes.indexOf(knot[0]['id']));
+            this.nodeDataSet.remove(knot[0]['id']!);
+            this.knotList.splice(this.knotList.indexOf(knot[0]));
+            this.fixedNodes.splice(this.fixedNodes.indexOf(knot[0]['id'] as string));
           }
           for(let index in connectedEdgesId){
             this.deleteEdge(node, connectedEdgesId[index], knot);
           }
           node['knotRole'] = null;
           this.knotRole = null;
-          // @ts-ignore
-          try {
-            this.nodeDataSet.update(node);
-          } catch (e) {
-          }
+          this.nodeDataSet.update(node);
         }
-        this.knotRoleChecked = e.detail.value;
       }
     }
   }
 
-  knotRangeCheckBoxChanged(e: CheckboxCheckedChangedEvent){
+  getSelectedNode(){
+    let nodeId = this.network.getSelectedNodes();
+    let node : { [key: string]: any } = this.nodeDataSet.get(nodeId)[0]
+
+    return node;
+  }
+
+  getNodeById(nodeId : number){
+    console.log(this.nodeDataSet.get(nodeId)!)
+    return this.nodeDataSet.get(nodeId)!;
+  }
+
+  knotRangeCheckBoxChanged(e: CustomEvent){
 
     if(this.selectedNode != null ){
-      let nodeId = this.network.getSelectedNodes();
-      let node = this.nodeDataSet.get(nodeId)[0]
+
+      let node = this.getSelectedNode();
 
       if((node['knotRange'] != null && node['knotRange'] != "") != e.detail.value){
         if(e.detail.value){
           let knot = this.addKnot();
           node['knotRange'] = knot['mnemonic'];
-          // @ts-ignore
-          try {
-            this.nodeDataSet.update([node]);
-          } catch (e) {
-            console.log(e)
-          }
+          this.nodeDataSet.update([node]);
           this.knotRange = node['knotRange'];
-          // this.knotRangeChecked = true;
         } else {
           const knot = this.knotList.filter(knotNode => knotNode['id'] == node['knotRange']);
-          if(this.network.getConnectedNodes(knot[0]['id']).length == 1){
-            this.nodeDataSet.remove(knot[0]['id']);
+          if(this.network.getConnectedNodes(knot[0].id!).length == 1){
+            this.nodeDataSet.remove(knot[0].id!);
           }
-          // @ts-ignore
-          this.knotList.splice(this.knotList.indexOf(knot));
+          this.knotList.splice(this.knotList.indexOf(knot[0]));
           node['knotRange'] = null;
-          // @ts-ignore
-          try {
-            this.nodeDataSet.update([node]);
-          } catch (e) {
-            console.log(e)
-          }
+          this.nodeDataSet.update([node]);
           this.knotRange = null;
-
         }
-        this.knotRangeChecked = e.detail.value;
       }
     }
 
   }
 
-  setHistoricalProperties(node){
-    node['timeRange'] = 'BIGINT';
-    node = this.setPositions(node);
-    try {
-      this.nodeDataSet.update([node]);
-    } catch (e) {
-      console.log(e)
-    }
-    if(node['type'] == 4){
-      this.historicalAttributes.push(node['id']);
-    } else {
-      this.historicalTies.push(node['id']);
-    }
-    this.timeRange = node['timeRange'];
-  }
-  unsetHistoricalProperties(node){
-    node['timeRange'] = null;
-    // @ts-ignore
-    node = this.setPositions(node);
-    try {
-      this.nodeDataSet.update([node]);
-    } catch (e) {
-      console.log(e)
-    }
-    if(node['type'] == 4){
-      this.historicalAttributes.splice(this.historicalAttributes.indexOf(node['id']), 1);
-    } else {
-      this.historicalTies.splice(this.historicalTies.indexOf(node['id']), 1);
-    }
-    // @ts-ignore
-    this.timeRange = null;
-  }
+  histCheckBoxChanged(e: CustomEvent){
 
-  histCheckBoxChanged(e: CheckboxCheckedChangedEvent){
     if(this.selectedNode != null ){
-      let nodeId = this.network.getSelectedNodes();
-      let node = this.nodeDataSet.get(nodeId)[0]
+
+      let node = this.getSelectedNode();
+
       if((node['timeRange'] != null && node['timeRange'] != "") != e.detail.value){
         if(e.detail.value){
-          this.setHistoricalProperties(node);
+          node['timeRange'] = 'BIGINT';
+          node = this.setPositions(node);
+          this.nodeDataSet.update(node);
+          if(node['type'] == 4){
+            this.historicalAttributes.push(this.selectedNode as string);
+          } else {
+            this.historicalTies.push(this.selectedNode as string);
+          }
+          this.timeRange = node['timeRange'];
         } else {
-          this.unsetHistoricalProperties(node);
+          node['timeRange'] = null;
+          node = this.setPositions(node);
+          this.nodeDataSet.update([node]);
+          if(node['type'] == 4){
+            this.historicalAttributes.splice(this.historicalAttributes.indexOf(node['id']), 1);
+          } else {
+            this.historicalTies.splice(this.historicalTies.indexOf(node['id']), 1);
+          }
+          this.timeRange = null;
         }
-        this.timeRangeChecked = e.detail.value;
-
       }
     }
   }
 
   comboBoxChanged(e: CustomEvent){
-    // if(this.selectedNode != null) {
-    //   let node = this.nodeDataSet.get(this.selectedNode);
-    //   node['timeRange'] = e.detail.value;
-    //   node = this.setPositions(node);
-    //   this.nodeDataSet.update(node);
-    // }
+    if(this.selectedNode != null) {
+      let node = this.nodeDataSet.get(this.selectedNode);
+      // @ts-ignore
+      node['timeRange'] = e.detail.value;
+      node = this.setPositions(node);
+      this.nodeDataSet.update(node as Node);
+    }
   }
 
   protected firstUpdated(_changedProperties: PropertyValues) {
@@ -939,16 +880,14 @@ export class VisJsComponent extends LitElement {
       }
     };
 
+
+
     this.network = new Network(
-      this.shadowRoot!.getElementById("customId")!,
-      data,
-      options
+        this.shadowRoot!.getElementById("customId")!,
+        data,
+        options
     );
     this.network.moveTo({scale: 0.25})
-  }
-
-  private clickAction() {
-    this.$server!.displayNotification("Click on button");
   }
 
 
@@ -960,13 +899,10 @@ export class VisJsComponent extends LitElement {
   }
 
   deleteEdge(node: any, edgeId: any, knot: any){
-    let edge = this.edgeDataSet.get(edgeId);
-    // @ts-ignore
+    let edge : Edge = this.edgeDataSet.get(edgeId);
     if((edge['from'] == node['id'] && edge['to'] == knot[0]['id']) || (edge['from']== knot[0]['id'] && edge['to'] == node['id'])){
-      // @ts-ignore
-      this.edgeDataSet.remove(edge['id']);
+      this.edgeDataSet.remove(edge['id'] as IdType);
       let edgeToDel = this.edgeList.filter(e => (e['from'] == node['id'] && e['to'] == knot[0]['id']) || (e['from']== knot[0]['id'] && e['to'] == node['id']));
-      // @ts-ignore
       this.edgeList.splice(this.edgeList.indexOf(edgeToDel[0]), 1);
     }
   }
@@ -984,11 +920,10 @@ export class VisJsComponent extends LitElement {
       "x": 0,
       "y": 0,
       "fixed": false,
+      "knotRole": null
     }
     node = this.fillKnotFigure(node);
-    // @ts-ignore
     this.knotList.push(node);
-    // @ts-ignore
     this.nodeDataSet.add([node]);
     this.connectNodes(node);
     return node;
@@ -996,23 +931,21 @@ export class VisJsComponent extends LitElement {
 
   descriptorChanged(e: CustomEvent) {
     if (this.selectedNode != null) {
-      // @ts-ignore
-      let node = this.network.body.data.nodes._data[this.selectedNode];
+      let node = this.getSelectedNode();
       let nodePosition = this.network.getPositions([node['id']]);
       if (this.descriptor != e.detail.value) {
         this.descriptor = e.detail.value;
         node['label'] = this.descriptor;
         node['x'] = nodePosition[node['id']].x;
         node['y'] = nodePosition[node['id']].y;
-        this.nodeDataSet.update(node)
+        this.nodeDataSet.update(node);
       }
     }
   }
   mnemonicChanged(e: CustomEvent) {
 
     if (this.selectedNode != null) {
-      // @ts-ignore
-      let node = this.network.body.data.nodes._data[this.selectedNode];
+      let node = this.getSelectedNode();
       if (this.mnemonic != e.detail.value) {
         this.mnemonic = e.detail.value;
         node['mnemonic'] = this.mnemonic;
@@ -1022,11 +955,13 @@ export class VisJsComponent extends LitElement {
         if(node['type'] == 3){
           let connectedNodes = this.network.getConnectedNodes(node['id']);
           for(let index = 0; index < connectedNodes.length; index++){
-            // if(connectedNodes[index])
-            let connectedNode = this.network.body.data.nodes._data[connectedNodes[index]];
+            let connectedNode = this.getNodeById(connectedNodes[index] as number);
+            // @ts-ignore
             if(connectedNode['type'] == 4){
+              // @ts-ignore
               connectedNode['knotRange'] = this.mnemonic
             } else {
+              // @ts-ignore
               connectedNode['knotRole']['type'] = this.mnemonic;
             }
             connectedNode = this.setPositions(connectedNode);
@@ -1040,9 +975,7 @@ export class VisJsComponent extends LitElement {
   }
   descriptionChanged(e: CustomEvent) {
     if(this.selectedNode != null){
-
-      // @ts-ignore
-      let node = this.network.body.data.nodes._data[this.selectedNode];
+      let node = this.getSelectedNode();
       let nodePosition = this.network.getPositions([node['id']]);
       if (this.description != e.detail.value) {
         this.description = e.detail.value;
@@ -1055,9 +988,10 @@ export class VisJsComponent extends LitElement {
   }
   layoutDataChanged(e: CustomEvent){
 
+    let target = e.target as HTMLInputElement;
+
     if(this.selectedNode != null){
-      // @ts-ignore
-      switch (e.target.name) {
+      switch (target.name) {
         case 'timeRange' : {
           this.timeRange = e.detail.value;
           break;
@@ -1147,27 +1081,24 @@ export class VisJsComponent extends LitElement {
           break;
         }
       }
-
-      // @ts-ignore
-      let node = this.network.body.data.nodes._data[this.selectedNode];
+      let node = this.getSelectedNode();
       let nodePosition = this.network.getPositions([node['id']]);
 
-
-      if(this.metadataKeys.includes(e.target.name)){
+      if(this.metadataKeys.includes(target.name)){
         if(node.metadata != null){
-          node.metadata[e.target.name] = e.detail.value;
+          node.metadata[target.name] = e.detail.value;
         } else {
           node['metadata'] = {}
-          node.metadata[e.target.name] = e.detail.value;
+          node.metadata[target.name] = e.detail.value;
         }
-      } else if (e.target.name=='_group') {
-        node[e.target.name] = [
+      } else if (target.name=='_group') {
+        node[target.name] = [
           {
-            id: e.target.value
+            id: target.value
           }
         ]
       } else {
-        node[e.target.name] = e.detail.value;
+        node[target.name] = e.detail.value;
       }
       node['x'] = nodePosition[node['id']].x;
       node['y'] = nodePosition[node['id']].y;
@@ -1176,18 +1107,6 @@ export class VisJsComponent extends LitElement {
     }
 
 
-  }
-  createGridItem(iconName: string, iconRepo: string, id: string) {
-
-    const item = document.createElement('vaadin-context-menu-item');
-    const icon = new Icon();
-    icon.setAttribute('icon', `${iconRepo}:${iconName}`)
-
-    item.setAttribute('Опция', String(id))
-    item.setAttribute('Значение', icon)
-
-
-    return item;
   }
 
 
@@ -1207,18 +1126,18 @@ export class VisJsComponent extends LitElement {
 
 
           this.nodeDataSet.forEach(node => {
-            if(!this.fixedNodes.includes(node.id)){
+            if(!this.fixedNodes.includes(node.id as string)){
               this.nodeDataSet.update({id: node.id, fixed: true});
-              this.fixedNodes.push(node.id)
+              this.fixedNodes.push(node.id as string)
             }
           });
 
           this.pinAll = false;
         } else {
           this.nodeDataSet.forEach(node => {
-            if(this.fixedNodes.includes(node.id)){
+            if(this.fixedNodes.includes(node.id as string)){
               this.nodeDataSet.update({id: node.id, fixed: false});
-              this.fixedNodes.splice(this.fixedNodes.indexOf(node.id), 1);
+              this.fixedNodes.splice(this.fixedNodes.indexOf(node.id as string), 1);
             }
           });
           this.pinAll = true;
@@ -1292,158 +1211,7 @@ export class VisJsComponent extends LitElement {
       "fixed": false
     }
     node = this.fillAnchorFigure(node);
-    // @ts-ignore
     this.anchorList.push(node);
-    // @ts-ignore
-    this.nodeDataSet.add([node]);
-    this.connectNodes(node);
-    this.itemsForAnchorsMenuBar = [this.anchorMenuBarItem]
-    this.network.unselectAll();
-    this.setNullLayout();
-    return node;
-  }
-  addTie(){
-    this.lastId++;
-    let mnemonic = this.lastId.toString();
-    let node = {
-      "id": mnemonic,
-      "label": null,
-      "descriptor": null,
-      "description": "Tie Example Description",
-      "mnemonic": mnemonic,
-      "type": 2,
-      "x": 0,
-      "y": 0,
-      "fixed": false
-    }
-    node = this.fillTieFigure(node);
-    // @ts-ignore
-    this.tieList.push(node);
-    // @ts-ignore
-    this.nodeDataSet.add([node]);
-    this.connectNodes(node);
-    this.itemsForAnchorsMenuBar = [this.anchorMenuBarItem]
-    this.network.unselectAll();
-    this.setNullLayout();
-    return node;
-  }
-  addHistoricalTie(){
-    this.lastId++;
-    let mnemonic = this.lastId.toString();
-    let node = {
-      "id": mnemonic,
-      "label": null,
-      "descriptor": null,
-      "description": "Tie Example Description",
-      "mnemonic": mnemonic,
-      "type": 2,
-      "x": 0,
-      "y": 0,
-      "fixed": false,
-      "timeRange": "bigint"
-    }
-    node = this.fillTieFigure(node);
-    // @ts-ignore
-    this.tieList.push(node);
-    // @ts-ignore
-    this.nodeDataSet.add([node]);
-    this.connectNodes(node);
-    this.itemsForAnchorsMenuBar = [this.anchorMenuBarItem]
-    this.network.unselectAll();
-    this.setNullLayout();
-    return node;
-  }
-  addAnchoredTie(){
-    let tie = this.addTie();
-    let anchor = this.addAnchor();
-    let edge = this.fillEdge(tie['id'], anchor['id']);
-    // @ts-ignore
-    this.edgeDataSet.add([edge]);
-    // @ts-ignore
-    // this.edgeList.push(edge);
-    this.network.unselectAll();
-    this.setNullLayout();
-    this.itemsForAnchorsMenuBar = [this.anchorMenuBarItem]
-  }
-  addAnchoredHistoricalTie(){
-    let tie = this.addHistoricalTie();
-    let anchor = this.addAnchor();
-    let edge = this.fillEdge(tie['id'], anchor['id']);
-    // @ts-ignore
-    this.edgeDataSet.add([edge]);
-    // @ts-ignore
-    // this.edgeList.push(edge);
-    this.network.unselectAll();
-    this.setNullLayout();
-    this.itemsForAnchorsMenuBar = [this.anchorMenuBarItem]
-  }
-  addAttribute(){
-    let mnemonic = randomBytes(2).toString('hex').substring(0, 3);
-    let node = {
-      "id": this.network.getSelectedNodes()[0].toString() + "_" + mnemonic,
-      "label": "AttributeExample",
-      "descriptor": "AttributeExample",
-      "description": "Attribute Example Description",
-      "mnemonic": mnemonic,
-      "type": 4,
-      "x": 0,
-      "y": 0,
-      "fixed": false
-    }
-    node = this.fillAttributeFigure(node);
-    // @ts-ignore
-    this.attributeList.push(node);
-    // @ts-ignore
-    this.nodeDataSet.add([node]);
-    this.connectNodes(node);
-    this.itemsForAnchorsMenuBar = [this.anchorMenuBarItem]
-    this.network.unselectAll();
-    this.setNullLayout();
-    return node;
-  }
-  addHistoricalAttribute(){
-    let mnemonic = randomBytes(2).toString('hex').substring(0, 3);
-    let node = {
-      "id": this.network.getSelectedNodes()[0].toString() + "_" + mnemonic,
-      "label": "AttributeExample",
-      "descriptor": "AttributeExample",
-      "description": "Attribute Example Description",
-      "mnemonic": mnemonic,
-      "type": 4,
-      "x": 0,
-      "y": 0,
-      "fixed": false,
-      "timeRange": "bigint"
-    }
-    node = this.fillAttributeFigure(node);
-    // @ts-ignore
-    this.attributeList.push(node);
-    // @ts-ignore
-    this.nodeDataSet.add([node]);
-    this.connectNodes(node);
-    this.itemsForAnchorsMenuBar = [this.anchorMenuBarItem]
-    this.network.unselectAll();
-    this.setNullLayout();
-    return node;
-  }
-  addComposedAttribute(){
-    let mnemonic = randomBytes(2).toString('hex').substring(0, 3);
-    let node = {
-      "id": this.network.getSelectedNodes()[0].toString() + "_" + mnemonic,
-      "label": "AttributeExample",
-      "descriptor": "AttributeExample",
-      "description": "Attribute Example Description",
-      "mnemonic": mnemonic,
-      "type": 4,
-      "x": 0,
-      "y": 0,
-      "fixed": false,
-      "innerColumn": [""]
-    }
-    node = this.fillAttributeFigure(node);
-    // @ts-ignore
-    this.attributeList.push(node);
-    // @ts-ignore
     this.nodeDataSet.add([node]);
     this.connectNodes(node);
     this.itemsForAnchorsMenuBar = [this.anchorMenuBarItem]
@@ -1452,15 +1220,109 @@ export class VisJsComponent extends LitElement {
     return node;
   }
 
+  createTieNodeTemplate(){
+    this.lastId++;
+    let mnemonic = this.lastId.toString();
+    let node = {
+      "id": mnemonic,
+      "label": null,
+      "descriptor": null,
+      "description": "Tie Example Description",
+      "mnemonic": mnemonic,
+      "type": 2,
+      "x": 0,
+      "y": 0,
+      "fixed": false
+    }
+    return node;
+  }
+  addTieToLayoutProperties(node: object){
+    this.tieList.push(node);
+    this.nodeDataSet.add([node]);
+    this.connectNodes(node);
+    this.itemsForAnchorsMenuBar = [this.anchorMenuBarItem]
+    this.network.unselectAll();
+    this.setNullLayout();
+  }
+  addTie(){
+    let node = this.createTieNodeTemplate();
+    node = this.fillTieFigure(node);
+    this.addTieToLayoutProperties(node);
+    return node;
+  }
+  addHistoricalTie(){
+    let node =  this.createTieNodeTemplate();
+    // @ts-ignore
+    node['timeRange'] = 'BIGINT';
+    node = this.fillTieFigure(node);
+    this.addTieToLayoutProperties(node);
+    return node;
+  }
+  addAnchoredTie(){
+    let tie = this.addTie();
+    let anchor = this.addAnchor();
+    let edge = this.fillEdge(tie['id'], anchor['id']);
+    this.edgeDataSet.add([edge]);
+  }
+  addAnchoredHistoricalTie(){
+    let tie = this.addHistoricalTie();
+    let anchor = this.addAnchor();
+    let edge = this.fillEdge(tie['id'], anchor['id']);
+    this.edgeDataSet.add([edge]);
+  }
+
+  createAttributeNodeTemplate(){
+    let mnemonic = randomBytes(2).toString('hex').substring(0, 3);
+    let node = {
+      "id": this.network.getSelectedNodes()[0].toString() + "_" + mnemonic,
+      "label": "AttributeExample",
+      "descriptor": "AttributeExample",
+      "description": "Attribute Example Description",
+      "mnemonic": mnemonic,
+      "type": 4,
+      "x": 0,
+      "y": 0,
+      "fixed": false,
+      "knotRange": null
+    }
+    return node;
+  }
+  addAttribute(){
+    let node = this.createAttributeNodeTemplate();
+    node = this.fillAttributeFigure(node);
+    this.addAttributeToLayoutProperties(node);
+    return node;
+  }
+  addHistoricalAttribute(){
+    let node = this.createAttributeNodeTemplate();
+    // @ts-ignore
+    node['timeRange'] = 'BIGINT';
+    node = this.fillAttributeFigure(node);
+    this.addAttributeToLayoutProperties(node);
+    return node;
+  }
+  addComposedAttribute(){
+    let node = this.createAttributeNodeTemplate();
+    // @ts-ignore
+    node['innerColumn'] = [""];
+    node = this.fillAttributeFigure(node);
+    this.addAttributeToLayoutProperties(node);
+    return node;
+  }
+  addAttributeToLayoutProperties(node : Node){
+    this.attributeList.push(node);
+    this.nodeDataSet.add([node]);
+    this.connectNodes(node);
+    this.itemsForAnchorsMenuBar = [this.anchorMenuBarItem]
+    this.network.unselectAll();
+    this.setNullLayout();
+  }
+
   connectNodes(node: any){
     for (let i = 0; i < this.network.getSelectedNodes().length; i++) {
       try {
         let edge = this.fillEdge(node['id'], this.network.getSelectedNodes()[i].toString());
-        // @ts-ignore
         this.edgeDataSet.add([edge]);
-        // @ts-ignore
-        // this.edgeList.push(edge);
-        // @ts-ignore
       } catch (err) {
         console.log(err)
       }
@@ -1468,23 +1330,20 @@ export class VisJsComponent extends LitElement {
     if(node['type'] != 3 && node['type'] != 4){
       this.network.unselectAll();
       this.selectedNode = null;
-      this.checkBoxesVisibility = 'none';
     }
 
   }
 
   download() {
-    this.$server!.addNodesAndEdges(
-      // @ts-ignore
-      JSON.stringify(this.network.body.data.nodes._data),
-      // @ts-ignore
-      JSON.stringify(this.network.body.data.edges._data),
-    );
+    // this.$server!.addNodesAndEdges(
+    //     JSON.stringify(this.network.body.data.nodes._data),
+    //     JSON.stringify(this.network.body.data.edges._data),
+    // );
   };
 
   allNodesIsTypedAs(nodeType: any) {
-    // @ts-ignore
-    let array = this.network.getSelectedNodes().filter(node => this.network.body.nodes[node].options.type != nodeType);
+    //@ts-ignore
+    let array = this.network.getSelectedNodes().filter(node => this.nodeDataSet.get(node)!.type != nodeType);
     return array.length == 0;
   }
 
@@ -1502,13 +1361,11 @@ export class VisJsComponent extends LitElement {
 
   getAnchors(anchors: string) {
     this.anchorList = JSON.parse(anchors);
-    // @ts-ignore
     this.anchorList = this.anchorList.map(node => this.parseAnchor(node));
     this.nodeDataSet.add(this.anchorList);
-    // @ts-ignore
     this.nodeDataSet.add(this.attributeList)
   }
-  parseAnchor(anchor: object | any) {
+  parseAnchor(anchor: object) {
 
     anchor = this.parseNodeMainData(anchor);
     anchor = this.parseNodeLayout(anchor);
@@ -1527,7 +1384,7 @@ export class VisJsComponent extends LitElement {
       this.attributeList.push(attribute);
     }
   }
-  parseAttribute(attribute: object | any, anchor: object | any) {
+  parseAttribute(attribute: object, anchor: object) {
 
     attribute = this.parseNodeMainData(attribute, anchor);
     attribute = this.parseNodeLayout(attribute, anchor);
@@ -1545,11 +1402,10 @@ export class VisJsComponent extends LitElement {
 
   getKnots(knots: string) {
     this.knotList = JSON.parse(knots);
-    // @ts-ignore
     this.knotList = this.knotList.map(node => this.parseKnot(node));
     this.nodeDataSet.add(this.knotList)
   }
-  parseKnot(knot: object | any) {
+  parseKnot(knot: object) {
     knot = this.parseNodeMainData(knot);
     knot = this.parseNodeLayout(knot);
     knot = this.fillKnotFigure(knot);
@@ -1559,11 +1415,10 @@ export class VisJsComponent extends LitElement {
 
   getTies(ties: string) {
     this.tieList = JSON.parse(ties);
-    // @ts-ignore
     this.tieList = this.tieList.map(node => this.parseTie(node));
     this.nodeDataSet.add(this.tieList)
   }
-  parseTie(tie: object | any) {
+  parseTie(tie: object) {
     tie = this.parseNodeMainData(tie);
     tie = this.parseNodeLayout(tie);
     tie = this.fillTieFigure(tie);
@@ -1593,7 +1448,6 @@ export class VisJsComponent extends LitElement {
       'length': 200
 
     }
-    // @ts-ignore
     this.edgeList.push(edge)
     return edge;
   }
@@ -1628,7 +1482,6 @@ export class VisJsComponent extends LitElement {
           node['fixed'] = node['layout']["fixed"];
           node['x'] = node['layout']["x"];
           node['y'] = node['layout']["y"];
-          // @ts-ignore
           this.fixedNodes.push(node["id"]);
         }
       } else {
@@ -1638,7 +1491,6 @@ export class VisJsComponent extends LitElement {
       }
     }
     if(node['transactional'] != null && node['transactional'] == true){
-      // @ts-ignore
       this.transAnchors.push(node['id']);
     }
 
@@ -1661,19 +1513,15 @@ export class VisJsComponent extends LitElement {
       border: "#f66",
       background: '#ffffff'
     };
-    // @ts-ignore
     node["borderWidth"] = 2;
-    // @ts-ignore
     node["shape"] = "dot";
     node['type'] = 4;
     if(node['innerColumn'] != null){
       if (node["innerColumn"].length != 0) {
-        // @ts-ignore
         this.fabergeNodes.push(node["id"]);
       }
     }
     if (node["timeRange"] != null) {
-      // @ts-ignore
       this.historicalAttributes.push(node["id"]);
     }
     return node;
@@ -1683,11 +1531,8 @@ export class VisJsComponent extends LitElement {
       border: "#f66",
       background: '#ffffff'
     };
-    // @ts-ignore
     node["borderWidth"] = 2;
-    // @ts-ignore
     node["shape"] = "square";
-    // @ts-ignore
     node["scaling"] = {
       label: {
         enabled: true,
@@ -1696,11 +1541,6 @@ export class VisJsComponent extends LitElement {
       }
     };
     node['type'] = 3;
-    // let selectedNodes = this.network.getSelectedNodes();
-    // if(selectedNodes.length != 0){
-    //   node['x'] = this.network.getPositions(selectedNodes[0])[selectedNodes[0]].x;
-    //   node['y'] = this.network.getPositions(selectedNodes[0])[selectedNodes[0]].y;
-    // }
     return node;
   }
   fillTieFigure(node: object | any) {
@@ -1708,17 +1548,13 @@ export class VisJsComponent extends LitElement {
       border: "#c0c0c0",
       background: '#c0c0c0'
     };
-    // @ts-ignore
     node["shape"] = "diamond";
     node['type'] = 2;
-    // @ts-ignore
     if (node["timeRange"] != null) {
-      // @ts-ignore
       this.historicalTies.push(node["id"]);
     }
     return node;
   }
-
 
   initEvents(){
 
@@ -1731,9 +1567,9 @@ export class VisJsComponent extends LitElement {
         ctx.strokeStyle = '#f66';
         ctx.lineWidth = 2;
         ctx.circle(
-          nodePosition[this.historicalAttributes[step]].x,
-          nodePosition[this.historicalAttributes[step]].y,
-          15
+            nodePosition[this.historicalAttributes[step]].x,
+            nodePosition[this.historicalAttributes[step]].y,
+            15
         );
         ctx.stroke();
       }
@@ -1751,9 +1587,9 @@ export class VisJsComponent extends LitElement {
         ctx.lineWidth = 4;
 
         ctx.circle(
-          nodePosition[this.fixedNodes[step]].x,
-          nodePosition[this.fixedNodes[step]].y,
-          2
+            nodePosition[this.fixedNodes[step]].x,
+            nodePosition[this.fixedNodes[step]].y,
+            2
         );
 
         ctx.stroke();
@@ -1763,9 +1599,9 @@ export class VisJsComponent extends LitElement {
         ctx.strokeStyle = '#000000';
         ctx.font = "30px arial";
         ctx.fillText(
-          "TX",
-          nodePosition[this.transAnchors[step]].x,
-          nodePosition[this.transAnchors[step]].y - 35,
+            "TX",
+            nodePosition[this.transAnchors[step]].x,
+            nodePosition[this.transAnchors[step]].y - 35,
         );
 
       }
@@ -1781,9 +1617,9 @@ export class VisJsComponent extends LitElement {
         }
         ctx.lineWidth = 2;
         ctx.circle(
-          nodePosition[this.fabergeNodes[step]].x + 35,
-          nodePosition[this.fabergeNodes[step]].y,
-          25
+            nodePosition[this.fabergeNodes[step]].x + 35,
+            nodePosition[this.fabergeNodes[step]].y,
+            25
         );
         ctx.fill()
         ctx.stroke();
@@ -1791,19 +1627,10 @@ export class VisJsComponent extends LitElement {
     });
     this.network.on("selectNode", (params) => {
 
+      this.selectedNode = params.nodes[0];
+      this.selectedNodes.push(this.selectedNode!);
 
-
-      const selectedNodeId = params.nodes[0];
-      // @ts-ignore
-      this.selectedNodes.push(selectedNodeId)
-      this.selectedNode = selectedNodeId;
-      // @ts-ignore
-      const node = this.network.body.nodes[selectedNodeId];
-      // if (this.network.getSelectedNodes().length > 1){
-      //   this.activeNode = null;
-      // }
-      //
-      // this.activeNode = node.options;
+      const node = this.getSelectedNode();
 
       this.switchCaseMenuBar(node);
       this.fillWorkplace(params);
@@ -1813,16 +1640,18 @@ export class VisJsComponent extends LitElement {
 
 
       const selectedNodeId = params.nodes[0];
-      // @ts-ignore
       this.selectedNodes.splice(this.selectedNodes.indexOf(selectedNodeId), 1);
-      // @ts-ignore
-      const node = this.network.body.nodes[selectedNodeId];
-
-      // this.unFillMetadata();
+      const node = this.getSelectedNode();
 
       this.switchCaseMenuBar(node);
 
-      this.checkBoxesVisibility = 'none';
+      // this.description = "";
+      // this.descriptor = "";
+      // this.mnemonic = "";
+
+      this.timeRange = "";
+      this.knotRole = "";
+      this.knotRange = "";
 
       this.mneAndDescriptorVisibility = 'none';
       this.descriptionVisibility = 'none';
@@ -1833,35 +1662,37 @@ export class VisJsComponent extends LitElement {
     this.network.on( 'doubleClick', (properties) => {
       const ids = properties.nodes;
       if (ids.length > 0) {
-        // @ts-ignore
-        const node = this.network.body.data.nodes._data[ids[0]];
-        // @ts-ignore
+        const node = this.nodeDataSet.get(ids[0]);
         if (this.fixedNodes.includes(ids[0])) {
           // @ts-ignore
           node["fixed"] = false;
-          // @ts-ignore
-          this.network.body.data.nodes.update(node);
+          this.nodeDataSet.update(node);
           // @ts-ignore
           const index = this.fixedNodes.indexOf(ids[0]);
           this.fixedNodes.splice(index, 1);
         } else {
-          // @ts-ignore
           this.fixedNodes.push(ids[0]);
+          // @ts-ignore
           node["fixed"] = true;
           const pos = this.network.getPositions([ids[0]]);
+          // @ts-ignore
           node["x"] = pos[ids[0]].x;
+          // @ts-ignore
           node["y"] = pos[ids[0]].y;
           // @ts-ignore
-          this.network.body.data.nodes.update(node);
+          this.nodeDataSet.update(node);
         }
       }
     });
     this.network.on( 'oncontext', (properties) => {
+
       const a = this.network.getNodeAt(properties.pointer.DOM);
       const b = this.network.getEdgeAt(properties.pointer.DOM);
 
       if (b != null){
+
       }
+
       const url = 'http://localhost:8080/down';
 
       if (a != null){
@@ -1880,7 +1711,7 @@ export class VisJsComponent extends LitElement {
         }
       }
     });
-    this.network.on('zoom', params => {
+    this.network.on('zoom', () => {
       if( this.network.getScale() > 1.5 )//the limit you want to stop at
       {
         this.network.moveTo({scale: 1.5}); //set this limit so it stops zooming out here
@@ -1897,11 +1728,9 @@ export class VisJsComponent extends LitElement {
       let node = null;
 
       if(selectedNodeId != null){
-        // @ts-ignore
         this.selectedNodes.push(selectedNodeId)
         this.selectedNode = selectedNodeId;
-        // @ts-ignore
-        node = this.network.body.nodes[selectedNodeId];
+        node = this.nodeDataSet.get([selectedNodeId]);
       }
 
       if(params.nodes.length != 0){
@@ -1912,28 +1741,32 @@ export class VisJsComponent extends LitElement {
       const ids = params.nodes;
       if (ids.length > 0) {
         // @ts-ignore
-        const node = this.network.body.data.nodes._data[ids[0]];
+        const node = this.nodeDataSet.get(ids[0]);
+        // @ts-ignore
         node["fixed"] = false;
         const pos = this.network.getPositions([ids[0]]);
+        // @ts-ignore
         node["x"] = pos[ids[0]].x;
+        // @ts-ignore
         node["y"] = pos[ids[0]].y;
         // @ts-ignore
-        this.network.body.data.nodes.update(node);
+        this.nodeDataSet.update(node);
       }
     });
     this.network.on('dragEnd', (properties) => {
       const ids = properties.nodes;
       if (ids.length > 0) {
-        // @ts-ignore
         if (this.fixedNodes.includes(ids[0])) {
           // @ts-ignore
-          const node = this.network.body.data.nodes._data[ids[0]];
+          const node = this.nodeDataSet.get(ids[0]);
+          // @ts-ignore
           node["fixed"] = true;
           const pos = this.network.getPositions([ids[0]]);
-          node["x"] = pos[ids[0]].x;
-          node["y"] = pos[ids[0]].y;
           // @ts-ignore
-          this.network.body.data.nodes.update(node);
+          node["x"] = pos[ids[0]].x;
+          // @ts-ignore
+          node["y"] = pos[ids[0]].y;
+          this.nodeDataSet.update(node);
         }
       }
     });
@@ -1941,13 +1774,13 @@ export class VisJsComponent extends LitElement {
 
   switchCaseMenuBar(node: any){
     if (this.network.getSelectedNodes().length == 1){
-      this.fillItemList(node.options.type);
+      this.fillItemList(node.type);
     } else if(this.network.getSelectedNodes().length == 0) {
       this.fillItemList(0);
     }
-    else if (this.allNodesIsTypedAs(node.options.type)
-      && this.network.getSelectedNodes().length > 1){
-      if(node.options.type == 1){
+    else if (this.allNodesIsTypedAs(node.type)
+        && this.network.getSelectedNodes().length > 1){
+      if(node.type == 1){
         this.fillItemList(7);
       }
     } else {
@@ -1955,9 +1788,8 @@ export class VisJsComponent extends LitElement {
     }
   }
 
-  fillMetadata(node){
+  fillMetadata(node: any){
 
-    // this.timeRange = node.timeRange != null ? node.timeRange : "";
     this.privacy = node.metadata != null ? node.metadata.privacy : "";
     this._id = node._id != null ? node._id : "";
     this.accessType = node.accessType != null ? node.accessType : "";
@@ -1976,67 +1808,54 @@ export class VisJsComponent extends LitElement {
     this.nullable = node.nullable != null ? node.nullable : false;
     this.restrictedAccess = node.restrictedAccess != null ? node.restrictedAccess : false;
     this._group = node._group != null ? (node._group.length != 0 ? node._group[0].id : "") : "";
-    // this.knotRole = node.knotRole != null ? node.knotRole.type : "";
-    // this.knotRange = node.knotRange != null ? node.knotRange : "";
     this.transactional = node.transactional;
   }
 
-  fillWorkplace(properties: any){
+  fillWorkplace(properties: any) {
+
     const selectedNodeId = properties.nodes[0].toString();
+    const node = this.nodeDataSet.get(selectedNodeId);
+
     // @ts-ignore
-    const node = this.network.body.nodes[selectedNodeId];
+    this.mnemonic = node.mnemonic;
+    // @ts-ignore
+    this.descriptor = node.label;
+    // @ts-ignore
+    this.description = node.description;
 
-    this.mnemonic = node.options.mnemonic;
-    this.descriptor = node.options.label;
-    this.description = node.options.description;
 
-    this.fillMetadata(node.options);
+    this.fillMetadata(node);
 
-    if(node.options.type != 3 && node.options.type != 1 && properties.nodes.length == 1){
-      this.checkBoxesVisibility = 'flex';
+    // @ts-ignore
+    if(node.type != 3 && node.type != 1 && properties.nodes.length == 1){
+
       let connectedNodes = this.network.getConnectedNodes(selectedNodeId);
       for(let id in connectedNodes){
         // @ts-ignore
-        if (this.network.body.nodes[connectedNodes[id]].options.type == 3) {
+        if (this.nodeDataSet.get(connectedNodes[id]).type == 3) {
           // @ts-ignore
-          if(node.options.type == 2){
-            this.knotRole = (node.options.knotRole != null && node.options.knotRole != "") ? node.options.knotRole.type : null;
-            this.knotRoleChecked = node.options.knotRole != null && node.options.knotRole != "";
+          if(node.type == 2){
+            // @ts-ignore
+            this.knotRole = node.knotRole.type;
           } else {
-            this.knotRange = (node.options.knotRange != null && node.options.knotRange != "") ? node.options.knotRange : null;
-            this.knotRangeChecked = node.options.knotRange != null && node.options.knotRange != "";
+            // @ts-ignore
+            this.knotRange = node.knotRange;
           }
           break;
-        } else {
-          this.knotRangeChecked = false;
-          this.knotRoleChecked = false;
-          this.knotRange = null;
-          this.knotRole = null;
         }
       }
-
-      if (node.options.timeRange != null && node.options.timeRange != "") {
+      // @ts-ignore
+      if (node.timeRange != null && node.timeRange != "") {
         // @ts-ignore
-        this.timeRange = node.options.timeRange;
-        this.timeRangeChecked = true;
-      } else {
-        this.timeRange = "";
-        this.timeRangeChecked = false;
+        this.timeRange = node.timeRange;
       }
 
     } else {
 
-      this.checkBoxesVisibility = 'none';
-      this.timeRange = "";
-      this.knotRange = "";
-      this.knotRole = "";
     }
 
     if(properties.nodes.length > 1){
       this.setNullLayout();
-      this.timeRange = "";
-      this.knotRange = "";
-      this.knotRole = "";
       this.mneAndDescriptorVisibility = 'none';
       this.descriptionVisibility = 'none';
     }
@@ -2106,44 +1925,6 @@ export class VisJsComponent extends LitElement {
         this.itemsForAnchorsMenuBar = [];
         break;
       }
-    }
-  }
-
-  getCoordinates(){
-
-    const url = 'http://localhost:8080/download';
-
-    try {
-      const response =  fetch(url, {
-        method: 'POST',
-        // @ts-ignore
-        body: JSON.stringify(this.network.body.data.nodes._data),
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-      console.log('Успех:', response);
-    } catch (error) {
-      console.error('Ошибка:', error);
-    }
-  }
-
-  updateNode(element: any, node: string){
-
-    try {
-      // @ts-ignore
-      this.network.body.data.nodes.update(JSON.parse(node))
-    } catch (err) {
-      console.log(err);
-    }
-  }
-
-  deleteNode(element: any, node: string){
-    try {
-      // @ts-ignore
-      this.network.body.data.nodes.update(JSON.parse(node))
-    } catch (err) {
-      console.log(err);
     }
   }
 
