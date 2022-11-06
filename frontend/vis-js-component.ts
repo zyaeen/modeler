@@ -1638,7 +1638,6 @@ export class VisJsComponent extends LitElement {
     });
     this.network.on("deselectNode", (params) => {
 
-
       const selectedNodeId = params.nodes[0];
       this.selectedNodes.splice(this.selectedNodes.indexOf(selectedNodeId), 1);
       const node = this.getSelectedNode();
@@ -1656,7 +1655,7 @@ export class VisJsComponent extends LitElement {
       this.mneAndDescriptorVisibility = 'none';
       this.descriptionVisibility = 'none';
 
-
+      this.selectedNode = null;
 
     });
     this.network.on( 'doubleClick', (properties) => {
