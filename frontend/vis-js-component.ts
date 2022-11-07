@@ -219,8 +219,12 @@ export class VisJsComponent extends LitElement {
   }
 
   handleAnchorChanging(e: CustomEvent){
-    console.log(e.detail)
-    console.log(e.value)
+    if(e.detail.name == 'descriptor'){
+      this.activeNode['label'] = e.detail.value;
+    }
+    this.activeNode[e.detail.name] = e.detail.value;
+    this.activeNode = this.setPositions(this.activeNode);
+    this.nodeDataSet.update(this.activeNode);
   }
 
   @property()

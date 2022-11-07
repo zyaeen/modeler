@@ -33,8 +33,14 @@ export class AnchorEditorLayout extends LitElement {
     private anchorMetdataChangedEvent = new CustomEvent<string>("zoom-event",{detail: 'zoom-plus'});
 
     changeAnchorMetadata(e: CustomEvent){
-        console.log(e.detail.value)
-        this.dispatchEvent(new CustomEvent<string>("anchor-data-changed",{detail: e.target!.name, value: e.detail.value}));
+        this.dispatchEvent(new CustomEvent<string>("anchor-data-changed",
+          {
+              detail: {
+                  name: e.target!.name,
+                  value: e.target.value
+              }
+          })
+        );
     }
 
     @property()
