@@ -221,8 +221,19 @@ export class VisJsComponent extends LitElement {
   handleAnchorChanging(e: CustomEvent){
     if(e.detail.name == 'descriptor'){
       this.activeNode['label'] = e.detail.value;
+      this.activeNode[e.detail.name] = e.detail.value;
+    } else if(e.detail.name.includes('metadata')){
+      let nameKeys = e.detail.name.split(".");
+      this.activeNode[nameKeys[0]][nameKeys[1]] = e.detail.value;
+    } else if (e.detail.name == '_group') {
+      this.activeNode[e.detail.name] = [
+        {
+          "id": e.detail.value
+        }
+      ]
+    } else {
+      this.activeNode[e.detail.name] = e.detail.value;
     }
-    this.activeNode[e.detail.name] = e.detail.value;
     this.activeNode = this.setPositions(this.activeNode);
     this.nodeDataSet.update(this.activeNode);
   }
@@ -1140,7 +1151,7 @@ export class VisJsComponent extends LitElement {
       const node = this.getSelectedNode();
 
       this.switchCaseMenuBar(node);
-      this.fillWorkplace(params);
+      // this.fillWorkplace(params);
 
       this.activeNode = node;
 
