@@ -2,7 +2,8 @@ import {css, html, LitElement, PropertyValues} from 'lit';
 import {customElement, property, state} from 'lit/decorators';
 import '@vaadin/menu-bar';
 import {createTemplate} from "Frontend/getIcons";
-import {DataSet, Edge, IdType, Network, Node} from "vis";
+import { Edge, IdType, Network, Node} from "vis-network";
+import {DataSet} from "vis-data";
 import '@vaadin/vertical-layout';
 import {randomBytes} from "crypto";
 
@@ -738,21 +739,48 @@ export class VisJsComponent extends LitElement {
     this.network.on("afterDrawing", (ctx) => {
       for (step = 0; step < this.historicalAttributes.length; step++) {
         nodePosition = this.network.getPositions([this.historicalAttributes[step]]);
+        console.log(ctx)
         ctx.strokeStyle = '#f66';
         ctx.lineWidth = 2;
-        ctx.circle(
-            nodePosition[this.historicalAttributes[step]].x,
-            nodePosition[this.historicalAttributes[step]].y,
-            15
+
+        ctx.beginPath();
+        ctx.arc(
+          nodePosition[this.historicalAttributes[step]].x,
+          nodePosition[this.historicalAttributes[step]].y,
+          15,
+          0,
+          2 * Math.PI
         );
         ctx.stroke();
+
       }
       for (step = 0; step < this.historicalTies.length; step++) {
         nodePosition = this.network.getPositions([this.historicalTies[step]]);
         ctx.strokeStyle = '#ffffff';
         ctx.lineWidth = 2;
-        ctx.diamond(nodePosition[this.historicalTies[step]].x, nodePosition[this.historicalTies[step]].y, 20);
+        // ctx.diamond(nodePosition[this.historicalTies[step]].x, nodePosition[this.historicalTies[step]].y, 20);
+        // ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(nodePosition[this.historicalTies[step]].x, nodePosition[this.historicalTies[step]].y - 20);
+
+        // top left edge
+        ctx.lineTo(nodePosition[this.historicalTies[step]].x - 20, nodePosition[this.historicalTies[step]].y );
+
+        // bottom left edge
+        ctx.lineTo(nodePosition[this.historicalTies[step]].x, nodePosition[this.historicalTies[step]].y + 20);
+
+        // bottom right edge
+        ctx.lineTo(nodePosition[this.historicalTies[step]].x + 20, nodePosition[this.historicalTies[step]].y);
+
+        // closing the path automatically creates
+        // the top right edge
+        ctx.closePath();
+
         ctx.stroke();
+
+        // ctx.fillStyle = "red";
+        // ctx.fill();
 
       }
       for (step = 0; step < this.fixedNodes.length; step++) {
@@ -760,12 +788,16 @@ export class VisJsComponent extends LitElement {
         ctx.strokeStyle = '#000000';
         ctx.lineWidth = 4;
 
-        ctx.circle(
-            nodePosition[this.fixedNodes[step]].x,
-            nodePosition[this.fixedNodes[step]].y,
-            2
-        );
 
+
+        ctx.beginPath();
+        ctx.arc(
+          nodePosition[this.fixedNodes[step]].x,
+          nodePosition[this.fixedNodes[step]].y,
+          2,
+          0,
+          2 * Math.PI
+        );
         ctx.stroke();
       }
       for (step = 0; step < this.transAnchors.length; step++) {
@@ -773,9 +805,9 @@ export class VisJsComponent extends LitElement {
         ctx.strokeStyle = '#000000';
         ctx.font = "30px arial";
         ctx.fillText(
-            "TX",
-            nodePosition[this.transAnchors[step]].x,
-            nodePosition[this.transAnchors[step]].y - 35,
+          "TX",
+          nodePosition[this.transAnchors[step]].x,
+          nodePosition[this.transAnchors[step]].y - 35,
         );
 
       }
@@ -790,10 +822,13 @@ export class VisJsComponent extends LitElement {
           ctx.fillStyle='#ffffff'
         }
         ctx.lineWidth = 2;
-        ctx.circle(
-            nodePosition[this.fabergeNodes[step]].x + 35,
-            nodePosition[this.fabergeNodes[step]].y,
-            25
+        ctx.beginPath();
+        ctx.arc(
+          nodePosition[this.fabergeNodes[step]].x + 35,
+          nodePosition[this.fabergeNodes[step]].y,
+          25,
+          0,
+          2 * Math.PI
         );
         ctx.fill()
         ctx.stroke();

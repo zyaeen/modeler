@@ -19,7 +19,7 @@ import org.xml.sax.SAXException;
 import java.io.*;
 
 @JsModule("./vis-js-component.ts")
-@NpmPackage(value = "vis", version = "0.110.0")
+@NpmPackage(value = "vis-network", version = "9.1.2")
 @Tag("custom-tag")
 @Uses(Icon.class)
 @Uses(MenuBar.class)

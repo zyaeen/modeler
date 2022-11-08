@@ -14,6 +14,7 @@ import java.io.*;
 
 @PageTitle("Main")
 @Route(value = "")
+
 public class MainView extends VerticalLayout {
 
 
