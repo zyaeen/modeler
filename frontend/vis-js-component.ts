@@ -5,10 +5,11 @@ import {createTemplate} from "Frontend/getIcons";
 import {DataSet, Edge, IdType, Network, Node} from "vis";
 import '@vaadin/vertical-layout';
 import {randomBytes} from "crypto";
-import {CheckboxCheckedChangedEvent} from "@vaadin/checkbox";
-import "Frontend/LeftSideMenuBar";
-import "Frontend/RightSideMenuBar"
-import "./AnchorEditorLayout"
+
+import {AnchorEditorLayout} from "Frontend/CustomLitComponents/AnchorEditorLayout";
+import "Frontend/CustomLitComponents/LeftSideMenuBar";
+import "Frontend/CustomLitComponents/RightSideMenuBar";
+import {KnotEditorLayout} from "Frontend/CustomLitComponents/KnotEditorLayout";
 
 const template = createTemplate();
 document.head.appendChild(template.content);
@@ -20,6 +21,12 @@ export class VisJsComponent extends LitElement {
   static get styles() {
     return css`
       .text-field-width{
+        width: 100%;
+      }
+      anchor-editor-layout{
+        width: 100%;
+      }
+      knot-editor-layout{
         width: 100%;
       }
       [slot="label"] {
@@ -74,7 +81,6 @@ export class VisJsComponent extends LitElement {
   @property()
   private edgeList: Edge[] = [];
 
-  private metadataKeys = ["privacy", "capsule", "restatable", "generator", "idempotent", "deletable"]
 
   @property()
   private nodeDataSet = new DataSet<Node>([]);
@@ -87,55 +93,10 @@ export class VisJsComponent extends LitElement {
   @property()
   private selectedNode : IdType | null  = null;
 
-  @property()
-  private privacy : string | null = "";
-  @property()
-  private timeRange : string | null = "";
-  @property()
-  private _id : string | null= ""
-  @property()
-  private accessType : string | null = ""
-  @property()
-  private deprecated : boolean | null = false
-  @property()
-  private identity : string | null = ""
-  @property()
-  private inheritPerm : string | null = ""
-  @property()
-  private capsule : string | null = ""
-  @property()
-  private generator : boolean | null = false
-  @property()
-  private idempotent : boolean | null = false
-  @property()
-  private restatable : boolean | null = false
-  @property()
-  private deletable : boolean | null = false
-  @property()
-  private skip : boolean | null = false
-  @property()
-  private dataRange : string | null = ""
-  @property()
-  private included : boolean | null = false
-  @property()
-  private columnName : string | null = ""
-  @property()
-  private nullable : boolean | null = false;
-  @property()
-  private restrictedAccess : boolean | null = false
-  @property()
-  private _group : string | null | object = ""
-  @property()
-  private knotRole : string | null | object = ""
-  @property()
-  private knotRange : string | null = ""
-  @property()
-  private transactional : boolean | null = false;
-
   private scale = 1;
 
   @property()
-  private activeNode: Node = null;
+  private activeNode: Node | null = null;
 
   @property()
   private pinAll = false;
@@ -157,16 +118,10 @@ export class VisJsComponent extends LitElement {
 
   private $server?: VisJsComponentServerInterface;
 
+
   @property()
-  private mnemonic : string | null = "";
-  @property()
-  private descriptor : string | null = "";
-  @property()
-  private description : string | null = "";
-  @property()
-  private mneAndDescriptorVisibility : string = 'none';
-  @property()
-  private descriptionVisibility : string = 'none'
+  private metadataLayoutVisibility = 'none';
+
 
   private nodeAddingEventHandlerStructure: {[element: string] : () => void} = {
     'anchor-add': () => this.addAnchor(),
@@ -181,6 +136,9 @@ export class VisJsComponent extends LitElement {
 
   @property()
   private chosenNodeType = 0;
+
+  @property()
+  private renderingComponent : AnchorEditorLayout | KnotEditorLayout | null = null;
 
   render() {
     return html`
@@ -205,208 +163,89 @@ export class VisJsComponent extends LitElement {
       </div>
       <div id="customId"></div>
       <div id="bottomPanel"
-           style="display: ${this.mneAndDescriptorVisibility == 'none' && this.descriptionVisibility == 'none' ? 'none' : 'flex'};"
+           style="display: ${this.metadataLayoutVisibility};"
       >
-        <anchor-editor-layout 
-            theme="spacing-xs padding" 
-            style="width: 100%"
-            .anchor="${this.activeNode}"
-            @anchor-data-changed="${(e: CustomEvent) => this.handleAnchorChanging(e)}"
-        >
-        </anchor-editor-layout>
+        ${this.renderingComponent}
       </div>
     `
   }
 
-  handleAnchorChanging(e: CustomEvent){
-    if(e.detail.name == 'descriptor'){
-      this.activeNode['label'] = e.detail.value;
-      this.activeNode[e.detail.name] = e.detail.value;
-    } else if(e.detail.name.includes('metadata')){
-      let nameKeys = e.detail.name.split(".");
-      this.activeNode[nameKeys[0]][nameKeys[1]] = e.detail.value;
-    } else if (e.detail.name == '_group') {
-      this.activeNode[e.detail.name] = [
+  handleNodeMetadataChanging(source: any){
+
+    if(source.name == 'descriptor'){
+      this.activeNode!['label'] = source.value;
+      // @ts-ignore
+      this.activeNode![source.name] = source.value;
+    } else if(source.name.includes('metadata')){
+      // @ts-ignore
+      if(this.activeNode['metadata'] == null){
+        // @ts-ignore
+        this.activeNode['metadata'] = {};
+      }
+      let nameKeys = source.name.split(".");
+      if(source.type == 'checkbox'){
+        // @ts-ignore
+        this.activeNode['metadata'][nameKeys[1]] = source.checked;
+      } else {
+        // @ts-ignore
+        this.activeNode['metadata'][nameKeys[1]] = source.value;
+      }
+      // @ts-ignore
+      this.activeNode['metadata'][nameKeys[1]] = source.value;
+    } else if (source.name == '_group') {
+      // @ts-ignore
+      this.activeNode[source.name] = [
         {
-          "id": e.detail.value
+          "id": source.value
         }
       ]
     } else {
-      this.activeNode[e.detail.name] = e.detail.value;
-    }
-    this.activeNode = this.setPositions(this.activeNode);
-    this.nodeDataSet.update(this.activeNode);
-  }
-
-  @property()
-  private attributeLayout : string = 'none';
-  @property()
-  private anchorLayout : string = 'none';
-  @property()
-  private tieLayout : string = 'none';
-  @property()
-  private knotLayout : string = 'none';
-
-  setAnchorLayout(){
-    this.anchorLayout = 'flex';
-    this.attributeLayout = 'none';
-    this.knotLayout = 'none';
-    this.tieLayout = 'none';
-  }
-  setAttributeLayout(){
-    this.anchorLayout = 'none';
-    this.attributeLayout = 'flex';
-    this.knotLayout = 'none';
-    this.tieLayout = 'none';
-  }
-  setKnotLayout(){
-    this.anchorLayout = 'none';
-    this.attributeLayout = 'none';
-    this.knotLayout = 'flex';
-    this.tieLayout = 'none';
-  }
-  setTieLayout(){
-    this.anchorLayout = 'none';
-    this.attributeLayout = 'none';
-    this.knotLayout = 'none';
-    this.tieLayout = 'flex';
-  }
-  setNullLayout(){
-    this.anchorLayout = 'none';
-    this.attributeLayout = 'none';
-    this.knotLayout = 'none';
-    this.tieLayout = 'none';
-
-    this.mneAndDescriptorVisibility = 'none';
-    this.descriptionVisibility = 'none';
-
-  }
-
-
-  knotRoleCheckBoxChanged(e: CustomEvent){
-
-    if(this.selectedNode != null ){
-      let nodeId = this.network.getSelectedNodes();
-      let node : { [key: string]: any } = this.nodeDataSet.get(nodeId)[0];
-
-      if((node['knotRole'] != null && node['knotRole'] != "") != e.detail.value){
-        if(e.detail.value){
-          let knot = this.addKnot();
-          node['knotRole'] = {
-            description: knot['description'],
-            type: knot['mnemonic'],
-            identifier: true,
-            role: "role"
-          };
-          this.nodeDataSet.update([node]);
-          this.knotRole = knot['mnemonic'];
-        } else {
-          const knot = this.knotList.filter(knotNode => knotNode['id'] == node['knotRole']['type'] || knotNode['id'] == node['knotRole']);
-          const connectedEdgesId = this.network.getConnectedEdges(knot[0]['id']!);
-
-          if(connectedEdgesId.length == 1){
-            this.nodeDataSet.remove(knot[0]['id']!);
-            this.knotList.splice(this.knotList.indexOf(knot[0]));
-            this.fixedNodes.splice(this.fixedNodes.indexOf(knot[0]['id'] as string));
-          }
-          for(let index in connectedEdgesId){
-            this.deleteEdge(node, connectedEdgesId[index], knot);
-          }
-          node['knotRole'] = null;
-          this.knotRole = null;
-          this.nodeDataSet.update(node);
-        }
+      if(source.type == 'checkbox'){
+        // @ts-ignore
+        this.activeNode[source.name] = source.checked;
+      } else {
+        // @ts-ignore
+        this.activeNode[source.name] = source.value;
       }
     }
+  }
+
+
+  createAnchorEditorComponent(){
+    this.renderingComponent = new AnchorEditorLayout();
+    this.renderingComponent.setAnchor(this.activeNode);
+    this.renderingComponent.render();
+    this.initInputEvent();
+  }
+  createKnotEditorComponent(){
+    this.renderingComponent = new KnotEditorLayout();
+    this.renderingComponent.setKnot(this.activeNode);
+    this.renderingComponent.render();
+    this.initInputEvent();
+  }
+
+  initInputEvent(){
+    this.renderingComponent!.oninput = (e: Event) => {
+      // @ts-ignore
+      this.handleNodeMetadataChanging(e.path[0]);
+      this.activeNode = this.setPositions(this.activeNode);
+      this.nodeDataSet.update(this.activeNode!);
+    };
   }
 
   getSelectedNode(){
     let nodeId = this.network.getSelectedNodes();
     let node : { [key: string]: any } = this.nodeDataSet.get(nodeId)[0]
-
     return node;
   }
 
-  getNodeById(nodeId : number){
-    console.log(this.nodeDataSet.get(nodeId)!)
-    return this.nodeDataSet.get(nodeId)!;
-  }
 
-  knotRangeCheckBoxChanged(e: CustomEvent){
-
-    if(this.selectedNode != null ){
-
-      let node = this.getSelectedNode();
-
-      if((node['knotRange'] != null && node['knotRange'] != "") != e.detail.value){
-        if(e.detail.value){
-          let knot = this.addKnot();
-          node['knotRange'] = knot['mnemonic'];
-          this.nodeDataSet.update([node]);
-          this.knotRange = node['knotRange'];
-        } else {
-          const knot = this.knotList.filter(knotNode => knotNode['id'] == node['knotRange']);
-          if(this.network.getConnectedNodes(knot[0].id!).length == 1){
-            this.nodeDataSet.remove(knot[0].id!);
-          }
-          this.knotList.splice(this.knotList.indexOf(knot[0]));
-          node['knotRange'] = null;
-          this.nodeDataSet.update([node]);
-          this.knotRange = null;
-        }
-      }
-    }
-
-  }
-
-  histCheckBoxChanged(e: CustomEvent){
-
-    if(this.selectedNode != null ){
-
-      let node = this.getSelectedNode();
-
-      if((node['timeRange'] != null && node['timeRange'] != "") != e.detail.value){
-        if(e.detail.value){
-          node['timeRange'] = 'BIGINT';
-          node = this.setPositions(node);
-          this.nodeDataSet.update(node);
-          if(node['type'] == 4){
-            this.historicalAttributes.push(this.selectedNode as string);
-          } else {
-            this.historicalTies.push(this.selectedNode as string);
-          }
-          this.timeRange = node['timeRange'];
-        } else {
-          node['timeRange'] = null;
-          node = this.setPositions(node);
-          this.nodeDataSet.update([node]);
-          if(node['type'] == 4){
-            this.historicalAttributes.splice(this.historicalAttributes.indexOf(node['id']), 1);
-          } else {
-            this.historicalTies.splice(this.historicalTies.indexOf(node['id']), 1);
-          }
-          this.timeRange = null;
-        }
-      }
-    }
-  }
-
-  comboBoxChanged(e: CustomEvent){
-    if(this.selectedNode != null) {
-      let node = this.nodeDataSet.get(this.selectedNode);
-      // @ts-ignore
-      node['timeRange'] = e.detail.value;
-      node = this.setPositions(node);
-      this.nodeDataSet.update(node as Node);
-    }
-  }
 
   protected firstUpdated(_changedProperties: PropertyValues) {
     super.firstUpdated(_changedProperties);
     this.initTree();
     this.$server?.fillComponentRequest();
     this.lastId = 1000;
-    // this.addEventListener("qqq", evt => {this.addAnchor(evt)});
   }
 
   initTree() {
@@ -429,8 +268,6 @@ export class VisJsComponent extends LitElement {
         }
       }
     };
-
-
 
     this.network = new Network(
         this.shadowRoot!.getElementById("customId")!,
@@ -479,186 +316,7 @@ export class VisJsComponent extends LitElement {
     return node;
   }
 
-  descriptorChanged(e: CustomEvent) {
-    if (this.selectedNode != null) {
-      let node = this.getSelectedNode();
-      let nodePosition = this.network.getPositions([node['id']]);
-      if (this.descriptor != e.detail.value) {
-        this.descriptor = e.detail.value;
-        node['label'] = this.descriptor;
-        node['x'] = nodePosition[node['id']].x;
-        node['y'] = nodePosition[node['id']].y;
-        this.nodeDataSet.update(node);
-      }
-    }
-  }
-  mnemonicChanged(e: CustomEvent) {
-
-    if (this.selectedNode != null) {
-      let node = this.getSelectedNode();
-      if (this.mnemonic != e.detail.value) {
-        this.mnemonic = e.detail.value;
-        node['mnemonic'] = this.mnemonic;
-        node = this.setPositions(node);
-        this.nodeDataSet.update(node)
-
-        if(node['type'] == 3){
-          let connectedNodes = this.network.getConnectedNodes(node['id']);
-          for(let index = 0; index < connectedNodes.length; index++){
-            let connectedNode = this.getNodeById(connectedNodes[index] as number);
-            // @ts-ignore
-            if(connectedNode['type'] == 4){
-              // @ts-ignore
-              connectedNode['knotRange'] = this.mnemonic
-            } else {
-              // @ts-ignore
-              connectedNode['knotRole']['type'] = this.mnemonic;
-            }
-            connectedNode = this.setPositions(connectedNode);
-            this.nodeDataSet.update(connectedNode)
-          }
-        }
-
-      }
-
-    }
-  }
-  descriptionChanged(e: CustomEvent) {
-    if(this.selectedNode != null){
-      let node = this.getSelectedNode();
-      let nodePosition = this.network.getPositions([node['id']]);
-      if (this.description != e.detail.value) {
-        this.description = e.detail.value;
-        node['description'] = this.description;
-        node['x'] = nodePosition[node['id']].x;
-        node['y'] = nodePosition[node['id']].y;
-        this.nodeDataSet.update(node)
-      }
-    }
-  }
-  layoutDataChanged(e: CustomEvent){
-
-    let target = e.target as HTMLInputElement;
-
-    if(this.selectedNode != null){
-      switch (target.name) {
-        case 'timeRange' : {
-          this.timeRange = e.detail.value;
-          break;
-        }
-        case 'privacy' : {
-          this.privacy = e.detail.value;
-          break;
-        }
-        case '_id' : {
-          this._id = e.detail.value;
-          break;
-        }
-        case 'accessType' : {
-          this.accessType = e.detail.value;
-          break;
-        }
-        case 'deprecated' : {
-          this.deprecated = e.detail.value;
-          break;
-        }
-        case 'identity' : {
-          this.identity = e.detail.value;
-          break;
-        }
-        case 'inheritPerm' : {
-          this.inheritPerm = e.detail.value;
-          break;
-        }
-        case 'capsule' : {
-          this.capsule = e.detail.value;
-          break;
-        }
-        case 'generator' : {
-          this.generator = e.detail.value;
-          break;
-        }
-        case 'idempotent' : {
-          this.idempotent = e.detail.value;
-          break;
-        }
-        case 'restatable' : {
-          this.restatable = e.detail.value;
-          break;
-        }
-        case 'deletable' : {
-          this.deletable = e.detail.value;
-          break;
-        }
-        case 'skip' : {
-          this.skip = e.detail.value;
-          break;
-        }
-        case 'dataRange' : {
-          this.dataRange = e.detail.value;
-          break;
-        }
-        case 'included' : {
-          this.included = e.detail.value;
-          break;
-        }
-        case 'columnName' : {
-          this.columnName = e.detail.value;
-          break;
-        }
-        case 'nullable' : {
-          this.nullable = e.detail.value;
-          break;
-        }
-        case 'restrictedAccess' : {
-          this.restrictedAccess = e.detail.value;
-          break;
-        }
-        case '_group' : {
-          this._group = e.detail.value;
-          break;
-        }
-        case 'knotRole' : {
-          this.knotRole = e.detail.value;
-          break;
-        }
-        case 'knotRange' : {
-          this.knotRange = e.detail.value;
-          break;
-        }
-        case 'transactional' : {
-          this.transactional = e.detail.value;
-          break;
-        }
-      }
-      let node = this.getSelectedNode();
-      let nodePosition = this.network.getPositions([node['id']]);
-
-      if(this.metadataKeys.includes(target.name)){
-        if(node.metadata != null){
-          node.metadata[target.name] = e.detail.value;
-        } else {
-          node['metadata'] = {}
-          node.metadata[target.name] = e.detail.value;
-        }
-      } else if (target.name=='_group') {
-        node[target.name] = [
-          {
-            id: target.value
-          }
-        ]
-      } else {
-        node[target.name] = e.detail.value;
-      }
-      node['x'] = nodePosition[node['id']].x;
-      node['y'] = nodePosition[node['id']].y;
-      this.nodeDataSet.update(node)
-
-    }
-  }
-
   handleZoom(e: CustomEvent){
-    console.log(e)
     if (e.detail == 'zoom-plus') {
       if(this.network.getScale() * 1.3 <= 1.5){
         this.scale = this.scale * 1.3;
@@ -734,7 +392,6 @@ export class VisJsComponent extends LitElement {
     this.connectNodes(node);
     this.chosenNodeType = 0;
     this.network.unselectAll();
-    this.setNullLayout();
     return node;
   }
 
@@ -760,7 +417,6 @@ export class VisJsComponent extends LitElement {
     this.connectNodes(node);
     this.chosenNodeType = 0;
     this.network.unselectAll();
-    this.setNullLayout();
   }
   addTie(){
     let node = this.createTieNodeTemplate();
@@ -833,7 +489,6 @@ export class VisJsComponent extends LitElement {
     this.connectNodes(node);
     this.chosenNodeType = 0;
     this.network.unselectAll();
-    this.setNullLayout();
   }
 
   connectNodes(node: any){
@@ -1074,6 +729,7 @@ export class VisJsComponent extends LitElement {
     return node;
   }
 
+
   initEvents(){
 
     let step;
@@ -1155,7 +811,14 @@ export class VisJsComponent extends LitElement {
 
       this.activeNode = node;
 
-      console.log(this.activeNode)
+      // @ts-ignore
+      if(this.activeNode.type == 1){
+        this.createAnchorEditorComponent();
+      }
+      // @ts-ignore
+      if(this.activeNode.type == 3){
+        this.createKnotEditorComponent();
+      }
 
     });
     this.network.on("deselectNode", (params) => {
@@ -1166,19 +829,10 @@ export class VisJsComponent extends LitElement {
 
       this.switchCaseMenuBar(node);
 
-      // this.description = "";
-      // this.descriptor = "";
-      // this.mnemonic = "";
-
-      this.timeRange = "";
-      this.knotRole = "";
-      this.knotRange = "";
-
-      this.mneAndDescriptorVisibility = 'none';
-      this.descriptionVisibility = 'none';
+      this.metadataLayoutVisibility = 'none';
 
       this.selectedNode = null;
-
+      this.renderingComponent = null;
     });
     this.network.on( 'doubleClick', (properties) => {
       const ids = properties.nodes;
@@ -1313,43 +967,10 @@ export class VisJsComponent extends LitElement {
     }
   }
 
-  fillMetadata(node: any){
-
-    this.privacy = node.metadata != null ? node.metadata.privacy : "";
-    this._id = node._id != null ? node._id : "";
-    this.accessType = node.accessType != null ? node.accessType : "";
-    this.deprecated = node.deprecated != null ? node.deprecated : false;
-    this.identity =  node.identity != null ? node.identity : "";
-    this.inheritPerm = node.inheritPerm != null ? node.inheritPerm : "";
-    this.capsule = node.metadata != null ? node.metadata.capsule : "";
-    this.generator = node.metadata != null && node.metadata.generator != null ? node.metadata.generator : false;
-    this.idempotent = node.metadata != null && node.metadata.idempotent != null ? node.metadata.idempotent : false;
-    this.restatable =  node.metadata != null && node.metadata.restatable != null ? node.metadata.restatable : false;
-    this.deletable = node.metadata != null && node.metadata.deletable != null ? node.metadata.deletable : false;
-    this.skip = node.skip != null ? node.skip : false;
-    this.dataRange = node.dataRange != null ? node.dataRange : "";
-    this.included = node.included != null ? node.included : false;
-    this.columnName = node.columnName != null ? node.columnName : false;
-    this.nullable = node.nullable != null ? node.nullable : false;
-    this.restrictedAccess = node.restrictedAccess != null ? node.restrictedAccess : false;
-    this._group = node._group != null ? (node._group.length != 0 ? node._group[0].id : "") : "";
-    this.transactional = node.transactional;
-  }
-
   fillWorkplace(properties: any) {
 
     const selectedNodeId = properties.nodes[0].toString();
     const node = this.nodeDataSet.get(selectedNodeId);
-
-    // @ts-ignore
-    this.mnemonic = node.mnemonic;
-    // @ts-ignore
-    this.descriptor = node.label;
-    // @ts-ignore
-    this.description = node.description;
-
-
-    this.fillMetadata(node);
 
     // @ts-ignore
     if(node.type != 3 && node.type != 1 && properties.nodes.length == 1){
@@ -1380,9 +1001,7 @@ export class VisJsComponent extends LitElement {
     }
 
     if(properties.nodes.length > 1){
-      this.setNullLayout();
-      this.mneAndDescriptorVisibility = 'none';
-      this.descriptionVisibility = 'none';
+      this.metadataLayoutVisibility = 'none';
     }
 
 
@@ -1392,41 +1011,31 @@ export class VisJsComponent extends LitElement {
 
     switch (nodeType){
       case 0: {
-        this.setNullLayout();
-        this.mneAndDescriptorVisibility = 'flex';
-        this.descriptionVisibility = 'flex';
+        this.metadataLayoutVisibility = 'flex';
+
         break;
       }
       case 7:{
-        this.setNullLayout();
-        this.mneAndDescriptorVisibility = 'none';
-        this.descriptionVisibility = 'none';
+        this.metadataLayoutVisibility = 'none';
         break;
       }
       case 1: {
-        this.setAnchorLayout();
-        this.mneAndDescriptorVisibility = 'flex';
-        this.descriptionVisibility = 'flex';
+        this.metadataLayoutVisibility = 'flex';
+
         break;
       }
       case 2:
       case 5: {
-        this.setTieLayout();
-        this.mneAndDescriptorVisibility = 'none';
-        this.descriptionVisibility = 'flex';
+        this.metadataLayoutVisibility = 'flex';
         break;
       }
       case 3:{
-        this.setKnotLayout();
-        this.mneAndDescriptorVisibility = 'flex';
-        this.descriptionVisibility = 'flex';
+        this.metadataLayoutVisibility = 'flex';
         break;
       }
       case 4:
       case 6: {
-        this.setAttributeLayout();
-        this.mneAndDescriptorVisibility = 'flex';
-        this.descriptionVisibility = 'flex';
+        this.metadataLayoutVisibility = 'flex';
         break;
       }
     }
@@ -1435,10 +1044,6 @@ export class VisJsComponent extends LitElement {
 }
 
 interface VisJsComponentServerInterface {
-  displayNotification(text: string): void;
   fillComponentRequest(): void;
-  workplaceFillComponent(text: string): void;
-  addNodesAndEdges(stringOfNodes: string, stringOfEdges: string): void;
 }
 
-// window.addEventListener("qqq", evt => {console.log(evt)})

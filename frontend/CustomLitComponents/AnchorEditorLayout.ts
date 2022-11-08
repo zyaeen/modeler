@@ -2,12 +2,8 @@ import {css, html, LitElement} from 'lit';
 import {customElement, property} from 'lit/decorators';
 import '@vaadin/menu-bar';
 import {createTemplate} from "Frontend/getIcons";
-import {Icon} from "@vaadin/icon";
 import '@vaadin/vertical-layout';
-import {TextField, TextFieldChangeEvent} from "@vaadin/text-field";
 import {applyTheme} from "Frontend/generated/theme";
-import {DataSet, Edge, IdType, Network, Node} from "vis";
-import {CheckboxCheckedChangedEvent} from "@vaadin/checkbox";
 
 const template = createTemplate();
 document.head.appendChild(template.content);
@@ -28,44 +24,30 @@ export class AnchorEditorLayout extends LitElement {
       [slot="label"] {
         font-size: medium;
         font-weight: normal ;
-      }`
-    }
-
-    changeAnchorMetadataTextField(e: TextFieldChangeEvent){
-        this.dispatchEvent(new CustomEvent<string>("anchor-data-changed",
-          {
-              detail: {
-                  name: e.target!.name,
-                  value: e.target.value
-              }
-          })
-        );
-    }
-    changeAnchorMetadataCheckBox(e: CheckboxCheckedChangedEvent){
-        this.dispatchEvent(new CustomEvent<string>("anchor-data-changed",
-            {
-                detail: {
-                    name: e.target!.name,
-                    value: e.detail.value
-                }
-            })
-        );
+      }
+    .text-field-width{
+        width: 100%;
+      }
+      `
     }
 
     @property()
     private anchor: any;
 
+    setAnchor(anchor: any){
+        this.anchor = anchor;
+    }
+
     render() {
         return html`
           <vaadin-horizontal-layout style="width: 100%;" theme="spacing-xs padding">
               
-            <vaadin-vertical-layout theme="spacing-xs padding">
+            <vaadin-vertical-layout theme="spacing-xs padding"  style="width: 600px">
                 <vaadin-text-field 
                         label="Мнемоник"
                         class="text-field-width"
                         name="mnemonic"
                         value="${this.anchor.mnemonic}"
-                        @input="${(e: TextFieldChangeEvent) => this.changeAnchorMetadataTextField(e)}"
                 >
                 </vaadin-text-field>
                 <vaadin-text-field 
@@ -73,7 +55,6 @@ export class AnchorEditorLayout extends LitElement {
                         class="text-field-width"
                         name="descriptor"
                         value="${this.anchor.descriptor}"
-                        @input="${(e: TextFieldChangeEvent) => this.changeAnchorMetadataTextField(e)}"
                 >
                 </vaadin-text-field>
                 <vaadin-text-area 
@@ -83,7 +64,6 @@ export class AnchorEditorLayout extends LitElement {
                         caret="20"
                         name="description"
                         style="height: 150px"
-                        @input="${(e: TextFieldChangeEvent) => this.changeAnchorMetadataTextField(e)}"
                 >
                 </vaadin-text-area>
             </vaadin-vertical-layout>
@@ -94,7 +74,6 @@ export class AnchorEditorLayout extends LitElement {
                         name="_id"
                         class="text-field-width"
                         value="${this.anchor._id}"
-                        @input="${(e: TextFieldChangeEvent) => this.changeAnchorMetadataTextField(e)}"
                 >
                 </vaadin-text-field>
                 <vaadin-text-field 
@@ -102,7 +81,6 @@ export class AnchorEditorLayout extends LitElement {
                         name="identity"
                         class="text-field-width"
                         value="${this.anchor.identity}"
-                        @input="${(e: TextFieldChangeEvent) => this.changeAnchorMetadataTextField(e)}"
                 >
                 </vaadin-text-field>
                 <vaadin-text-field 
@@ -110,7 +88,6 @@ export class AnchorEditorLayout extends LitElement {
                         name="inheritPerm"
                         class="text-field-width"
                         value="${this.anchor.inheritPerm}"
-                        @input="${(e: TextFieldChangeEvent) => this.changeAnchorMetadataTextField(e)}"
                 >
                 </vaadin-text-field>
             </vaadin-vertical-layout>
@@ -122,7 +99,6 @@ export class AnchorEditorLayout extends LitElement {
                       name="_group"
                       class="text-field-width"
                       value="${this.anchor._group != null && this.anchor._group.length != 0 ? this.anchor._group[0].id : null}"
-                      @input="${(e: TextFieldChangeEvent) => this.changeAnchorMetadataTextField(e)}"
               >
               </vaadin-text-field>
               <vaadin-text-field 
@@ -130,7 +106,6 @@ export class AnchorEditorLayout extends LitElement {
                       name="accessType"
                       class="text-field-width"
                       value="${this.anchor.accessType}"
-                      @input="${(e: TextFieldChangeEvent) => this.changeAnchorMetadataTextField(e)}"
               >
               </vaadin-text-field>
               <br>
@@ -138,21 +113,18 @@ export class AnchorEditorLayout extends LitElement {
                       label="Deprecated"
                       name="deprecated" 
                       .checked="${this.anchor.deprecated == null ? false : this.anchor.deprecated}"
-                      @checked-changed="${(e: CheckboxCheckedChangedEvent) => this.changeAnchorMetadataCheckBox(e)}"
               >
               </vaadin-checkbox>
               <vaadin-checkbox 
                       label="Skip" 
                       name="skip"
                       .checked="${this.anchor.skip == null ? false : this.anchor.skip}"
-                      @checked-changed="${(e: CheckboxCheckedChangedEvent) => this.changeAnchorMetadataCheckBox(e)}"
               >
               </vaadin-checkbox>
               <vaadin-checkbox 
                       label="Transactional" 
                       name="transactional"
                       .checked="${this.anchor.transactional == null ? false : this.anchor.transactional}"
-                      @checked-changed="${(e: CheckboxCheckedChangedEvent) => this.changeAnchorMetadataCheckBox(e)}"
               >
               </vaadin-checkbox>
             </vaadin-vertical-layout>
@@ -163,45 +135,39 @@ export class AnchorEditorLayout extends LitElement {
                       label="Privacy"
                       name="metadata.privacy"
                       class="text-field-width"
-                      value="${this.anchor.metadata.privacy}"
-                      @input="${(e: TextFieldChangeEvent) => this.changeAnchorMetadataTextField(e)}"
+                      value="${this.anchor.metadata != null ? this.anchor.metadata.privacy : null}"
               >
               </vaadin-text-field>
               <vaadin-text-field 
                       label="Capsule" 
                       name="metadata.capsule"
                       class="text-field-width"
-                      value="${this.anchor.metadata.capsule}"
-                      @input="${(e: TextFieldChangeEvent) => this.changeAnchorMetadataTextField(e)}"
+                      value="${this.anchor.metadata != null ? this.anchor.metadata.capsule : null}"
               >
               </vaadin-text-field>
               <br>
               <vaadin-checkbox
                       label="Restatable" 
                       name="metadata.restatable"
-                      .checked="${this.anchor.metadata.restatable == null ? false : this.anchor.metadata.restatable}"
-                      @checked-changed="${(e: CheckboxCheckedChangedEvent) => this.changeAnchorMetadataCheckBox(e)}"
+                      .checked="${this.anchor.metadata != null && this.anchor.metadata.restatable != null ? this.anchor.metadata.restatable : false}"
               >
               </vaadin-checkbox>
               <vaadin-checkbox
                       label="Generator" 
                       name="metadata.generator"
-                      .checked="${this.anchor.metadata.generator == null ? false : this.anchor.metadata.generator}"
-                      @checked-changed="${(e: CheckboxCheckedChangedEvent) => this.changeAnchorMetadataCheckBox(e)}"
+                      .checked="${this.anchor.metadata != null && this.anchor.metadata.generator != null ? this.anchor.metadata.generator : false}"
               >
               </vaadin-checkbox>
               <vaadin-checkbox 
                       label="Idempotent" 
                       name="metadata.idempotent"
-                      .checked="${this.anchor.metadata.idempotent == null ? false : this.anchor.metadata.idempotent}"
-                      @checked-changed="${(e: CheckboxCheckedChangedEvent) => this.changeAnchorMetadataCheckBox(e)}"
+                      .checked="${this.anchor.metadata != null && this.anchor.metadata.idempotent != null ? this.anchor.metadata.idempotent : false}"
               >
               </vaadin-checkbox>
               <vaadin-checkbox 
                       label="Deletable"
                       name="metadata.deletable"
-                      .checked="${this.anchor.metadata.deletable == null ? false : this.anchor.metadata.deletable}"
-                      @checked-changed="${(e: CheckboxCheckedChangedEvent) => this.changeAnchorMetadataCheckBox(e)}"
+                      .checked="${this.anchor.metadata != null && this.anchor.metadata.deletable != null ? this.anchor.metadata.deletable : false}"
               >
               </vaadin-checkbox>
             </vaadin-vertical-layout>
